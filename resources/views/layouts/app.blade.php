@@ -40,14 +40,20 @@
             background-color: #f8f9fa;
             color: #0d6efd;
         }
+        .brand-logo {
+        height: 32px; 
+        width: auto; /* Agar rasio gambar tetap terjaga */
+        object-fit: contain;
+    }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-cpu-fill me-2"></i>LAB SISKOM
-            </a>
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+    <img src="logo.png" alt="Logo LAB SISKOM" class="brand-logo me-2">
+    LAB SISKOM
+</a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
