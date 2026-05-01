@@ -2,6 +2,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SopController;
 use App\Http\Controllers\SiteMapController;
+use App\Http\Controllers\SuratBebasLabController;
 
 // Halaman yang bisa dilihat semua orang (Mahasiswa, Dosen, Umum)
 Route::get('/', function () {
@@ -37,4 +38,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Route untuk Mahasiswa
+Route::get('/bebas-lab', [SuratBebasLabController::class, 'create'])->name('bebas-lab.form');
+Route::post('/bebas-lab', [SuratBebasLabController::class, 'store'])->name('bebas-lab.store');
+Route::get('/bebas-lab/verify/{id}', [SuratBebasLabController::class, 'verifyEmail'])->name('bebas-lab.verify');
+
+// Gunakan dua middleware sekaligus
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/bebas-lab', [SuratBebasLabController::class, 'indexAdmin'])->name('admin.bebas-lab.index');
+    Route::post('/bebas-lab/{id}/update', [SuratBebasLabController::class, 'updateStatus'])->name('admin.bebas-lab.update');
 });

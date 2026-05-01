@@ -7,7 +7,7 @@
         <!-- text-dark -> text-body -->
         <h2 class="fw-bold text-body">Tentang Kami</h2>
         <!-- text-muted -> text-body-secondary -->
-        <p class="text-body-secondary px-lg-5">Laboratorium Pemrograman dan Komputasi berada di bawah jurusan Rekayasa Sistem Komputer (RSK), FMIPA Untan. Memberikan pelayanan untuk praktikum, penelitian, ataupun pengabdian masyarakat oleh dosen ataupun mahasiswa.</p>
+        <p class="text-body-secondary px-lg-5">Laboratorium Pemrograman dan Komputasi berada di bawah jurusan Rekayasa Sistem Komputer, FMIPA Untan. Memberikan pelayanan untuk praktikum, penelitian, ataupun pengabdian masyarakat oleh dosen ataupun mahasiswa.</p>
         <div class="mx-auto" style="width: 60px; height: 4px; background-color: #0d6efd; border-radius: 2px;"></div>
     </div>
 
@@ -25,7 +25,7 @@
                 </div>
                 <div class="card-body text-center p-4">
                     <h5 class="fw-bold mb-0 text-body">Suhardi, S.T., M.Eng.</h5>
-                    <p class="text-body-secondary small mb-2">NIP. 198606182020121006</p>
+                    <p class="text-body-secondary small mb-2">NIP 198606182020121006</p>
                     <p class="text-primary small fw-bold mb-3">Kepala Laboratorium</p>
                     <p class="card-text text-body-secondary small mb-4">Dosen Program Studi Rekayasa Sistem Komputer dengan fokus pada Automation & Embedded System dan IoT.</p>
                     
@@ -51,7 +51,7 @@
                 </div>
                 <div class="card-body text-center p-4">
                     <h5 class="fw-bold mb-0 text-body">Filza Buana Putra, S.Mat.</h5>
-                    <p class="text-body-secondary small mb-2">NIP. 199611192025061007</p>
+                    <p class="text-body-secondary small mb-2">NIP 199611192025061007</p>
                     <p class="text-success small fw-bold mb-3">Pranata Laboratorium Pendidikan (PLP)</p>
                     <p class="card-text text-body-secondary small mb-4">Mengelola operasional harian, perawatan fasilitas, dan pendampingan teknis praktikum mahasiswa.</p>
                     
