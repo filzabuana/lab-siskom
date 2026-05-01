@@ -18,7 +18,7 @@
         .tree li:first-child::after { border-radius: 5px 0 0 0; }
         .tree ul ul::before { content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; }
         .tree li a { border: 2px solid #cbd5e1; padding: 12px 18px; text-decoration: none; color: #334155; font-size: 13px; display: inline-block; border-radius: 8px; background: white; transition: all 0.3s; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-transform: uppercase; }
-        .tree li a:hover { background: #3b82f6; color: white; border-color: #2563eb; transform: translateY(-3px); }
+        .tree li a:hover { background: #3b82f6 !important; color: white !important; border-color: #2563eb !important; transform: translateY(-3px); }
         .root-node { background: #1e293b !important; color: white !important; border-color: #0f172a !important; }
         .category-node { background: #eff6ff !important; border-color: #3b82f6 !important; color: #1e40af !important; }
     </style>
@@ -34,36 +34,26 @@
                     <!-- Cabang Profil -->
                     <li><a href="/about" class="category-node">PROFIL LAB</a></li>
 
-                    <!-- Cabang SOP (Otomatis dari XML) -->
+                    <!-- Cabang SOP (Otomatis dari Database) -->
                     <li>
                         <a href="/sop" class="category-node">STANDAR OPERASIONAL (SOP)</a>
                         <ul>
-                            @foreach($urls as $url)
-                                @if(str_contains($url, '/sop/'))
-                                    @php
-                                        $path = parse_url($url, PHP_URL_PATH);
-                                        $slug = str_replace('/sop/', '', $path);
-                                        $judul = str_replace('-', ' ', $slug);
-                                    @endphp
-                                    <li>
-                                        <a href="{{ $path }}">{{ $judul }}</a>
-                                    </li>
-                                @endif
+                            @foreach($sops as $sop)
+                                <li>
+                                    <a href="{{ route('sop.show', $sop->slug) }}">{{ $sop->judul }}</a>
+                                </li>
                             @endforeach
                         </ul>
                     </li>
 
-                    <!-- Cabang Lainnya -->
+                    <!-- Cabang Halaman Lain -->
                     <li>
-                        <a href="#" class="category-node">HALAMAN LAIN</a>
+                        <a href="#" class="category-node">LAYANAN & SISTEM</a>
                         <ul>
-                            @foreach($urls as $url)
-                                @php $path = parse_url($url, PHP_URL_PATH); @endphp
-                                @if(!str_contains($url, '/sop/') && $path != '/' && $path != '/about' && $path != '/sop')
-                                    <li>
-                                        <a href="{{ $path }}">{{ str_replace('/', '', $path) }}</a>
-                                    </li>
-                                @endif
+                            @foreach($pages as $page)
+                                <li>
+                                    <a href="{{ url($page['url']) }}">{{ $page['nama'] }}</a>
+                                </li>
                             @endforeach
                         </ul>
                     </li>

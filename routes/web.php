@@ -12,7 +12,6 @@ Route::get('/', function () {
 Route::get('/about', function () {
     return view('about');
 })->name('about');
-Route::get('/peta-situs', [SiteMapController::class, 'index'])->name('peta.situs');
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -50,3 +49,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/bebas-lab', [SuratBebasLabController::class, 'indexAdmin'])->name('admin.bebas-lab.index');
     Route::post('/bebas-lab/{id}/update', [SuratBebasLabController::class, 'updateStatus'])->name('admin.bebas-lab.update');
 });
+
+Route::get('/sitemap.xml', [SiteMapController::class, 'index']);
+Route::get('/peta-situs', [App\Http\Controllers\SiteMapController::class, 'visual']);

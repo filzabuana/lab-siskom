@@ -95,7 +95,7 @@
                 </div>
                 <h4 class="fw-bold">Surat Bebas Lab</h4>
                 <p class="text-body-secondary small">Pelayanan online untuk mengurus surat keterangan bebas pinjaman sebagai syarat yudisium/wisuda.</p>
-                <span class="text-body-tertiary small fw-italic fst-italic">Dalam pengembangan</span>
+                <a href="{{ route('bebas-lab.form') }}" class="btn btn-link text-info p-0 fw-semibold text-decoration-none">Ajukan Sekarang →</a>
             </div>
         </div>
     </div>

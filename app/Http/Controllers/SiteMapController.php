@@ -2,27 +2,35 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\File;
+use App\Models\Sop;
 use Illuminate\Http\Request;
 
 class SiteMapController extends Controller
 {
+    // Untuk sitemap.xml (Bot Google)
     public function index()
     {
-        $path = public_path('sitemap.xml');
+        $sops = Sop::all();
+        $staticUrls = [url('/'), url('/about'), url('/sop'), url('/bebas-lab')];
 
-        if (!File::exists($path)) {
-            return "File sitemap.xml tidak ditemukan. Jalankan 'php artisan sitemap:generate' dulu.";
-        }
+        return response()->view('sitemap-xml', [
+            'sops' => $sops,
+            'staticUrls' => $staticUrls
+        ])->header('Content-Type', 'text/xml');
+    }
 
-        $xmlString = File::get($path);
-        $xmlObject = simplexml_load_string($xmlString);
+    // Untuk /peta-situs (Visual untuk Manusia)
+    public function visual()
+    {
+        // Ambil data langsung dari Database agar selalu otomatis
+        $sops = Sop::all();
         
-        $urls = [];
-        foreach ($xmlObject->url as $url) {
-            $urls[] = (string) $url->loc;
-        }
+        // Daftar halaman statis lainnya
+        $pages = [
+            ['url' => '/bebas-lab', 'nama' => 'BEBAS LAB'],
+            ['url' => '/dashboard', 'nama' => 'DASHBOARD'],
+        ];
 
-        return view('sitemap-visual', compact('urls'));
+        return view('sitemap-visual', compact('sops', 'pages'));
     }
 }
