@@ -5,7 +5,7 @@
     <!-- Judul Halaman -->
     <div class="text-center mb-5">
         <h2 class="fw-bold text-dark">Tentang Kami</h2>
-        <p class="text-muted">Mengenal lebih dekat tim di balik Laboratorium Pemrograman & Komputasi</p>
+        <p class="text-muted">Laboratorium Pemrograman dan Komputasi berada di bawah jurusan Rekayasa Sistem Komputer, FMIPA Untan. Memberikan pelayanan untuk praktikum, penelitian, ataupun pengabdian masyarakat oleh dosen ataupun mahasiswa.</p>
         <div class="mx-auto" style="width: 60px; height: 4px; background-color: #0d6efd; border-radius: 2px;"></div>
     </div>
 
@@ -58,6 +58,9 @@
                         </a>
                         <a href="https://www.linkedin.com/in/filza-buana-putra-45a5a41a3" target="_blank" class="btn btn-outline-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                             <i class="bi bi-linkedin"></i>
+                        </a>
+                        <a href="https://github.com/filzabuana" target="_blank" class="btn btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="bi bi-github"></i>
                         </a>
                     </div>
                 </div>

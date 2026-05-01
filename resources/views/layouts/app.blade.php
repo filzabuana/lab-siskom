@@ -6,7 +6,13 @@
     <title>Lab Pemrograman & Komputasi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+    <script>
+    // Script untuk mengecek preferensi dark mode sebelum halaman dirender (mencegah kedipan putih)
+    const storedTheme = localStorage.getItem('theme')
+    if (storedTheme) {
+        document.documentElement.setAttribute('data-bs-theme', storedTheme)
+    }
+</script>
     <style>
         body { 
             background-color: #fcfcfc; 
@@ -45,6 +51,39 @@
         width: auto; /* Agar rasio gambar tetap terjaga */
         object-fit: contain;
     }
+
+        /* Menghilangkan background putih paksa agar mengikuti tema dark mode */
+    [data-bs-theme="dark"] .card, 
+    [data-bs-theme="dark"] .bg-white {
+        background-color: var(--bs-body-bg) !important;
+        color: var(--bs-body-color) !important;
+        border: 1px solid var(--bs-border-color);
+    }
+
+    /* Memastikan teks di navbar tetap terlihat */
+    [data-bs-theme="dark"] .navbar {
+        background-color: #000000 !important;
+    }
+
+    /* Mode Terang: Putih Bersih */
+[data-bs-theme="light"] body {
+    background-color: #ffffff !important;
+}
+
+/* Mode Gelap: Hitam/Gelap Pekat */
+[data-bs-theme="dark"] body {
+    background-color: #121212 !important; /* Warna dark mode standar material design */
+}
+
+/* Pastikan section welcome juga mengikuti */
+[data-bs-theme="light"] .bg-body-tertiary {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6; /* Beri border tipis agar section tetap terlihat terpisah */
+}
+
+[data-bs-theme="dark"] .bg-body-tertiary {
+    background-color: #1e1e1e !important;
+}
     </style>
 </head>
 <body>
@@ -102,6 +141,11 @@
                             </a>
                         </li>
                     @endauth
+                    <div class="nav-item">
+                    <button class="btn btn-link nav-link px-3" id="bd-theme" type="button" onclick="toggleTheme()">
+                        <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
+                    </button>
+                </div>
                 </ul>
             </div>
         </div>
@@ -126,7 +170,37 @@
             startOnLoad: true,
             theme: 'default',
             securityLevel: 'loose',
+            theme: (localStorage.getItem('theme') === 'dark') ? 'dark' : 'default',
         });
     </script>
+
+    <script>
+    function toggleTheme() {
+        const htmlElement = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        let currentTheme = htmlElement.getAttribute('data-bs-theme');
+        let targetTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+
+        // Terapkan tema
+        htmlElement.setAttribute('data-bs-theme', targetTheme);
+        localStorage.setItem('theme', targetTheme);
+
+        // Update Icon
+        if (targetTheme === 'dark') {
+            icon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+        } else {
+            icon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
+        }
+    }
+
+    // Pastikan icon sesuai saat halaman pertama kali dibuka
+    window.addEventListener('DOMContentLoaded', () => {
+        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        const icon = document.getElementById('theme-icon');
+        if (currentTheme === 'dark') {
+            icon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
+        }
+    });
+</script>
 </body>
 </html>
