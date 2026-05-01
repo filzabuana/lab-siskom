@@ -53,9 +53,11 @@
                                     <option value="Matematika" {{ old('prodi') == 'Matematika' ? 'selected' : '' }}>Matematika</option>
                                     <option value="Sistem Informasi" {{ old('prodi') == 'Sistem Informasi' ? 'selected' : '' }}>Sistem Informasi</option>
                                     <option value="Fisika" {{ old('prodi') == 'Fisika' ? 'selected' : '' }}>Fisika</option>
+                                    <option value="Geofisika" {{ old('prodi') == 'Geofisika' ? 'selected' : '' }}>Geofisika</option>
                                     <option value="Biologi" {{ old('prodi') == 'Biologi' ? 'selected' : '' }}>Biologi</option>
-                                    <option value="Kimia" {{ old('prodi') == 'Kimia' ? 'selected' : '' }}>Kimia</option>
-                                    <option value="Kelautan" {{ old('prodi') == 'Kelautan' ? 'selected' : '' }}>Kelautan</option>
+                                    <option value="Kimia" {{ old('prodi') == 'S1 Kimia' ? 'selected' : '' }}>S1 Kimia</option>
+                                    <option value="Kimia" {{ old('prodi') == 'S2 Kimia' ? 'selected' : '' }}>S2 Kimia</option>
+                                    <option value="Kelautan" {{ old('prodi') == 'Ilmu Kelautan' ? 'selected' : '' }}>Ilmu Kelautan</option>
                                     <option value="Statistika" {{ old('prodi') == 'Statistika' ? 'selected' : '' }}>Statistika</option>
                                 </select>
                                 @error('prodi')
@@ -95,7 +97,7 @@
                 <ol class="text-body-secondary mb-0 small">
                     <li class="mb-2">Isi formulir di atas dengan data yang benar (NIM harus unik).</li>
                     <li class="mb-2">Cek kotak masuk/spam email student Anda dan klik tombol verifikasi.</li>
-                    <li class="mb-2">Admin Laboratorium akan mengecek status peminjaman alat Anda.</li>
+                    <li class="mb-2">PLP akan mengecek status peminjaman alat Anda.</li>
                     <li>Jika sudah bebas pinjaman, Surat Bebas Lab (PDF) akan dikirimkan via email.</li>
                 </ol>
             </div>
