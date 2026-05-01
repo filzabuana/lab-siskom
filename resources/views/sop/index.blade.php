@@ -32,6 +32,9 @@
                 @auth
     <hr>
     <div class="d-flex justify-content-end">
+        <a href="{{ route('sop.edit', $sop->id) }}" class="btn btn-outline-warning btn-sm">
+            <i class="bi bi-pencil-square"></i> Edit
+        </a>
         <form action="{{ route('sop.destroy', $sop->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus SOP ini? File di server juga akan terhapus.')">
             @csrf
             @method('DELETE')

@@ -58,7 +58,7 @@
 <div class="row text-center">
     <div class="col-md-12 mb-4">
         <h2 class="fw-bold text-dark">Layanan</h2>
-        <p class="text-muted">Akses cepat berbagai kebutuhan administratif dan fasilitas laboratorium.</p>
+        <p class="text-muted">Akses <a href="https://google.com">cepat</a> berbagai kebutuhan administratif dan fasilitas laboratorium.</p>
     </div>
     
     <div class="col-md-4 mb-4">

@@ -51,7 +51,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-    <img src="logo.png" alt="Logo LAB SISKOM" class="brand-logo me-2">
+    <img src="{{ asset('logo.png') }}" alt="Logo LAB SISKOM" class="brand-logo me-2">
     LAB SISKOM
 </a>
 
