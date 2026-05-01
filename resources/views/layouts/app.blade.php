@@ -6,201 +6,163 @@
     <title>Lab Pemrograman & Komputasi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <script>
-    // Script untuk mengecek preferensi dark mode sebelum halaman dirender (mencegah kedipan putih)
-    const storedTheme = localStorage.getItem('theme')
-    if (storedTheme) {
-        document.documentElement.setAttribute('data-bs-theme', storedTheme)
-    }
-</script>
+        // Set tema secepat mungkin sebelum render
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', storedTheme);
+        
+        function initThemeSwitch(el) {
+            el.checked = (localStorage.getItem('theme') === 'dark');
+        }
+    </script>
+
     <style>
         body { 
-            background-color: #fcfcfc; 
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
         }
-        .navbar { 
-            background-color: #1a1a1a !important; 
-        }
-        .footer { 
-            background: #1a1a1a; 
-            color: rgba(255,255,255,0.6); 
-            padding: 30px 0; 
-            margin-top: 60px; 
-        }
-        .carousel-item img {
-            height: 400px; 
-            object-fit: cover; 
-            border-radius: 15px;
-        }
-        /* Custom Dropdown Styling */
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-            border-radius: 0.75rem;
-        }
-        .dropdown-item {
-            padding: 0.5rem 1.25rem;
-            transition: all 0.2s;
-        }
-        .dropdown-item:hover {
-            background-color: #f8f9fa;
-            color: #0d6efd;
-        }
-        .brand-logo {
-        height: 32px; 
-        width: auto; /* Agar rasio gambar tetap terjaga */
-        object-fit: contain;
-    }
+        .navbar { background-color: #1a1a1a !important; }
+        .footer { background: #1a1a1a; color: rgba(255,255,255,0.6); padding: 30px 0; margin-top: 60px; }
+        .brand-logo { height: 32px; width: auto; object-fit: contain; }
 
-        /* Menghilangkan background putih paksa agar mengikuti tema dark mode */
-    [data-bs-theme="dark"] .card, 
-    [data-bs-theme="dark"] .bg-white {
-        background-color: var(--bs-body-bg) !important;
-        color: var(--bs-body-color) !important;
-        border: 1px solid var(--bs-border-color);
-    }
+        /* Theme Switch Styling */
+        .theme-switch-wrapper { display: flex; align-items: center; }
+        .theme-switch { display: inline-block; height: 30px; position: relative; width: 60px; }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
 
-    /* Memastikan teks di navbar tetap terlihat */
-    [data-bs-theme="dark"] .navbar {
-        background-color: #000000 !important;
-    }
+        .slider {
+            background-color: #333;
+            bottom: 0; cursor: pointer; left: 0; position: absolute; right: 0; top: 0;
+            border-radius: 34px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 8px; border: 1px solid #444;
+            transition: none; 
+        }
 
-    /* Mode Terang: Putih Bersih */
-[data-bs-theme="light"] body {
-    background-color: #ffffff !important;
-}
+        .slider:before {
+            background-color: #fff; bottom: 3px; content: ""; height: 22px; left: 4px;
+            position: absolute; width: 22px; border-radius: 50%; z-index: 2;
+            transition: none;
+        }
 
-/* Mode Gelap: Hitam/Gelap Pekat */
-[data-bs-theme="dark"] body {
-    background-color: #121212 !important; /* Warna dark mode standar material design */
-}
+        [data-bs-theme="dark"] .slider:before { transform: translateX(30px); }
+        [data-bs-theme="dark"] .slider { background-color: #0d6efd; border-color: #0d6efd; }
 
-/* Pastikan section welcome juga mengikuti */
-[data-bs-theme="light"] .bg-body-tertiary {
-    background-color: #ffffff !important;
-    border: 1px solid #dee2e6; /* Beri border tipis agar section tetap terlihat terpisah */
-}
+        .ready .slider, .ready .slider:before {
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
 
-[data-bs-theme="dark"] .bg-body-tertiary {
-    background-color: #1e1e1e !important;
-}
+        .slider i { color: #f1c40f; font-size: 14px; z-index: 1; }
+
+        [data-bs-theme="light"] body { background-color: #ffffff !important; }
+        [data-bs-theme="dark"] body { background-color: #121212 !important; }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-    <img src="{{ asset('logo.png') }}" alt="Logo LAB SISKOM" class="brand-logo me-2">
-    LAB SISKOM
-</a>
+                <img src="{{ asset('logo.png') }}" alt="Logo LAB" class="brand-logo me-2">
+                LAB SISKOM
+            </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <!-- Mobile Toggle -->
+            <div class="d-flex align-items-center d-lg-none">
+                <div class="theme-switch-wrapper me-2">
+                    <label class="theme-switch">
+                        <input type="checkbox" id="checkbox-mobile" onchange="applyTheme(this.checked)">
+                        <script>initThemeSwitch(document.getElementById('checkbox-mobile'));</script>
+                        <div class="slider">
+                            <i class="bi bi-sun-fill"></i>
+                            <i class="bi bi-moon-stars-fill"></i>
+                        </div>
+                    </label>
+                </div>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->is('/') ? 'active' : '' }}" href="/">Beranda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->is('sop*') ? 'active' : '' }}" href="/sop">Repository SOP</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/">Beranda</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/sop">Repository SOP</a></li>
                     
                     @auth
+                        <!-- Dropdown User (Tampil hanya jika sudah Login) -->
                         <li class="nav-item dropdown ms-lg-3">
-                            <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm px-3 text-white border-secondary rounded-pill" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm px-3 text-white border-secondary rounded-pill" href="#" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end mt-2 animate slideIn">
-                                <li>
-                                    <a class="dropdown-item" href="/dashboard">
-                                        <i class="bi bi-speedometer2 me-2 text-primary"></i> Dashboard
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                        <i class="bi bi-person-gear me-2 text-info"></i> Edit Profil
-                                    </a>
-                                </li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person-gear me-2"></i> Edit Profil</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Keluar
-                                        </button>
+                                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Keluar</button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
                     @else
+                        <!-- Tombol Login (Tampil hanya jika belum Login) -->
                         <li class="nav-item">
-                            <a class="nav-link text-white bg-primary rounded-pill px-4 ms-lg-2 mt-2 mt-lg-0 d-inline-block fw-bold" href="{{ route('login') }}">
-                                Login
-                            </a>
+                            <a class="nav-link text-white bg-primary rounded-pill px-4 ms-lg-2 fw-bold" href="{{ route('login') }}">Login</a>
                         </li>
                     @endauth
-                    <div class="nav-item">
-                    <button class="btn btn-link nav-link px-3" id="bd-theme" type="button" onclick="toggleTheme()">
-                        <i id="theme-icon" class="bi bi-moon-stars-fill"></i>
-                    </button>
-                </div>
+
+                    <!-- Desktop Switch -->
+                    <li class="nav-item d-none d-lg-block ms-lg-4">
+                        <div class="theme-switch-wrapper">
+                            <label class="theme-switch">
+                                <input type="checkbox" id="checkbox-desktop" onchange="applyTheme(this.checked)">
+                                <script>initThemeSwitch(document.getElementById('checkbox-desktop'));</script>
+                                <div class="slider shadow-sm">
+                                    <i class="bi bi-sun-fill"></i>
+                                    <i class="bi bi-moon-stars-fill"></i>
+                                </div>
+                            </label>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-2 mt-lg-4">
-    @yield('content')
-</div>
+    <main class="container mt-4">
+        @yield('content')
+    </main>
 
     <footer class="footer text-center">
         <div class="container">
-            <p class="mb-1">&copy; 2026 Lab Pemrograman dan Komputasi FMIPA Untan</p>
-            {{-- <small class="text-white-50">Sistem Informasi Manajemen Laboratorium v1.0</small> --}}
+            <p class="mb-0">&copy; 2026 Lab Pemrograman dan Komputasi FMIPA Untan</p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
     <script>
-        mermaid.initialize({ 
-            startOnLoad: true,
-            theme: 'default',
-            securityLevel: 'loose',
-            theme: (localStorage.getItem('theme') === 'dark') ? 'dark' : 'default',
+        function applyTheme(isDark) {
+            const theme = isDark ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            const cbDesktop = document.getElementById('checkbox-desktop');
+            const cbMobile = document.getElementById('checkbox-mobile');
+            if (cbDesktop) cbDesktop.checked = isDark;
+            if (cbMobile) cbMobile.checked = isDark;
+
+            document.body.classList.add('ready');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.body.classList.add('ready');
+            }, 100);
         });
     </script>
-
-    <script>
-    function toggleTheme() {
-        const htmlElement = document.documentElement;
-        const icon = document.getElementById('theme-icon');
-        let currentTheme = htmlElement.getAttribute('data-bs-theme');
-        let targetTheme = (currentTheme === 'dark') ? 'light' : 'dark';
-
-        // Terapkan tema
-        htmlElement.setAttribute('data-bs-theme', targetTheme);
-        localStorage.setItem('theme', targetTheme);
-
-        // Update Icon
-        if (targetTheme === 'dark') {
-            icon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
-        } else {
-            icon.classList.replace('bi-sun-fill', 'bi-moon-stars-fill');
-        }
-    }
-
-    // Pastikan icon sesuai saat halaman pertama kali dibuka
-    window.addEventListener('DOMContentLoaded', () => {
-        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-        const icon = document.getElementById('theme-icon');
-        if (currentTheme === 'dark') {
-            icon.classList.replace('bi-moon-stars-fill', 'bi-sun-fill');
-        }
-    });
-</script>
 </body>
 </html>

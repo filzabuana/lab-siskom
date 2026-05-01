@@ -1,23 +1,36 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- Ganti bg-white menjadi bg-body-tertiary agar background mengikuti tema -->
-<div class="row align-items-center py-3 py-lg-5 mb-5 rounded-4 bg-body-tertiary shadow-sm px-4 d-flex flex-column flex-lg-row">
+<style>
+    /* Mengunci tinggi carousel agar seragam di semua slide */
+    .hero-carousel-img {
+        height: 300px; /* Tinggi di Mobile */
+        object-fit: cover; /* Gambar akan terpotong rapi, tidak gepeng */
+    }
+
+    @media (min-width: 992px) {
+        .hero-carousel-img {
+            height: 400px; /* Tinggi di Desktop */
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="row align-items-center py-3 py-lg-5 mb-5 rounded-4 bg-body-tertiary shadow-sm px-4">
     
-    <div class="col-12 d-lg-none text-center mb-3">
+    <!-- Judul Mobile (Hanya muncul di layar kecil) -->
+    <div class="col-12 d-lg-none text-center mb-4">
         <span class="badge bg-primary-subtle text-primary rounded-pill mb-2 px-3 py-2 fw-semibold">Pusat Layanan Digital</span>
-        <!-- Ganti text-dark menjadi text-body -->
         <h1 class="h2 fw-bold text-body">Laboratorium Pemrograman & Komputasi</h1>
     </div>
 
-    <div class="col-lg-6 px-lg-5 order-2 order-lg-1 mt-4 mt-lg-0">
+    <!-- Teks Kiri -->
+    <div class="col-lg-6 px-lg-5 order-2 order-lg-1 mt-2 mt-lg-0">
         <div class="d-none d-lg-block">
             <span class="badge bg-primary-subtle text-primary rounded-pill mb-2 px-3 py-2 fw-semibold">Pusat Layanan Digital</span>
-            <!-- Ganti text-dark menjadi text-body -->
             <h1 class="display-4 fw-bold text-body mb-3">Laboratorium Pemrograman & Komputasi</h1>
         </div>
         
-        <!-- Ganti text-secondary menjadi text-body-secondary -->
         <p class="lead text-body-secondary mb-4 text-center text-lg-start">Solusi terintegrasi untuk peminjaman alat praktikum, penelitian, dan administrasi laboratorium yang efisien.</p>
         
         <div class="d-grid gap-2 d-sm-flex justify-content-center justify-content-lg-start">
@@ -30,18 +43,18 @@
         </div>
     </div>
 
+    <!-- Carousel Kanan -->
     <div class="col-lg-6 text-center order-1 order-lg-2">
         <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
-            <!-- Carousel content tetap sama -->
             <div class="carousel-inner rounded-4 shadow">
                 <div class="carousel-item active" data-bs-interval="5000"> 
-                    <img src="{{ asset('images/hero-lab.jpeg') }}" class="d-block w-100" alt="Robot Komputasi">
+                    <img src="{{ asset('images/hero-lab.jpeg') }}" class="d-block w-100 hero-carousel-img" alt="Robot Komputasi">
                 </div>
                 <div class="carousel-item" data-bs-interval="5000">
-                    <img src="{{ asset('images/bioloid.jpeg') }}" class="d-block w-100" alt="Robot Bioloid">
+                    <img src="{{ asset('images/bioloid.jpeg') }}" class="d-block w-100 hero-carousel-img" alt="Robot Bioloid">
                 </div>
                 <div class="carousel-item" data-bs-interval="5000">
-                    <img src="{{ asset('images/expo.jpeg') }}" class="d-block w-100" alt="Expo">
+                    <img src="{{ asset('images/expo.jpeg') }}" class="d-block w-100 hero-carousel-img" alt="Expo">
                 </div>
             </div>
             <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
@@ -54,15 +67,14 @@
     </div>
 </div>
 
+<!-- Layanan Section -->
 <div class="row text-center">
     <div class="col-md-12 mb-4">
-        <!-- text-dark -> text-body -->
         <h2 class="fw-bold text-body">Layanan</h2>
-        <p class="text-body-secondary">Akses <a href="https://google.com" class="text-primary">cepat</a> berbagai kebutuhan administratif dan fasilitas laboratorium.</p>
+        <p class="text-body-secondary">Akses cepat berbagai kebutuhan administratif dan fasilitas laboratorium.</p>
     </div>
     
     <div class="col-md-4 mb-4">
-        <!-- Hapus bg-white, biarkan card mengikuti tema default -->
         <div class="card h-100 shadow-sm border-0 rounded-4">
             <div class="card-body p-4 text-body">
                 <div class="feature-icon bg-primary text-white rounded-circle mb-3 d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
