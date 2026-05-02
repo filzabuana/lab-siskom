@@ -38,11 +38,9 @@
         <p class="lead text-body-secondary mb-4 text-center text-lg-start">Solusi terintegrasi untuk peminjaman alat praktikum, penelitian, dan administrasi laboratorium yang efisien.</p>
         
         <div class="d-grid gap-2 d-sm-flex justify-content-center justify-content-lg-start">
-            <!-- Link ke section layanan di bawah -->
             <a href="#layanan" class="btn btn-primary btn-lg px-4 gap-3 rounded-pill">
-                <i class="bi bi- lightning-charge me-2"></i>Akses Pelayanan
+                <i class="bi bi-lightning-charge me-2"></i>Akses Pelayanan
             </a>
-            <!-- Tentang Kami diganti ke SOP sesuai request -->
             <a href="/sop" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">   
                 <i class="bi bi-file-earmark-text me-2"></i>SOP Laboratorium
             </a>
@@ -80,7 +78,7 @@
                     <i class="bi bi-cpu"></i>
                 </div>
                 <h4 class="fw-bold">Peminjaman Alat</h4>
-                <p class="text-body-secondary small">Hardware praktikum, kit robotika, dan perangkat penelitian RSK.</p>
+                <p class="text-body-secondary small">Hardware praktikum, kit robotika, dan perangkat penelitian Rekayasa Sistem Komputer.</p>
                 <a href="#katalog" class="btn btn-link text-primary p-0 fw-semibold text-decoration-none">Lihat Katalog Alat →</a>
             </div>
         </div>
@@ -129,11 +127,9 @@
 
     <div class="col-12">
         <div class="row g-4">
-            @forelse($inventaris->take(4) as $item) {{-- Kita batasi 4 atau 8 saja untuk Home --}}
+            @forelse($inventaris->take(4) as $item)
                 <div class="col-md-4 col-lg-3">
                     <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden v-card-hover">
-                        
-                        {{-- Link Detail --}}
                         <a href="{{ route('katalog.show', $item->id) }}" class="text-decoration-none text-dark card-link-wrapper">
                             <div class="bg-light d-flex align-items-center justify-content-center" style="height: 160px; overflow: hidden;">
                                 @if($item->foto_barang)
@@ -157,7 +153,6 @@
                         </a>
 
                         <div class="card-body pt-2">
-                            {{-- Badge Status --}}
                             <div class="mb-3">
                                 @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                                     <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle small">
@@ -201,13 +196,11 @@
                     </div>
                 </div>
 
-                {{-- Modal harus ikut di-include agar tombol Pinjam berfungsi --}}
                 @auth
                     @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                         @include('peminjaman.partials.modal_pinjam')
                     @endif
                 @endauth
-
             @empty
                 <div class="col-12 text-center py-5">
                     <p class="text-secondary">Maaf, saat ini tidak ada alat tersedia.</p>
@@ -217,8 +210,20 @@
     </div>
 </div>
 
+<!-- Section About Ringkas -->
+<div class="row mt-5 pt-5 border-top">
+    <div class="col-md-8 mx-auto text-center">
+        <h3 class="fw-bold text-body mb-3">Tentang Laboratorium</h3>
+        <p class="text-body-secondary">
+            Laboratorium Pemrograman & Komputasi Program Studi <strong>Rekayasa Sistem Komputer</strong> Universitas Tanjungpura berfokus pada pengembangan teknologi berbasis 
+            <strong>Automation & Embedded System (AES)</strong> dan <strong>Network Intelligent Control (NIC)</strong>. 
+            Kami menjadi pusat riset dan inovasi dalam mengeksplorasi kontrol cerdas, sistem tertanam, dan otomasi.
+        </p>
+        <a href="/about" class="btn btn-link text-decoration-none fw-bold p-0">Baca profil selengkapnya <i class="bi bi-arrow-right"></i></a>
+    </div>
+</div>
+
 <style>
-    /* Mengambil style asli dari /katalog Bapak */
     .card-link-wrapper { display: block; cursor: pointer; }
     .v-card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
     .v-card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
