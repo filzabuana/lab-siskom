@@ -172,5 +172,41 @@
             }, 100);
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Logika deteksi tema untuk SweetAlert
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            const swalConfig = {
+                background: isDark ? '#212529' : '#fff',
+                color: isDark ? '#fff' : '#000',
+                confirmButtonColor: '#0d6efd',
+                timer: 3500,
+                timerProgressBar: true
+            };
+
+            // Notifikasi Sukses
+            @if(session('success'))
+                Swal.fire({
+                    ...swalConfig,
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                });
+            @endif
+
+            // Notifikasi Error
+            @if(session('error'))
+                Swal.fire({
+                    ...swalConfig,
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{{ session('error') }}",
+                });
+            @endif
+        });
+    </script>
+</body>
 </body>
 </html>

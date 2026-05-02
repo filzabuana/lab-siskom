@@ -16,26 +16,32 @@
         @forelse($inventaris as $item)
             <div class="col-md-4 col-lg-3">
                 <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden v-card-hover">
-                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 160px; overflow: hidden;">
-                        @if($item->foto_barang)
-                            {{-- Tambahkan 'storage/' sebelum 'inventaris/' --}}
-                            <img src="{{ asset('storage/inventaris/' . $item->foto_barang) }}" 
-                                alt="{{ $item->nama_aset }}" 
-                                class="img-fluid w-100 h-100" 
-                                style="object-fit: cover;"
-                                onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=File+Tidak+Ditemukan';">
-                        @else
-                            <div class="text-center">
-                                <i class="bi bi-image text-secondary opacity-25" style="font-size: 3rem;"></i>
-                                <small class="d-block text-muted" style="font-size: 0.6rem;">No Image</small>
-                            </div>
-                        @endif
-                    </div>
+                    
+                    {{-- Bungkus Area Gambar & Judul dengan Link Detail --}}
+                    <a href="{{ route('katalog.show', $item->id) }}" class="text-decoration-none text-dark card-link-wrapper">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 160px; overflow: hidden;">
+                            @if($item->foto_barang)
+                                <img src="{{ asset('storage/inventaris/' . $item->foto_barang) }}" 
+                                    alt="{{ $item->nama_aset }}" 
+                                    class="img-fluid w-100 h-100" 
+                                    style="object-fit: cover;"
+                                    onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=File+Tidak+Ditemukan';">
+                            @else
+                                <div class="text-center placeholder-container">
+                                    <i class="bi bi-image text-secondary opacity-50 icon-no-image" style="font-size: 3rem;"></i>
+                                    <small class="d-block text-muted opacity-75 mt-1" style="font-size: 0.6rem;">No Image Available</small>
+                                </div>
+                            @endif
+                        </div>
 
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-1 text-truncate">{{ $item->nama_aset }}</h6>
-                        <small class="text-muted d-block mb-3 small">{{ $item->kode_barang }}</small>
+                        <div class="card-body pb-0">
+                            {{-- Gunakan utility class text-body agar warna teks mengikuti tema (Dark/Light) --}}
+                            <h6 class="fw-bold mb-1 text-truncate text-body">{{ $item->nama_aset }}</h6>
+                            <small class="text-muted d-block mb-2 small">{{ $item->kode_barang }}</small>
+                        </div>
+                    </a>
 
+                    <div class="card-body pt-2">
                         {{-- Badge Status Akses --}}
                         <div class="mb-3">
                             @if($item->tipe_peminjaman == 'Bisa Dipinjam')
@@ -55,7 +61,7 @@
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <small class="text-secondary fw-bold">Stok: {{ $item->jumlah_stok }}</small>
                                 </div>
-                                <button class="btn btn-primary w-100 rounded-pill fw-bold" 
+                                <button class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#modalPinjam{{ $item->id }}"
                                         {{ $item->jumlah_stok <= 0 ? 'disabled' : '' }}>
@@ -65,23 +71,17 @@
                                 <button class="btn btn-outline-secondary w-100 rounded-pill fw-bold disabled" style="cursor: not-allowed;">
                                     Hanya Gunakan di Lab
                                 </button>
-                                <small class="text-muted d-block text-center mt-1" style="font-size: 0.7rem;">
-                                    Hubungi PLP untuk izin penggunaan
-                                </small>
                             @endif
                         @else
                             {{-- Jika Belum Login (Publik) --}}
                             @if($item->tipe_peminjaman == 'Bisa Dipinjam')
-                                {{-- Hanya tampilkan ajakan login untuk alat yang memang BOLEH dipinjam --}}
                                 <div class="alert alert-light py-2 px-3 small rounded-3 mb-0 border shadow-sm text-center">
                                     <i class="bi bi-info-circle me-1 text-primary"></i> 
                                     <a href="{{ route('login') }}" class="text-decoration-none fw-bold">Login</a> untuk meminjam.
                                 </div>
                             @else
-                                {{-- Untuk alat 'Hanya di Lab', cukup beri keterangan tanpa link login --}}
                                 <div class="alert alert-secondary py-2 px-3 small rounded-3 mb-0 border-0 text-center opacity-75">
-                                    <i class="bi bi-door-open me-1"></i> 
-                                    Tersedia untuk penggunaan di Lab
+                                    <i class="bi bi-door-open me-1"></i> Tersedia di Lab
                                 </div>
                             @endif
                         @endauth
@@ -89,7 +89,6 @@
                 </div>
             </div>
 
-            {{-- Load Modal (Hanya jika user login dan alat bisa dipinjam) --}}
             @auth
                 @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                     @include('peminjaman.partials.modal_pinjam')
@@ -106,13 +105,23 @@
 </div>
 
 <style>
-    /* Sedikit sentuhan biar card terasa interaktif */
+    /* Styling agar card terasa seperti satu kesatuan link */
+    .card-link-wrapper {
+        display: block;
+        cursor: pointer;
+    }
+    
     .v-card-hover {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+    
     .v-card-hover:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
+
+    [data-bs-theme="dark"] .bg-light { background-color: #2b3035 !important; }
+    [data-bs-theme="dark"] .icon-no-image { color: #6c757d !important; opacity: 0.3 !important; }
+    [data-bs-theme="dark"] .card { border: 1px solid #373b3e !important; }
 </style>
 @endsection

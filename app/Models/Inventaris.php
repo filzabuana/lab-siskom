@@ -25,18 +25,18 @@ class Inventaris extends Model
     protected $fillable = [
         'kode_barang',
         'nama_aset',
-        'foto_barang', // Kolom foto yang baru kita tambahkan
         'kategori',
-        'laboratorium',
-        'ruangan',
-        'nup',
         'merk',
+        'nup',
+        'ruangan',
         'tahun_perolehan',
-        'sumber_dana',
-        'jumlah_stok',
+        'jumlah_stok',   
+        'jumlah_rusak',  
         'kondisi',
-        'catatan_lokasi',
         'tipe_peminjaman',
+        'deskripsi',     
+        'catatan_lokasi',
+        'foto_barang',
     ];
 
     /**

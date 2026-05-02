@@ -26,52 +26,45 @@ class InventarisController extends Controller
     $request->validate([
         'kode_barang'     => 'required|unique:inventaris,kode_barang',
         'nama_aset'       => 'required|string|max:255',
-        'foto_barang'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Maks 2MB
+        'foto_barang'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'kategori'        => 'required',
         'ruangan'         => 'required',
         'tahun_perolehan' => 'required|digits:4',
         'jumlah_stok'     => 'required|integer|min:0',
+        'jumlah_rusak'    => 'required|integer|min:0', // Tambahkan ini
         'kondisi'         => 'required',
         'tipe_peminjaman' => 'required',
+        'deskripsi'       => 'nullable|string',        // Tambahkan ini
     ]);
 
-    // 2. Ambil semua data input
+    // ... (logika upload foto tetap sama seperti kode Bapak) ...
     $data = $request->all();
-
-    // 3. Logika Upload Foto
+    
     if ($request->hasFile('foto_barang')) {
         $file = $request->file('foto_barang');
-        
-        // Buat nama file unik: timestamp + nama asli (tanpa spasi)
         $namaFile = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-        
-        // Pastikan folder tujuan ada di public/storage/inventaris
         $tujuanFolder = public_path('storage/inventaris');
-        
-        // Buat folder jika belum ada
         if (!file_exists($tujuanFolder)) {
             mkdir($tujuanFolder, 0755, true);
         }
-
-        // Pindahkan file
         $file->move($tujuanFolder, $namaFile);
-        
-        // Simpan nama file ke array data untuk database
         $data['foto_barang'] = $namaFile;
     }
 
-    // 4. Simpan ke Database
     \App\Models\Inventaris::create($data);
 
-    // 5. Redirect dengan pesan sukses
     return redirect()->route('admin.inventaris.index')
-                     ->with('success', 'Aset baru berhasil didaftarkan dengan foto.');
+                     ->with('success', 'Aset baru berhasil didaftarkan dengan data lengkap.');
 }
     public function show($id)
-    {
-        $item = Inventaris::findOrFail($id);
-        return view('admin.inventaris.show', compact('item'));
-    }
+{
+    $item = Inventaris::findOrFail($id);
+    
+    // Logika untuk menentukan apakah ini akses dari katalog atau admin
+    $isKatalog = request()->is('katalog*');
+
+    return view('admin.inventaris.show', compact('item', 'isKatalog'));
+}
 
     // Menampilkan form edit
 public function edit($id)
@@ -90,18 +83,18 @@ public function update(Request $request, $id)
         'foto_barang'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'tahun_perolehan' => 'required|digits:4',
         'jumlah_stok'     => 'required|integer|min:0',
+        'jumlah_rusak'    => 'required|integer|min:0', // Tambahkan ini
         'kondisi'         => 'required',
+        'deskripsi'       => 'nullable|string',        // Tambahkan ini
     ]);
 
     $data = $request->all();
 
-    // Logika Update Foto
+    // ... (logika update foto tetap sama seperti kode Bapak) ...
     if ($request->hasFile('foto_barang')) {
-        // Hapus foto lama jika ada
         if ($item->foto_barang && file_exists(public_path('storage/inventaris/' . $item->foto_barang))) {
             unlink(public_path('storage/inventaris/' . $item->foto_barang));
         }
-
         $file = $request->file('foto_barang');
         $namaFile = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
         $file->move(public_path('storage/inventaris'), $namaFile);
@@ -112,7 +105,6 @@ public function update(Request $request, $id)
 
     return redirect()->route('admin.inventaris.index')->with('success', 'Data aset berhasil diperbarui.');
 }
-
 public function destroy($id)
 {
     $item = \App\Models\Inventaris::findOrFail($id);

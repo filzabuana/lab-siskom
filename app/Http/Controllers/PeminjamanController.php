@@ -34,6 +34,9 @@ class PeminjamanController extends Controller
         ]);
 
         $alat = Inventaris::findOrFail($request->inventaris_id);
+        if ($alat->tipe_peminjaman != 'Bisa Dipinjam') {
+            return back()->with('error', 'Maaf, alat ini hanya tersedia untuk penggunaan di laboratorium.');
+        }
 
         // Proteksi: Cek apakah stok fisik mencukupi
         if ($request->jumlah_pinjam > $alat->jumlah_stok) {
@@ -54,26 +57,38 @@ class PeminjamanController extends Controller
     }
     public function updateStatus(Request $request, $id)
     {
+        // Pastikan hanya admin yang bisa akses
+        if (!Auth::user()->is_admin) {
+            abort(403);
+        }
+
         $peminjaman = Peminjaman::findOrFail($id);
         $alat = Inventaris::findOrFail($peminjaman->inventaris_id);
 
         if ($request->status == 'disetujui') {
-            // Potong stok alat di lab
+            if ($alat->jumlah_stok < $peminjaman->jumlah_pinjam) {
+                return back()->with('error', 'Stok tidak mencukupi untuk disetujui.');
+            }
+            
             $alat->decrement('jumlah_stok', $peminjaman->jumlah_pinjam);
             $peminjaman->update(['status' => 'disetujui']);
-            
+
         } elseif ($request->status == 'selesai') {
-            // Kembalikan stok alat ke lab
             $alat->increment('jumlah_stok', $peminjaman->jumlah_pinjam);
             $peminjaman->update([
                 'status' => 'selesai',
                 'tgl_kembali_aktual' => now()
             ]);
-            
+
         } elseif ($request->status == 'ditolak') {
+            // --- TAMBAHKAN VALIDASI DI SINI ---
+            $request->validate([
+                'catatan' => 'required|string|max:500',
+            ]);
+
             $peminjaman->update([
                 'status' => 'ditolak',
-                'catatan_admin' => $request->catatan_admin
+                'catatan' => $request->catatan,
             ]);
         }
 

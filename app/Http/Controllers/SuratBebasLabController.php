@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\SuratBebasLab;
+use App\Models\Peminjaman; // Tambahkan ini
+use App\Models\Inventaris;  // Tambahkan jika perlu statistik alat
 use App\Mail\VerifyBebasLab;
+use App\Mail\NotifikasiBebasLab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
-use App\Mail\NotifikasiBebasLab;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class SuratBebasLabController extends Controller
 {
     /**
-     * 1. Menampilkan Form untuk Mahasiswa
+     * 1. Menampilkan Form untuk Mahasiswa (Umum)
      */
     public function create()
     {
@@ -32,14 +35,13 @@ class SuratBebasLabController extends Controller
             'email' => [
                 'required',
                 'email',
-                'regex:/^[Hh][0-9]+@student\.untan\.ac\.id$/i' // Khusus email student UNTAN
+                'regex:/^[Hh][0-9]+@student\.untan\.ac\.id$/i'
             ],
         ], [
             'email.regex' => 'Gunakan email resmi mahasiswa UNTAN (H... @student.untan.ac.id)',
             'nim.unique'  => 'NIM ini sudah pernah mengajukan surat bebas lab.'
         ]);
 
-        // Simpan data ke database
         $pengajuan = SuratBebasLab::create([
             'nama'   => $request->nama,
             'nim'    => $request->nim,
@@ -48,41 +50,67 @@ class SuratBebasLabController extends Controller
             'status' => 'pending',
         ]);
 
-        // Generate URL Verifikasi yang aman (Signed URL) berlaku 24 jam
         $verificationUrl = URL::temporarySignedRoute(
             'bebas-lab.verify', 
             now()->addHours(24), 
             ['id' => $pengajuan->id]
         );
 
-        // Mengirim Email Verifikasi
         Mail::to($pengajuan->email)->send(new VerifyBebasLab($verificationUrl, $pengajuan));
 
         return back()->with('success', 'Form berhasil dikirim! Silakan cek email Anda untuk melakukan verifikasi.');
     }
 
-public function dashboardAdmin()
-{
-    $notifPengajuan = SuratBebasLab::where('status', 'verified_email')->count();
-
-    // SANGAT PENTING: Return ke 'dashboard', BUKAN 'admin.dashboard'
-    // Supaya file layouts.app (CSS/Navigasi) tetap ikut terbawa.
-    return view('dashboard', compact('notifPengajuan'));
-}
-    
     /**
-     * 3. Verifikasi Email oleh Mahasiswa (Klik Link dari Email)
+     * DASHBOARD UTAMA (Adaptif: Admin vs Mahasiswa)
+     */
+    public function dashboardAdmin()
+{
+    $user = Auth::user();
+
+    if ($user->is_admin) {
+        $notifPengajuan = SuratBebasLab::where('status', 'verified_email')->count();
+        
+        // Statistik Admin
+        $countPeminjamanAktif = Peminjaman::where('status', 'disetujui')->count(); 
+        $countPending = Peminjaman::where('status', 'pending')->count();
+        
+        // Untuk Admin, Riwayat adalah semua yang sudah 'selesai' di lab
+        $countTotal = Peminjaman::where('status', 'selesai')->count();
+
+        return view('dashboard', compact('notifPengajuan', 'countPeminjamanAktif', 'countPending', 'countTotal'));
+    }
+
+    // --- LOGIKA MAHASISWA ---
+    
+    // 1. Sedang Dipinjam: Alat ada di mahasiswa (disetujui tapi belum selesai)
+    $countPeminjamanAktif = Peminjaman::where('user_id', $user->id)
+                                      ->where('status', 'disetujui')
+                                      ->count();
+
+    // 2. Menunggu Approval: Masih proses pengajuan
+    $countPending = Peminjaman::where('user_id', $user->id)
+                                ->where('status', 'pending')
+                                ->count();
+
+    // 3. Total Riwayat: Hanya yang SUDAH BERHASIL (Selesai pinjam & kembali)
+    $countTotal = Peminjaman::where('user_id', $user->id)
+                            ->where('status', 'selesai')
+                            ->count();
+
+    return view('dashboard', compact('countPeminjamanAktif', 'countPending', 'countTotal'));
+}
+    /**
+     * 3. Verifikasi Email oleh Mahasiswa
      */
     public function verifyEmail(Request $request, $id)
     {
-        // Mengecek apakah link valid dan belum expired (Signed URL check)
         if (! $request->hasValidSignature()) {
             abort(403, 'Tautan verifikasi sudah kedaluwarsa atau tidak sah.');
         }
 
         $pengajuan = SuratBebasLab::findOrFail($id);
         
-        // Update status hanya jika sebelumnya masih pending
         if ($pengajuan->status == 'pending') {
             $pengajuan->update([
                 'status' => 'verified_email',
@@ -94,51 +122,42 @@ public function dashboardAdmin()
     }
 
     /**
-     * 4. (ADMIN ONLY) Dashboard List Pengajuan
+     * 4. (ADMIN ONLY) List Pengajuan Bebas Lab
      */
     public function indexAdmin()
     {
-        // Mengambil data terbaru untuk ditampilkan di tabel admin
         $data = SuratBebasLab::orderBy('created_at', 'desc')->get();
         return view('admin.bebas-lab.index', compact('data'));
     }
 
     /**
-     * 5. (ADMIN ONLY) Update Status (Setujui/Tolak)
+     * 5. (ADMIN ONLY) Update Status Bebas Lab
      */
     public function updateStatus(Request $request, $id)
-{
-    $pengajuan = SuratBebasLab::findOrFail($id);
-    
-    // Tentukan status dan catatan berdasarkan tombol yang diklik admin
-    if ($request->action == 'setujui') {
-        $pengajuan->update([
-            'status' => 'disetujui'
-        ]);
-        $statusEmail = 'disetujui';
-    } else {
-        $pengajuan->update([
-            'status' => 'ditolak',
-            'catatan_admin' => $request->catatan
-        ]);
-        $statusEmail = 'ditolak';
+    {
+        $pengajuan = SuratBebasLab::findOrFail($id);
+        
+        if ($request->action == 'setujui') {
+            $pengajuan->update(['status' => 'disetujui']);
+            $statusEmail = 'disetujui';
+        } else {
+            $pengajuan->update([
+                'status' => 'ditolak',
+                'catatan_admin' => $request->catatan
+            ]);
+            $statusEmail = 'ditolak';
+        }
+
+        try {
+            Mail::to($pengajuan->email)->send(new NotifikasiBebasLab(
+                $pengajuan, 
+                $statusEmail, 
+                $request->catatan
+            ));
+        } catch (\Exception $e) {
+            return back()->with('success', 'Status diperbarui, namun email gagal dikirim.');
+        }
+
+        return back()->with('success', 'Status pengajuan berhasil diperbarui.');
     }
-
-    // EKSEKUSI PENGIRIMAN EMAIL
-    // Pastikan Bapak sudah membuat Mailable 'NotifikasiBebasLab'
-    try {
-        Mail::to($pengajuan->email)->send(new NotifikasiBebasLab(
-            $pengajuan, 
-            $statusEmail, 
-            $request->catatan
-        ));
-    } catch (\Exception $e) {
-        // Jika email gagal tapi database berhasil update, tetap beri info ke admin
-        return back()->with('success', 'Status diperbarui, namun email gagal dikirim. Cek konfigurasi SMTP.');
-    }
-
-    return back()->with('success', 'Status pengajuan berhasil diperbarui dan email notifikasi telah dikirim.');
-}
-
-
 }

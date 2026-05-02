@@ -34,7 +34,16 @@
                             <small class="text-secondary">{{ $item->merk }} ({{ $item->tahun_perolehan }})</small>
                         </td>
                         <td><span class="badge bg-info-subtle text-info px-3">{{ $item->kategori }}</span></td>
-                        <td>{{ $item->jumlah_stok }} Unit</td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ $item->jumlah_stok + $item->jumlah_rusak }} Unit</div>
+                            @if($item->jumlah_rusak > 0)
+                                <small class="text-danger" style="font-size: 0.75rem;">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> {{ $item->jumlah_rusak }} Rusak
+                                </small>
+                            @else
+                                <small class="text-success" style="font-size: 0.7rem;">Ready</small>
+                            @endif
+                        </td>
                         <td>
                             @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                                 <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
@@ -48,21 +57,18 @@
                         </td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-2">
-                                {{-- Tombol Detail --}}
                                 <a href="{{ route('admin.inventaris.show', $item->id) }}" 
                                 class="btn btn-light btn-sm rounded-circle shadow-sm" 
                                 title="Lihat Detail">
                                     <i class="bi bi-eye text-primary"></i>
                                 </a>
 
-                                {{-- Tombol Edit --}}
                                 <a href="{{ route('admin.inventaris.edit', $item->id) }}" 
                                 class="btn btn-light btn-sm rounded-circle shadow-sm" 
                                 title="Edit Data">
                                     <i class="bi bi-pencil text-warning"></i>
                                 </a>
 
-                                {{-- Tombol Hapus dengan SweetAlert --}}
                                 <form action="{{ route('admin.inventaris.destroy', $item->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
@@ -87,16 +93,13 @@
     .table { color: inherit; }
     .card { background-color: var(--bs-card-bg); }
     .btn-light { background-color: var(--bs-tertiary-bg); border: none; }
-    /* Menghaluskan tampilan SweetAlert agar matching dengan dashboard */
     .swal2-popup { font-family: 'Inter', sans-serif !important; border-radius: 20px !important; }
 </style>
 
-{{-- Pastikan CDN SweetAlert2 ada --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // 1. Konfigurasi Tombol Delete
         const deleteButtons = document.querySelectorAll('.btn-delete');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function (e) {
@@ -123,7 +126,6 @@
             });
         });
 
-        // 2. Notifikasi Toast Sukses (Muncul jika ada session success)
         @if(session('success'))
             const Toast = Swal.mixin({
                 toast: true,
