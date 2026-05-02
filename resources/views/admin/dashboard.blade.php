@@ -28,39 +28,52 @@
             </div>
         </div>
 
-        <!-- Shortcut Verifikasi Bebas Lab -->
-    <div class="col-md-6 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100 position-relative">
-            <div class="card-body p-4 text-center">
-                <div class="bg-success bg-opacity-10 p-3 rounded-4 d-inline-block mb-3 position-relative">
-                    <i class="bi bi-person-check-fill text-success fs-2"></i>
-                    
-                    {{-- Angka akan muncul HANYA jika statusnya 'verified_email' --}}
-                    @if(($notifPengajuan ?? 0) > 0)
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm border border-white" style="font-size: 0.85rem; padding: 0.4em 0.6em;">
-                            {{ $notifPengajuan }}
-                        </span>
-                    @endif
+        <!-- Shortcut Kelola Inventaris -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-info bg-opacity-10 p-3 rounded-4 d-inline-block mb-3">
+                        <i class="bi bi-boxes text-info fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold">Inventaris Alat</h5>
+                    <p class="text-body-secondary small">Pantau stok, kondisi barang, dan lokasi penyimpanan aset lab.</p>
+                    <a href="{{ route('admin.inventaris.index') }}" class="btn btn-info w-100 rounded-pill fw-bold text-white">Buka Inventaris</a>
                 </div>
-
-                <h5 class="fw-bold">Bebas Lab</h5>
-                <p class="text-body-secondary small">
-                    @if(($notifPengajuan ?? 0) > 0)
-                        Ada <strong>{{ $notifPengajuan }}</strong> pengajuan menunggu validasi Anda.
-                    @else
-                        Belum ada pengajuan baru yang masuk.
-                    @endif
-                </p>
-                
-                <a href="{{ route('admin.bebas-lab.index') }}" class="btn btn-success w-100 rounded-pill fw-bold text-white d-flex align-items-center justify-content-center">
-                    <span>Cek Pengajuan</span>
-                    @if(($notifPengajuan ?? 0) > 0)
-                        <span class="badge bg-white text-success ms-2 rounded-pill">{{ $notifPengajuan }}</span>
-                    @endif
-                </a>
             </div>
         </div>
-    </div>
+
+        <!-- Shortcut Verifikasi Bebas Lab -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-success bg-opacity-10 p-3 rounded-4 d-inline-block mb-3 position-relative">
+                        <i class="bi bi-person-check-fill text-success fs-2"></i>
+                        
+                        @if(($notifPengajuan ?? 0) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm border border-white" style="font-size: 0.85rem; padding: 0.4em 0.6em;">
+                                {{ $notifPengajuan }}
+                            </span>
+                        @endif
+                    </div>
+
+                    <h5 class="fw-bold">Bebas Lab</h5>
+                    <p class="text-body-secondary small">
+                        @if(($notifPengajuan ?? 0) > 0)
+                            Ada <strong>{{ $notifPengajuan }}</strong> pengajuan menunggu validasi Anda.
+                        @else
+                            Belum ada pengajuan baru yang masuk.
+                        @endif
+                    </p>
+                    
+                    <a href="{{ route('admin.bebas-lab.index') }}" class="btn btn-success w-100 rounded-pill fw-bold text-white d-flex align-items-center justify-content-center">
+                        <span>Cek Pengajuan</span>
+                        @if(($notifPengajuan ?? 0) > 0)
+                            <span class="badge bg-white text-success ms-2 rounded-pill">{{ $notifPengajuan }}</span>
+                        @endif
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

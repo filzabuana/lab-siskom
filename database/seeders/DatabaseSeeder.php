@@ -13,12 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Memanggil SopSeeder agar data SOP masuk ke database
+        // 1. Memanggil semua seeder dalam satu array
         $this->call([
             SopSeeder::class,
+            InventarisSeeder::class,
         ]);
 
-        // Baris ini boleh tetap ada untuk membuat akun uji coba
+        // 2. Membuat akun uji coba (di luar array call)
+        // Pastikan User factory tidak error, atau jika sudah ada user ini, 
+        // Bapak bisa berikan komentar (comment out) jika tidak diperlukan lagi.
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',

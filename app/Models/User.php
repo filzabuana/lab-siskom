@@ -46,4 +46,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function peminjaman()
+{
+    // Relasi One-to-Many: Satu user bisa punya banyak riwayat peminjaman
+    return $this->hasMany(Peminjaman::class);
+}
 }
