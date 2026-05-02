@@ -4,74 +4,143 @@
 <div class="container">
     <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
         <div class="col-md-10">
-            <div class="card border-0 shadow-lg overflow-hidden rounded-4">
+            <div class="card border-0 shadow-lg overflow-hidden rounded-4 bg-body">
                 <div class="row g-0">
+                    
+                    {{-- Sisi Kiri: Visual Portal --}}
                     <div class="col-lg-6 d-none d-lg-block" style="background: linear-gradient(135deg, #0d6efd 0%, #003d99 100%); position: relative;">
-                        <div class="h-100 d-flex flex-column justify-content-center align-items-center text-white p-5">
-                            <img src="{{ asset('images/hero-lab.jpeg') }}" alt="Admin Illustration" class="img-fluid mb-4" style="max-height: 250px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));">
-                            <h3 class="fw-bold">Portal Admin</h3>
-                            <p class="text-center text-white-50">Silakan masuk untuk mengelola SOP dan layanan laboratorium komputasi.</p>
+                        <div class="h-100 d-flex flex-column justify-content-center align-items-center text-white p-5 text-center">
+                            <img src="{{ asset('images/hero-lab.jpeg') }}" alt="Lab Illustration" class="img-fluid mb-4 rounded-3" style="max-height: 250px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.3));">
+                            <h3 class="fw-bold">Sistem Informasi Lab</h3>
+                            <p class="text-white-50">Akses layanan mandiri mahasiswa, repositori dokumen, dan manajemen laboratorium dalam satu pintu.</p>
                         </div>
                     </div>
 
-                    <div class="col-lg-6 bg-white p-4 p-md-5">
+                    {{-- Sisi Kanan: Form Login --}}
+                    <div class="col-lg-6 p-4 p-md-5 bg-body">
                         <div class="mb-4">
-                            <h2 class="fw-bold text-dark">Selamat Datang</h2>
-                            <p class="text-muted">Masukkan kredensial Anda untuk melanjutkan.</p>
+                            <h2 class="fw-bold text-body">Selamat Datang</h2>
+                            <p class="text-body-secondary">Silakan masuk dengan akun institusi Anda.</p>
                         </div>
 
                         @if (session('status'))
-                            <div class="alert alert-success mb-4">{{ session('status') }}</div>
+                            <div class="alert alert-success mb-4 border-0 bg-success bg-opacity-10 text-success">
+                                {{ session('status') }}
+                            </div>
                         @endif
 
                         <form method="POST" action="{{ route('login') }}">
                             @csrf
 
+                            {{-- Email Input --}}
                             <div class="mb-3">
-                                <label for="email" class="form-label fw-semibold">Alamat Email</label>
+                                <label for="email" class="form-label fw-semibold text-body">Alamat Email</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope"></i></span>
-                                    <input id="email" type="email" name="email" class="form-control bg-light border-start-0 @error('email') is-invalid @enderror" value="{{ old('email') }}" required autofocus placeholder="nama@untan.ac.id">
+                                    <span class="input-group-text bg-body-tertiary border-end-0 text-body-secondary">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input id="email" type="email" name="email" 
+                                        class="form-control bg-body-tertiary border-start-0 text-body @error('email') is-invalid @enderror" 
+                                        value="{{ old('email') }}" required autofocus 
+                                        placeholder="nim@student.untan.ac.id">
                                 </div>
                                 @error('email')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label fw-semibold">Password</label>
+                            {{-- Password Input dengan Fitur Show/Hide --}}
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-semibold text-body">Password</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
-                                    <input id="password" type="password" name="password" class="form-control bg-light border-start-0 @error('password') is-invalid @enderror" required autocomplete="current-password" placeholder="••••••••">
+                                    <span class="input-group-text bg-body-tertiary border-end-0 text-body-secondary">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input id="password" type="password" name="password" 
+                                        class="form-control bg-body-tertiary border-x-0 text-body @error('password') is-invalid @enderror" 
+                                        required autocomplete="current-password" 
+                                        placeholder="••••••••">
+                                    {{-- Tombol Mata --}}
+                                    <button class="btn btn-outline-secondary bg-body-tertiary border-start-0 text-body-secondary px-3" 
+                                            type="button" id="togglePassword" style="border-color: var(--bs-border-color);">
+                                        <i class="bi bi-eye" id="eyeIcon"></i>
+                                    </button>
                                 </div>
                                 @error('password')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block small mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" name="remember" class="form-check-input" id="remember_me">
-                                <label class="form-check-label text-muted" for="remember_me">Ingat saya di perangkat ini</label>
+                            {{-- Remember Me & Forgot Password --}}
+                            <div class="mb-4 d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input type="checkbox" name="remember" class="form-check-input cursor-pointer" id="remember_me">
+                                    <label class="form-check-label text-body-secondary small cursor-pointer" for="remember_me">
+                                        Ingat saya
+                                    </label>
+                                </div>
+                                @if (Route::has('password.request'))
+                                    <a class="text-decoration-none small fw-medium" href="{{ route('password.request') }}">
+                                        Lupa Password?
+                                    </a>
+                                @endif
                             </div>
 
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
-                                    Masuk Sekarang
+                            {{-- Submit Button --}}
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm py-3">
+                                    Masuk <i class="bi bi-arrow-right ms-2"></i>
                                 </button>
                             </div>
-
-                            @if (Route::has('password.request'))
-                                <div class="text-center mt-3">
-                                    {{-- <a class="text-decoration-none small text-primary" href="{{ route('password.request') }}">
-                                        Lupa password Anda?
-                                    </a> --}}
-                                </div>
-                            @endif
                         </form>
+                        
+                        <div class="mt-4 pt-3 border-top text-center">
+                            <p class="text-body-secondary small mb-0">
+                                Belum memiliki akun? Hubungi <a href="#" class="text-decoration-none fw-medium">Admin</a>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+{{-- Script Khusus Toggle Password --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const toggleButton = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        toggleButton.addEventListener('click', function() {
+            // Toggle tipe input
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle icon mata
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    });
+</script>
+
+<style>
+    .form-control, .input-group-text, .btn {
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    /* Hilangkan border biru bawaan saat button diklik agar rapi */
+    .btn:focus {
+        box-shadow: none !important;
+    }
+
+    .form-control:focus {
+        background-color: var(--bs-body-bg) !important;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+
+    .cursor-pointer { cursor: pointer; }
+</style>
 @endsection

@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab Pemrograman & Komputasi</title>
+    <title>Lab Pemrograman & Komputasi - Siskom Untan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <script>
-        // Set tema secepat mungkin sebelum render untuk menghindari flashing
         const storedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', storedTheme);
         
@@ -25,9 +24,13 @@
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s ease;
         }
-        .navbar { background-color: #1a1a1a !important; }
+        .navbar { background-color: #1a1a1a !important; padding: 0.75rem 0; }
         .footer { background: #1a1a1a; color: rgba(255,255,255,0.6); padding: 30px 0; margin-top: 60px; }
-        .brand-logo { height: 32px; width: auto; object-fit: contain; }
+        .brand-logo { height: 38px; width: auto; object-fit: contain; }
+        
+        /* Navbar Styling */
+        .nav-link { font-size: 0.95rem; transition: color 0.2s; }
+        .nav-link:hover { color: #0d6efd !important; }
 
         /* Theme Switch Styling */
         .theme-switch-wrapper { display: flex; align-items: center; }
@@ -40,20 +43,16 @@
             border-radius: 34px;
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 8px; border: 1px solid #444;
-            transition: none; 
         }
 
         .slider:before {
             background-color: #fff; bottom: 3px; content: ""; height: 22px; left: 4px;
             position: absolute; width: 22px; border-radius: 50%; z-index: 2;
-            transition: none;
         }
 
-        /* Geser lingkaran ke kanan saat Dark Mode */
         [data-bs-theme="dark"] .slider:before { transform: translateX(30px); }
         [data-bs-theme="dark"] .slider { background-color: #0d6efd; border-color: #0d6efd; }
 
-        /* Tambahkan transisi hanya setelah halaman siap */
         .ready .slider, .ready .slider:before {
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
@@ -69,7 +68,10 @@
         <div class="container">
             <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
                 <img src="{{ asset('logo.png') }}" alt="Logo LAB" class="brand-logo me-2">
-                LAB SISKOM
+                <div class="lh-1">
+                    <span class="d-block fs-6">LAB SISKOM</span>
+                    <small class="fw-light opacity-50" style="font-size: 0.7rem;">Pemrograman & Komputasi</small>
+                </div>
             </a>
 
             <!-- Mobile Toggle -->
@@ -79,55 +81,79 @@
                         <input type="checkbox" id="checkbox-mobile" onchange="applyTheme(this.checked)">
                         <script>initThemeSwitch(document.getElementById('checkbox-mobile'));</script>
                         <div class="slider shadow-sm">
-                            <!-- POSISI ICON DITUKAR -->
-                            <i class="bi bi-moon-stars-fill"></i> <!-- Kiri -->
-                            <i class="bi bi-sun-fill"></i> <!-- Kanan -->
+                            <i class="bi bi-moon-stars-fill"></i>
+                            <i class="bi bi-sun-fill"></i>
                         </div>
                     </label>
                 </div>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="/">Beranda</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/sop">Repository SOP</a></li>
-                    
+                    {{-- MENU PUBLIK (Bisa diakses semua mahasiswa tanpa login) --}}
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/katalog">
+                            <i class="bi bi-search me-1"></i> Katalog Alat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/bebas-lab">
+                            <i class="bi bi-shield-check me-1"></i> Bebas Lab
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/sop">
+                            <i class="bi bi-journal-text me-1"></i> Repository SOP
+                        </a>
+                    </li>
+
+                    {{-- MENU KHUSUS ADMIN (Hanya muncul jika login sebagai admin) --}}
+                    @auth
+                        @if(Auth::user()->is_admin) {{-- Sesuaikan logic role admin Bapak --}}
+                            <li class="nav-item">
+                                <a class="nav-link px-3 fw-bold text-warning" href="/admin/inventaris">
+                                    <i class="bi bi-boxes me-1"></i> Inventaris
+                                </a>
+                            </li>
+                        @endif
+                    @endauth
+
+                    {{-- AUTHENTICATION SECTION --}}
                     @auth
                         <li class="nav-item dropdown ms-lg-3">
                             <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm px-3 text-white border-secondary rounded-pill" href="#" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
-                                <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person-gear me-2"></i> Edit Profil</a></li>
+                                <li><a class="dropdown-item py-2" href="/dashboard"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item py-2" href="{{ route('profile.edit') }}"><i class="bi bi-person-gear me-2"></i> Edit Profil</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Keluar</button>
+                                        <button type="submit" class="dropdown-item text-danger py-2"><i class="bi bi-box-arrow-right me-2"></i> Keluar</button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
                     @else
                         <li class="nav-item">
-                            <a class="nav-link text-white bg-primary rounded-pill px-4 ms-lg-2 fw-bold" href="{{ route('login') }}">Login</a>
+                            <a class="nav-link text-white bg-primary rounded-pill px-4 ms-lg-3 fw-bold" href="{{ route('login') }}">Login</a>
                         </li>
                     @endauth
 
-                    <!-- Desktop Switch -->
+                    {{-- THEME SWITCH --}}
                     <li class="nav-item d-none d-lg-block ms-lg-4">
                         <div class="theme-switch-wrapper">
                             <label class="theme-switch">
                                 <input type="checkbox" id="checkbox-desktop" onchange="applyTheme(this.checked)">
                                 <script>initThemeSwitch(document.getElementById('checkbox-desktop'));</script>
                                 <div class="slider shadow-sm">
-                                    <!-- POSISI ICON DITUKAR -->
-                                    <i class="bi bi-moon-stars-fill"></i> <!-- Kiri -->
-                                    <i class="bi bi-sun-fill"></i> <!-- Kanan -->
+                                    <i class="bi bi-moon-stars-fill"></i>
+                                    <i class="bi bi-sun-fill"></i>
                                 </div>
                             </label>
                         </div>
@@ -143,7 +169,8 @@
 
     <footer class="footer text-center">
         <div class="container">
-            <p class="mb-0">&copy; 2026 Lab Pemrograman dan Komputasi FMIPA Untan</p>
+            <p class="mb-1 fw-bold">&copy; 2026 Lab Pemrograman dan Komputasi</p>
+            <p class="small mb-0 opacity-50">Rekayasa Sistem Komputer - FMIPA Universitas Tanjungpura</p>
         </div>
     </footer>
 
@@ -155,17 +182,14 @@
             document.documentElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
             
-            // Sinkronkan status kedua checkbox
             const cbDesktop = document.getElementById('checkbox-desktop');
             const cbMobile = document.getElementById('checkbox-mobile');
             if (cbDesktop) cbDesktop.checked = isDark;
             if (cbMobile) cbMobile.checked = isDark;
 
-            // Tambahkan class ready untuk mengaktifkan transisi setelah interaksi pertama
             document.body.classList.add('ready');
         }
 
-        // Aktifkan transisi sedikit setelah load agar tidak kaku
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 document.body.classList.add('ready');
@@ -175,7 +199,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Logika deteksi tema untuk SweetAlert
             const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
             const swalConfig = {
                 background: isDark ? '#212529' : '#fff',
@@ -185,7 +208,6 @@
                 timerProgressBar: true
             };
 
-            // Notifikasi Sukses
             @if(session('success'))
                 Swal.fire({
                     ...swalConfig,
@@ -196,7 +218,6 @@
                 });
             @endif
 
-            // Notifikasi Error
             @if(session('error'))
                 Swal.fire({
                     ...swalConfig,
@@ -207,6 +228,5 @@
             @endif
         });
     </script>
-</body>
 </body>
 </html>

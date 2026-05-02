@@ -20,15 +20,15 @@ class UserController extends Controller
     }
 
     public function show($id)
-    {
-        $user = User::findOrFail($id);
-        
-        // Ambil riwayat lengkap peminjaman user ini
-        $riwayat = Peminjaman::with('inventaris')
-            ->where('user_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->get();
+{
+    $user = User::findOrFail($id);
+    
+    // SANGAT PENTING: Tambahkan with('inventaris')
+    $riwayat = Peminjaman::with('inventaris') 
+        ->where('user_id', $id)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-        return view('admin.users.show', compact('user', 'riwayat'));
-    }
+    return view('admin.users.show', compact('user', 'riwayat'));
+}
 }
