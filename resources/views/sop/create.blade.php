@@ -5,8 +5,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-0 py-3">
-                    <h4 class="fw-bold text-dark mb-0">Tambah SOP Baru</h4>
+                {{-- Menghapus bg-white dan text-dark agar adaptif --}}
+                <div class="card-header border-0 py-3 bg-transparent">
+                    <h4 class="fw-bold mb-0">Tambah SOP Baru</h4>
                 </div>
                 <div class="card-body p-4">
                     @if ($errors->any())
@@ -18,6 +19,7 @@
                             </ul>
                         </div>
                     @endif
+                    
                     <form action="{{ route('sop.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
@@ -43,7 +45,7 @@
                             </div>
 
                             <div class="col-12 d-none mb-3" id="kategoriLainnyaWrapper">
-                                <label class="form-label text-muted">Sebutkan Kategori Baru</label>
+                                <label class="form-label opacity-75">Sebutkan Kategori Baru</label>
                                 <input type="text" name="kategori_input_manual" class="form-control" placeholder="Masukkan nama kategori">
                             </div>
                         </div>
@@ -60,7 +62,7 @@
                             @error('file_pdf') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
-                        <hr class="my-5">
+                        <hr class="my-5 opacity-25">
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="fw-bold mb-0 text-primary">Bagian Alur Prosedur (Mermaid)</h5>
@@ -70,14 +72,15 @@
                         </div>
 
                         <div id="container-alur">
-                            <div class="alur-item card bg-light border-0 p-3 mb-3 shadow-sm rounded-3">
+                            {{-- Mengganti bg-light dengan border dan bg-transparent agar terlihat di dark mode --}}
+                            <div class="alur-item card border p-3 mb-3 shadow-sm rounded-3 bg-opacity-10 bg-secondary">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <label class="fw-bold text-dark small">BAGIAN #1</label>
-                                    <span class="text-muted small">Wajib diisi minimal satu</span>
+                                    <label class="fw-bold small opacity-75">BAGIAN #1</label>
+                                    <span class="small opacity-50">Wajib diisi minimal satu</span>
                                 </div>
-                                <input type="text" name="alur_judul[]" class="form-control mb-2 shadow-sm" placeholder="Judul Bagian (Contoh: Tahap Persiapan)" required>
-                                <textarea name="alur_kode[]" class="form-control shadow-sm mb-1" rows="4" style="font-family: monospace;" placeholder="Ketik kode flowchart TD..." required></textarea>
-                                <div class="form-text">Gunakan format <a href="https://mermaid.js.org/syntax/flowchart.html" target="_blank">Mermaid.js Flowchart</a></div>
+                                <input type="text" name="alur_judul[]" class="form-control mb-2" placeholder="Judul Bagian (Contoh: Tahap Persiapan)" required>
+                                <textarea name="alur_kode[]" class="form-control mb-1" rows="4" style="font-family: monospace;" placeholder="Ketik kode flowchart TD..." required></textarea>
+                                <div class="form-text">Gunakan format <a href="https://mermaid.js.org/syntax/flowchart.html" target="_blank" class="text-decoration-none">Mermaid.js Flowchart</a></div>
                             </div>
                         </div>
 
@@ -85,7 +88,7 @@
                             <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow">
                                 <i class="bi bi-save me-2"></i> Simpan SOP Lengkap
                             </button>
-                            <a href="{{ route('sop.index') }}" class="btn btn-link text-secondary mt-2">Batal</a>
+                            <a href="{{ route('sop.index') }}" class="btn btn-link text-decoration-none text-secondary mt-2">Batal</a>
                         </div>
 
                     </form>
@@ -96,7 +99,6 @@
 </div>
 
 <script>
-    // 1. Logika Kategori Lainnya
     document.getElementById('kategoriSelect').addEventListener('change', function() {
         const wrapper = document.getElementById('kategoriLainnyaWrapper');
         if (this.value === 'Lainnya') {
@@ -106,19 +108,19 @@
         }
     });
 
-    // 2. Logika Tambah Alur Dinamis
     let count = 1;
     function tambahAlur() {
         count++;
         const container = document.getElementById('container-alur');
+        // HTML Template juga disesuaikan untuk Dark Mode
         const html = `
-            <div class="alur-item card bg-light border-0 p-3 mb-3 shadow-sm rounded-3 animate__animated animate__fadeInUp">
+            <div class="alur-item card border p-3 mb-3 shadow-sm rounded-3 bg-opacity-10 bg-secondary animate__animated animate__fadeInUp">
                 <div class="d-flex justify-content-between mb-2">
-                    <label class="fw-bold text-dark small">BAGIAN #${count}</label>
+                    <label class="fw-bold small opacity-75">BAGIAN #${count}</label>
                     <button type="button" class="btn-close" onclick="hapusAlur(this)" aria-label="Close"></button>
                 </div>
-                <input type="text" name="alur_judul[]" class="form-control mb-2 shadow-sm" placeholder="Judul Bagian" required>
-                <textarea name="alur_kode[]" class="form-control shadow-sm" rows="4" style="font-family: monospace;" placeholder="Ketik kode Mermaid..." required></textarea>
+                <input type="text" name="alur_judul[]" class="form-control mb-2" placeholder="Judul Bagian" required>
+                <textarea name="alur_kode[]" class="form-control" rows="4" style="font-family: monospace;" placeholder="Ketik kode Mermaid..." required></textarea>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', html);
@@ -130,9 +132,14 @@
 </script>
 
 <style>
+    /* Menggunakan variabel CSS untuk shadow agar lebih soft di dark mode */
     .form-control:focus, .form-select:focus {
-        box-shadow: 0 0 0 0.25 mil rem rgba(13, 110, 253, 0.1);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
         border-color: #0d6efd;
+    }
+    /* Pastikan input background mengikuti tema */
+    .card {
+        background-color: var(--bs-card-bg);
     }
 </style>
 @endsection

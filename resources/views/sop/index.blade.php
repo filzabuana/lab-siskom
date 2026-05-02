@@ -5,9 +5,12 @@
 <div class="row">
     <div class="col-md-12 mb-4">
         <h2 class="display-6">Repository SOP</h2>
-        @auth
-        <a href="{{ route('sop.create') }}" class="btn btn-success">+ Tambah SOP</a>
-        @endauth
+        
+        {{-- Hanya Admin yang bisa melihat tombol Tambah --}}
+        @if(Auth::check() && Auth::user()->is_admin)
+            <a href="{{ route('sop.create') }}" class="btn btn-success">+ Tambah SOP</a>
+        @endif
+        
         <p class="text-muted">Daftar Standar Operasional Prosedur Laboratorium Pemrograman dan Komputasi.</p>
         <hr>
     </div>
@@ -29,21 +32,23 @@
                 download="{{ $sop->file_pdf }}">
                 <i class="bi bi-download"></i> Download PDF
                 </a>
-                @auth
-    <hr>
-    <div class="d-flex justify-content-end">
-        <a href="{{ route('sop.edit', $sop->id) }}" class="btn btn-outline-warning btn-sm">
-            <i class="bi bi-pencil-square"></i> Edit
-        </a>
-        <form action="{{ route('sop.destroy', $sop->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus SOP ini? File di server juga akan terhapus.')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-outline-danger btn-sm">
-                <i class="bi bi-trash"></i> Hapus SOP
-            </button>
-        </form>
-    </div>
-@endauth
+
+                {{-- Hanya Admin yang bisa melihat tombol Edit & Hapus --}}
+                @if(Auth::check() && Auth::user()->is_admin)
+                    <hr>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ route('sop.edit', $sop->id) }}" class="btn btn-outline-warning btn-sm me-2">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <form action="{{ route('sop.destroy', $sop->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus SOP ini? File di server juga akan terhapus.')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="bi bi-trash"></i> Hapus SOP
+                            </button>
+                        </form>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
