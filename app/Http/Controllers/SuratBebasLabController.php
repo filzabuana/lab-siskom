@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\SuratBebasLab;
 use App\Mail\VerifyBebasLab;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use App\Mail\NotifikasiBebasLab;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class SuratBebasLabController extends Controller
@@ -60,6 +61,15 @@ class SuratBebasLabController extends Controller
         return back()->with('success', 'Form berhasil dikirim! Silakan cek email Anda untuk melakukan verifikasi.');
     }
 
+public function dashboardAdmin()
+{
+    $notifPengajuan = SuratBebasLab::where('status', 'verified_email')->count();
+
+    // SANGAT PENTING: Return ke 'dashboard', BUKAN 'admin.dashboard'
+    // Supaya file layouts.app (CSS/Navigasi) tetap ikut terbawa.
+    return view('dashboard', compact('notifPengajuan'));
+}
+    
     /**
      * 3. Verifikasi Email oleh Mahasiswa (Klik Link dari Email)
      */
@@ -97,22 +107,38 @@ class SuratBebasLabController extends Controller
      * 5. (ADMIN ONLY) Update Status (Setujui/Tolak)
      */
     public function updateStatus(Request $request, $id)
-    {
-        $pengajuan = SuratBebasLab::findOrFail($id);
-        
-        if ($request->action == 'setujui') {
-            $pengajuan->update([
-                'status' => 'disetujui'
-            ]);
-            // Di sini nantinya Bapak bisa menambahkan Mail::to(...)->send(new SuratDisetujuiMail($pengajuan));
-        } else {
-            $pengajuan->update([
-                'status' => 'ditolak',
-                'catatan_admin' => $request->catatan
-            ]);
-            // Di sini nantinya Bapak bisa menambahkan Mail::to(...)->send(new SuratDitolakMail($pengajuan));
-        }
-
-        return back()->with('success', 'Status pengajuan berhasil diperbarui.');
+{
+    $pengajuan = SuratBebasLab::findOrFail($id);
+    
+    // Tentukan status dan catatan berdasarkan tombol yang diklik admin
+    if ($request->action == 'setujui') {
+        $pengajuan->update([
+            'status' => 'disetujui'
+        ]);
+        $statusEmail = 'disetujui';
+    } else {
+        $pengajuan->update([
+            'status' => 'ditolak',
+            'catatan_admin' => $request->catatan
+        ]);
+        $statusEmail = 'ditolak';
     }
+
+    // EKSEKUSI PENGIRIMAN EMAIL
+    // Pastikan Bapak sudah membuat Mailable 'NotifikasiBebasLab'
+    try {
+        Mail::to($pengajuan->email)->send(new NotifikasiBebasLab(
+            $pengajuan, 
+            $statusEmail, 
+            $request->catatan
+        ));
+    } catch (\Exception $e) {
+        // Jika email gagal tapi database berhasil update, tetap beri info ke admin
+        return back()->with('success', 'Status diperbarui, namun email gagal dikirim. Cek konfigurasi SMTP.');
+    }
+
+    return back()->with('success', 'Status pengajuan berhasil diperbarui dan email notifikasi telah dikirim.');
+}
+
+
 }

@@ -8,12 +8,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <script>
-        // Set tema secepat mungkin sebelum render
+        // Set tema secepat mungkin sebelum render untuk menghindari flashing
         const storedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', storedTheme);
         
         function initThemeSwitch(el) {
-            el.checked = (localStorage.getItem('theme') === 'dark');
+            if (el) {
+                el.checked = (localStorage.getItem('theme') === 'dark');
+            }
         }
     </script>
 
@@ -46,9 +48,11 @@
             transition: none;
         }
 
+        /* Geser lingkaran ke kanan saat Dark Mode */
         [data-bs-theme="dark"] .slider:before { transform: translateX(30px); }
         [data-bs-theme="dark"] .slider { background-color: #0d6efd; border-color: #0d6efd; }
 
+        /* Tambahkan transisi hanya setelah halaman siap */
         .ready .slider, .ready .slider:before {
             transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
@@ -73,9 +77,10 @@
                     <label class="theme-switch">
                         <input type="checkbox" id="checkbox-mobile" onchange="applyTheme(this.checked)">
                         <script>initThemeSwitch(document.getElementById('checkbox-mobile'));</script>
-                        <div class="slider">
-                            <i class="bi bi-sun-fill"></i>
-                            <i class="bi bi-moon-stars-fill"></i>
+                        <div class="slider shadow-sm">
+                            <!-- POSISI ICON DITUKAR -->
+                            <i class="bi bi-moon-stars-fill"></i> <!-- Kiri -->
+                            <i class="bi bi-sun-fill"></i> <!-- Kanan -->
                         </div>
                     </label>
                 </div>
@@ -90,7 +95,6 @@
                     <li class="nav-item"><a class="nav-link" href="/sop">Repository SOP</a></li>
                     
                     @auth
-                        <!-- Dropdown User (Tampil hanya jika sudah Login) -->
                         <li class="nav-item dropdown ms-lg-3">
                             <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm px-3 text-white border-secondary rounded-pill" href="#" data-bs-toggle="dropdown">
                                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
@@ -108,7 +112,6 @@
                             </ul>
                         </li>
                     @else
-                        <!-- Tombol Login (Tampil hanya jika belum Login) -->
                         <li class="nav-item">
                             <a class="nav-link text-white bg-primary rounded-pill px-4 ms-lg-2 fw-bold" href="{{ route('login') }}">Login</a>
                         </li>
@@ -121,8 +124,9 @@
                                 <input type="checkbox" id="checkbox-desktop" onchange="applyTheme(this.checked)">
                                 <script>initThemeSwitch(document.getElementById('checkbox-desktop'));</script>
                                 <div class="slider shadow-sm">
-                                    <i class="bi bi-sun-fill"></i>
-                                    <i class="bi bi-moon-stars-fill"></i>
+                                    <!-- POSISI ICON DITUKAR -->
+                                    <i class="bi bi-moon-stars-fill"></i> <!-- Kiri -->
+                                    <i class="bi bi-sun-fill"></i> <!-- Kanan -->
                                 </div>
                             </label>
                         </div>
@@ -150,14 +154,17 @@
             document.documentElement.setAttribute('data-bs-theme', theme);
             localStorage.setItem('theme', theme);
             
+            // Sinkronkan status kedua checkbox
             const cbDesktop = document.getElementById('checkbox-desktop');
             const cbMobile = document.getElementById('checkbox-mobile');
             if (cbDesktop) cbDesktop.checked = isDark;
             if (cbMobile) cbMobile.checked = isDark;
 
+            // Tambahkan class ready untuk mengaktifkan transisi setelah interaksi pertama
             document.body.classList.add('ready');
         }
 
+        // Aktifkan transisi sedikit setelah load agar tidak kaku
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 document.body.classList.add('ready');

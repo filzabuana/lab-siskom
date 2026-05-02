@@ -6,8 +6,9 @@
         <div class="col-lg-8">
             
             <div class="mb-4">
-                <h2 class="fw-bold text-dark"><i class="bi bi-person-gear me-2 text-primary"></i>Pengaturan Akun</h2>
-                <p class="text-muted">Kelola informasi profil dan keamanan akun Anda sebagai Admin Laboratorium.</p>
+                <!-- Hapus text-dark agar mengikuti warna tema otomatis -->
+                <h2 class="fw-bold"><i class="bi bi-person-gear me-2 text-primary"></i>Pengaturan Akun</h2>
+                <p class="text-body-secondary">Kelola informasi profil dan keamanan akun Anda sebagai Admin Laboratorium.</p>
             </div>
 
             @if (session('status') === 'profile-updated')
@@ -26,8 +27,8 @@
 
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4 p-md-5">
-                    <h5 class="fw-bold mb-1 text-dark">Informasi Profil</h5>
-                    <p class="text-muted small mb-4">Perbarui nama panggilan atau alamat email resmi Anda.</p>
+                    <h5 class="fw-bold mb-1">Informasi Profil</h5>
+                    <p class="text-body-secondary small mb-4">Perbarui nama panggilan atau alamat email resmi Anda.</p>
 
                     <form method="post" action="{{ route('profile.update') }}">
                         @csrf
@@ -46,7 +47,7 @@
                         </div>
 
                         <div class="d-flex align-items-center gap-3">
-                            <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold">Simpan Perubahan</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-pill fw-bold shadow-sm">Simpan Perubahan</button>
                         </div>
                     </form>
                 </div>
@@ -54,8 +55,8 @@
 
             <div class="card border-0 shadow-sm rounded-4 mb-4">
                 <div class="card-body p-4 p-md-5">
-                    <h5 class="fw-bold mb-1 text-dark">Keamanan Akun</h5>
-                    <p class="text-muted small mb-4">Pastikan akun Anda menggunakan password yang panjang dan acak untuk tetap aman.</p>
+                    <h5 class="fw-bold mb-1">Keamanan Akun</h5>
+                    <p class="text-body-secondary small mb-4">Pastikan akun Anda menggunakan password yang panjang dan acak untuk tetap aman.</p>
 
                     <form method="post" action="{{ route('password.update') }}">
                         @csrf
@@ -80,23 +81,50 @@
                         </div>
 
                         <div class="d-flex align-items-center gap-3">
-                            <button type="submit" class="btn btn-dark px-4 rounded-pill fw-bold">Update Password</button>
+                            <!-- Ganti btn-dark ke btn-outline-primary atau custom agar terlihat di dark mode -->
+                            <button type="submit" class="btn btn-outline-primary px-4 rounded-pill fw-bold">Update Password</button>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="text-center mt-5">
-                <small class="text-muted">Laboratorium Pemrograman & Komputasi - Universitas Tanjungpura</small>
-            </div>
         </div>
     </div>
 </div>
 
 <style>
-    body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-    .form-control { border: 1px solid #e2e8f0; padding: 0.75rem 1rem; }
-    .form-control:focus { box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.05); border-color: #0d6efd; }
-    .card { transition: transform 0.2s ease; }
+    /* Menggunakan variabel Bootstrap agar adaptif */
+    body { 
+        background-color: var(--bs-tertiary-bg); 
+        font-family: 'Inter', sans-serif; 
+    }
+    
+    .card {
+        background-color: var(--bs-card-bg);
+        border: 1px solid var(--bs-border-color-translucent) !important;
+    }
+
+    .form-control { 
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color); 
+        color: var(--bs-body-color);
+        padding: 0.75rem 1rem; 
+    }
+    
+    .form-control:focus { 
+        background-color: var(--bs-body-bg);
+        color: var(--bs-body-color);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15); 
+        border-color: #0d6efd; 
+    }
+
+    /* Memperbaiki warna input saat autofill browser di mode gelap */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--bs-body-color);
+        -webkit-box-shadow: 0 0 0px 1000px var(--bs-body-bg) inset;
+        transition: background-color 5000s ease-in-out 0s;
+    }
 </style>
 @endsection

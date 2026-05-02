@@ -86,11 +86,13 @@
         return (theme === 'dark') ? 'dark' : 'neutral';
     }
 
-    mermaid.initialize({ 
-        startOnLoad: false, 
-        theme: getMermaidTheme(),
-        flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'stepAfter' }
-    });
+   mermaid.initialize({ 
+    // ... setting lainnya
+    flowchart: { 
+        htmlLabels: true, 
+        curve: 'stepAfter' // Pastikan ini 'stepAfter' untuk mode siku
+    }
+});
 
     document.addEventListener('DOMContentLoaded', function() {
         const accordionSOP = document.getElementById('accordionSOP');
