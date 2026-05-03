@@ -68,9 +68,7 @@
                                     Pinjam Alat
                                 </button>
                             @else
-                                <button class="btn btn-outline-secondary w-100 rounded-pill fw-bold disabled" style="cursor: not-allowed;">
-                                    Hanya Gunakan di Lab
-                                </button>
+                                
                             @endif
                         @else
                             {{-- Jika Belum Login (Publik) --}}

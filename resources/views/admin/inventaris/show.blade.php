@@ -121,6 +121,32 @@
 
         {{-- Sisi Kanan: Status & Stok --}}
         <div class="col-lg-4">
+
+            {{-- Widget Alat Sedang Dipinjam (Hanya untuk Admin) --}}
+                @auth
+                    @if(auth()->user()->is_admin == 1)
+                    <div class="card border-0 shadow-sm rounded-4 mb-3 bg-warning bg-opacity-10 border-start border-4 border-warning">
+                        <div class="card-body p-3 d-flex align-items-center">
+                            <div class="rounded-circle bg-warning bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                                <i class="bi bi-person-walking text-warning fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-dark small">Sedang Dipinjam</h6>
+                                <span class="small text-secondary">
+                                    @php
+                                        // Menghitung jumlah yang sedang dipinjam
+                                        // Menggunakan filter agar lebih akurat memeriksa string status
+                                        $totalDipinjam = $item->peminjaman->filter(function($p) {
+                                            return in_array(strtolower($p->status), ['dipinjam', 'sedang dipinjam', 'disetujui']);
+                                        })->sum('jumlah_pinjam');
+                                    @endphp
+                                    <strong>{{ $totalDipinjam }}</strong> Unit sedang di luar
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                @endauth
             {{-- Card Stok: Tampilkan angka hanya jika LOGIN --}}
             <div class="card border-0 shadow-sm rounded-4 mb-4 {{ Auth::check() ? 'bg-primary' : 'bg-secondary bg-opacity-10' }} text-white">
                 <div class="card-body p-4 text-center">

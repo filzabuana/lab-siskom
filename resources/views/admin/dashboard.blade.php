@@ -74,7 +74,7 @@
                 <div class="card-body p-3">
                     <div class="bg-success bg-opacity-10 p-2 p-md-3 rounded-4 d-inline-block mb-2 position-relative">
                         <i class="bi bi-person-check-fill text-success fs-3"></i>
-                        @php $notifBebasLab = \App\Models\SuratBebasLab::where('status', 'pending')->count(); @endphp
+                        @php $notifBebasLab = \App\Models\SuratBebasLab::where('status', 'verified_email')->count(); @endphp
                         @if($notifBebasLab > 0)
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style="font-size: 0.7rem;">
                                 {{ $notifBebasLab }}
