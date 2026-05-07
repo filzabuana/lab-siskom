@@ -6,7 +6,9 @@
     <title>Lab Pemrograman & Komputasi - Siskom Untan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+    <!-- Prism.js Tema Tomorrow Night (Gelap/Modern) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" rel="stylesheet" />
     <script>
         const storedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-bs-theme', storedTheme);
@@ -93,7 +95,12 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    {{-- MENU PUBLIK (Bisa diakses semua mahasiswa tanpa login) --}}
+                    {{-- MENU PUBLIK --}}
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="/blog">
+                            <i class="bi bi-newspaper me-1"></i> Blog
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link px-3" href="/katalog">
                             <i class="bi bi-search me-1"></i> Katalog Alat
@@ -110,9 +117,14 @@
                         </a>
                     </li>
 
-                    {{-- MENU KHUSUS ADMIN (Hanya muncul jika login sebagai admin) --}}
+                    {{-- MENU KHUSUS ADMIN --}}
                     @auth
-                        @if(Auth::user()->is_admin) {{-- Sesuaikan logic role admin Bapak --}}
+                        @if(Auth::user()->is_admin)
+                            <li class="nav-item">
+                                <a class="nav-link px-3 fw-bold text-info" href="{{ route('admin.posts.index') }}">
+                                    <i class="bi bi-pencil-square me-1"></i> Kelola Blog
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link px-3 fw-bold text-warning" href="/admin/inventaris">
                                     <i class="bi bi-boxes me-1"></i> Inventaris
@@ -163,9 +175,10 @@
         </div>
     </nav>
 
-    <main class="container mt-4">
-        @yield('content')
-    </main>
+   {{-- pt-3 untuk jarak tipis di mobile, pt-lg-5 untuk jarak lebar di desktop --}}
+<main class="container pt-3 pt-lg-5 pb-5">
+    @yield('content')
+</main>
 
     <footer class="footer text-center">
         <div class="container">
