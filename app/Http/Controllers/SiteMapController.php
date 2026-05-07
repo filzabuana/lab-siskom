@@ -3,34 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sop;
+use App\Models\Inventaris; // Tambahkan ini
 use Illuminate\Http\Request;
 
 class SiteMapController extends Controller
 {
-    // Untuk sitemap.xml (Bot Google)
+    // Fungsi bantuan untuk list halaman statis agar konsisten
+    private function getStaticPages()
+    {
+        return [
+            ['url' => '/', 'nama' => 'Beranda'],
+            ['url' => '/about', 'nama' => 'Profil Lab'],
+            ['url' => '/sop', 'nama' => 'Daftar SOP'],
+            ['url' => '/bebas-lab', 'nama' => 'Bebas Lab'],
+            ['url' => '/katalog', 'nama' => 'Katalog Alat'],
+        ];
+    }
+
     public function index()
     {
         $sops = Sop::all();
-        $staticUrls = [url('/'), url('/about'), url('/sop'), url('/bebas-lab')];
+        $items = Inventaris::all(); // Tambahkan inventaris agar terindeks Google
+        $staticPages = $this->getStaticPages();
 
         return response()->view('sitemap-xml', [
             'sops' => $sops,
-            'staticUrls' => $staticUrls
+            'items' => $items,
+            'staticPages' => $staticPages
         ])->header('Content-Type', 'text/xml');
     }
 
-    // Untuk /peta-situs (Visual untuk Manusia)
-    public function visual()
-    {
-        // Ambil data langsung dari Database agar selalu otomatis
-        $sops = Sop::all();
-        
-        // Daftar halaman statis lainnya
-        $pages = [
-            ['url' => '/bebas-lab', 'nama' => 'BEBAS LAB'],
-            ['url' => '/dashboard', 'nama' => 'DASHBOARD'],
-        ];
+   public function visual()
+{
+    $sops = Sop::all();
+    $items = Inventaris::all(); // Tambahkan ini
+    
+    // Filter halaman statis agar tidak duplikat dengan yang sudah ada di tree
+    $pages = [
+        ['url' => '/dashboard', 'nama' => 'DASHBOARD'],
+    ];
 
-        return view('sitemap-visual', compact('sops', 'pages'));
-    }
+    return view('sitemap-visual', compact('sops', 'items', 'pages'));
+}
 }

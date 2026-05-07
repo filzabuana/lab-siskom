@@ -6,7 +6,7 @@
     <div class="row mb-5">
         <div class="col-12 text-center">
             <h2 class="fw-bold">Katalog Alat Laboratorium</h2>
-            <p class="text-secondary">Daftar aset tersedia di Lab Pemrograman & Komputasi - Untan</p>
+            <p class="text-secondary">Daftar aset tersedia di Lab Pemrograman & Komputasi - FMIPA Untan</p>
             <hr class="short-hr mx-auto" style="width: 50px; border: 2px solid #0d6efd; border-radius: 5px;">
         </div>
     </div>

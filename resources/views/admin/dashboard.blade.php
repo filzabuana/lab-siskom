@@ -44,7 +44,7 @@
                     <div class="text-truncate w-100">
                         <div class="text-secondary d-none d-md-block" style="font-size: 0.8rem;">Surat Selesai</div>
                         <div class="text-secondary d-md-none" style="font-size: 0.65rem;">Surat</div>
-                        <h5 class="fw-bold mb-0 mt-md-1 fs-6 fs-md-4 text-body">{{ \App\Models\SuratBebasLab::where('status', 'selesai')->count() }}</h5>
+                        <h5 class="fw-bold mb-0 mt-md-1 fs-6 fs-md-4 text-body">{{ \App\Models\SuratBebasLab::where('status', 'disetujui')->count() }}</h5>
                     </div>
                 </div>
             </div>

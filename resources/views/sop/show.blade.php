@@ -41,7 +41,37 @@
 
             <div class="mb-5">
                 <h6 class="fw-bold text-body-tertiary mb-4 text-center small">--- KLIK TAHAPAN UNTUK MEMBUKA ALUR ---</h6>
-                
+                    <!-- Bagian Legenda Warna -->
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-body-tertiary">
+                        <div class="card-body p-3">
+                            <div class="text-center mb-2">
+                                <small class="fw-bold text-body-secondary text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Legenda Pelaksana (Aktor)</small>
+                            </div>
+                            <div class="d-flex flex-wrap justify-content-center gap-2">
+                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
+                                    <span class="badge bg-primary me-2">&nbsp;</span>
+                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Kepala Lab</small>
+                                </div>
+                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
+                                    <span class="badge bg-success me-2">&nbsp;</span>
+                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Laboran/PLP</small>
+                                </div>
+                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
+                                    <span class="badge bg-warning me-2">&nbsp;</span>
+                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Dosen</small>
+                                </div>
+                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
+                                    <span class="badge bg-info me-2">&nbsp;</span>
+                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Asisten</small>
+                                </div>
+                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
+                                    <span class="badge bg-secondary me-2">&nbsp;</span>
+                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Mahasiswa</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 @php $semuaAlur = json_decode($sop->gambar_alur, true); @endphp
 
                 @if(is_array($semuaAlur))
@@ -73,6 +103,15 @@
                         @endforeach
                     </div>
                 @endif
+                {{-- Catatan Pengecualian BHP --}}
+            <div class="mt-4 p-3 rounded-4 border-0 shadow-sm bg-body-tertiary">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-info-circle-fill text-primary me-2 mt-1"></i>
+                    <small class="text-body-secondary" style="line-height: 1.5;">
+                        <strong>Catatan:</strong> Kerusakan pada barang habis pakai (BHP) dikecualikan dari prosedur penggantian barang rusak.
+                    </small>
+                </div>
+            </div>
             </div>
         </div>
     </div>

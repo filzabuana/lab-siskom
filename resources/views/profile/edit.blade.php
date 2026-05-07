@@ -8,7 +8,7 @@
             <div class="mb-4">
                 <!-- Hapus text-dark agar mengikuti warna tema otomatis -->
                 <h2 class="fw-bold"><i class="bi bi-person-gear me-2 text-primary"></i>Pengaturan Akun</h2>
-                <p class="text-body-secondary">Kelola informasi profil dan keamanan akun Anda sebagai Admin Laboratorium.</p>
+                <p class="text-body-secondary">Kelola informasi profil dan keamanan akun Anda.</p>
             </div>
 
             @if (session('status') === 'profile-updated')

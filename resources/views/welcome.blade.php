@@ -2,7 +2,7 @@
 
 @section('content')
 <style>
-    /* Mengunci tinggi carousel agar seragam */
+    /* --- 1. Komponen Carousel & Layout --- */
     .hero-carousel-img {
         height: 300px; 
         object-fit: cover; 
@@ -14,16 +14,44 @@
         }
     }
 
-    /* Hover effect untuk card alat */
-    .card-alat:hover {
+    /* --- 2. Efek Hover & Interaksi --- */
+    .card-alat:hover, .v-card-hover:hover {
         transform: translateY(-5px);
-        transition: 0.3s;
+        transition: 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
+
+    /* --- 3. Komponen Futuristik & Code Style --- */
+    .code-wrapper {
+        display: inline-block;
+        font-family: 'Fira Code', 'Cascadia Code', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        background: rgba(13, 202, 240, 0.05); /* Background biru muda transparan */
+        padding: 2px 12px;
+        border-radius: 4px;
+        border-left: 3px solid #0dcaf0; /* Border Cyan */
+        line-height: 1.8;
+    }
+
+    .code-syntax {
+        color: #0dcaf0; /* WARNA BARU: Cyan / Biru Langit */
+        font-weight: 600;
+        text-shadow: 0 0 10px rgba(13, 202, 240, 0.5); /* Efek glow cyan */
+    }
+
+    .typed-cursor {
+        color: #0dcaf0;
+        font-weight: normal;
+        margin-left: 2px;
+    }
+
+    /* --- 4. Dark Mode Support --- */
+    [data-bs-theme="dark"] .bg-light { background-color: #2b3035 !important; }
+    [data-bs-theme="dark"] .card { border: 1px solid #373b3e !important; }
 </style>
 
-<!-- Hero Section -->
+<script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+
 <div class="row align-items-center py-3 py-lg-5 mb-5 rounded-4 bg-body-tertiary shadow-sm px-4">
-    
     <div class="col-12 d-lg-none text-center mb-4">
         <span class="badge bg-primary-subtle text-primary rounded-pill mb-2 px-3 py-2 fw-semibold">Pusat Layanan Digital</span>
         <h1 class="h2 fw-bold text-body">Laboratorium Pemrograman & Komputasi</h1>
@@ -35,8 +63,15 @@
             <h1 class="display-4 fw-bold text-body mb-3">Laboratorium Pemrograman & Komputasi</h1>
         </div>
         
-        <p class="lead text-body-secondary mb-4 text-center text-lg-start">Solusi terintegrasi untuk peminjaman alat praktikum, penelitian, dan administrasi laboratorium yang efisien.</p>
-        
+        <p class="lead text-body-secondary mb-4 text-center text-lg-start" style="min-height: 4.5em; line-height: 1.8;">
+            Solusi terintegrasi untuk <br>
+            <span class="code-wrapper">
+                <span id="typed-text" class="code-syntax"></span>
+            </span>
+            <br>
+            <span class="d-block mt-2 fw-medium text-body">yang efisien.</span>
+        </p>
+
         <div class="d-grid gap-2 d-sm-flex justify-content-center justify-content-lg-start">
             <a href="#layanan" class="btn btn-primary btn-lg px-4 gap-3 rounded-pill">
                 <i class="bi bi-lightning-charge me-2"></i>Akses Pelayanan
@@ -64,10 +99,9 @@
     </div>
 </div>
 
-<!-- Layanan Section -->
 <div id="layanan" class="row text-center mb-5">
     <div class="col-md-12 mb-4">
-        <h2 class="fw-bold text-body">Layanan Digital</h2>
+        <h2 class="fw-bold text-body">Layanan</h2>
         <p class="text-body-secondary">Pilih jenis pelayanan laboratorium yang Anda butuhkan.</p>
     </div>
     
@@ -111,7 +145,6 @@
     </div>
 </div>
 
-<!-- Katalog Alat Section -->
 <div id="katalog" class="row mb-5 mt-5">
     <div class="col-12 mb-4">
         <div class="d-flex justify-content-between align-items-center">
@@ -145,13 +178,11 @@
                                     </div>
                                 @endif
                             </div>
-
                             <div class="card-body pb-0">
                                 <h6 class="fw-bold mb-1 text-truncate text-body">{{ $item->nama_aset }}</h6>
                                 <small class="text-muted d-block mb-2 small">{{ $item->kode_barang }}</small>
                             </div>
                         </a>
-
                         <div class="card-body pt-2">
                             <div class="mb-3">
                                 @if($item->tipe_peminjaman == 'Bisa Dipinjam')
@@ -164,7 +195,6 @@
                                     </span>
                                 @endif
                             </div>
-                            
                             @auth
                                 @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -195,7 +225,6 @@
                         </div>
                     </div>
                 </div>
-
                 @auth
                     @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                         @include('peminjaman.partials.modal_pinjam')
@@ -210,24 +239,34 @@
     </div>
 </div>
 
-<!-- Section About Ringkas -->
 <div class="row mt-5 pt-5 border-top">
     <div class="col-md-8 mx-auto text-center">
         <h3 class="fw-bold text-body mb-3">Tentang Laboratorium</h3>
         <p class="text-body-secondary">
             Laboratorium Pemrograman & Komputasi Program Studi <strong>Rekayasa Sistem Komputer</strong> Universitas Tanjungpura berfokus pada pengembangan teknologi berbasis 
             <strong>Automation & Embedded System (AES)</strong> dan <strong>Network Intelligent Control (NIC)</strong>. 
-            Kami menjadi pusat riset dan inovasi dalam mengeksplorasi kontrol cerdas, sistem tertanam, dan otomasi.
         </p>
         <a href="/about" class="btn btn-link text-decoration-none fw-bold p-0">Baca profil selengkapnya <i class="bi bi-arrow-right"></i></a>
     </div>
 </div>
 
-<style>
-    .card-link-wrapper { display: block; cursor: pointer; }
-    .v-card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .v-card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
-    [data-bs-theme="dark"] .bg-light { background-color: #2b3035 !important; }
-    [data-bs-theme="dark"] .card { border: 1px solid #373b3e !important; }
-</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Typed !== 'undefined') {
+            new Typed('#typed-text', {
+                strings: [
+                    'peminjaman_alat',
+                    'riset_penelitian',
+                    'layanan_administrasi'
+                ],
+                typeSpeed: 25,
+                backSpeed: 10,
+                backDelay: 2000,
+                loop: true,
+                smartBackspace: true,
+                cursorChar: '█',
+            });
+        }
+    });
+</script>
 @endsection
