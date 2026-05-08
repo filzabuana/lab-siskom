@@ -19,6 +19,8 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "mermaid": "^11.14.0"
+        "@vitejs/plugin-vue": "^6.0.6",
+        "mermaid": "^11.14.0",
+        "vue": "^3.5.34"
     }
 }

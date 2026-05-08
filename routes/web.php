@@ -34,6 +34,14 @@ Route::get('/bebas-lab/verify/{id}', [SuratBebasLabController::class, 'verifyEma
 Route::get('/sitemap.xml', [SiteMapController::class, 'index']);
 Route::get('/peta-situs', [SiteMapController::class, 'visual']);
 
+Route::get('/simulasigerbanglogika', function () {
+    return view('simulator');
+});
+
+Route::get('/trainer-digital', function () {
+    return view('trainer'); 
+});
+
 
 /*
 |--------------------------------------------------------------------------
