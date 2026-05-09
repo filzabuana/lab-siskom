@@ -42,6 +42,19 @@ Route::get('/trainer-digital', function () {
     return view('trainer'); 
 });
 
+Route::get('/apps', function () {
+    return view('apps.index');
+})->name('apps.index');
+
+Route::get('/simulasigerbanglogika', function () {
+    return view('simulator');
+})->name('simulator.logic');
+
+Route::get('/trainer-digital', function () {
+    return view('trainer'); 
+})->name('simulator.trainer');
+
+
 
 /*
 |--------------------------------------------------------------------------

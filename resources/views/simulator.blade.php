@@ -19,8 +19,8 @@
                 </div>
             </div>
             <nav>
-                <a href="/" class="group flex items-center space-x-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
-                    <span>Kembali ke Beranda</span>
+                <a href="/apps" class="group flex items-center space-x-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+                    <span>Kembali</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

@@ -344,7 +344,7 @@
 
         <div class="inner-row row-bottom-modules">
           <div class="bottom-half-panel">
-            <span class="panel-title font-mono">FIXED FLIP-FLOP REGISTER (FALLING EDGE TRIGGERED)</span>
+            <span class="panel-title font-mono">FIXED FLIP-FLOP REGISTER</span>
             <div class="flipflop-horizontal-container">
               
               <div class="sub-chip-box-horizontal">
