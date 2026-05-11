@@ -82,7 +82,7 @@
 }
     </style>
 </head>
-<body class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
+<body id="app" class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
 
 <!-- NAVBAR -->
 <nav id="mainNavbar" class="sticky top-0 z-50 bg-white/90 dark:bg-railway-dark/90 border-b border-slate-200 dark:border-railway-border nav-blur py-3 px-4 transition-colors duration-300">

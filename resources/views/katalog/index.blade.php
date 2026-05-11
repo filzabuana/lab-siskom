@@ -1,7 +1,7 @@
 @extends('layouts.modern')
 
 @section('content')
-<div id="app" class="min-h-screen bg-white dark:bg-railway-dark transition-colors duration-500 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+<div class="min-h-screen bg-white dark:bg-railway-dark transition-colors duration-500 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
     
     {{-- Decorative Background Element --}}
     <div class="absolute top-0 left-0 w-full h-full opacity-[0.03] dark:opacity-[0.05] pointer-events-none" 

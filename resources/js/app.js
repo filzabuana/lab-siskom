@@ -21,7 +21,7 @@ const LabAlert = Swal.mixin({
     }
 });
 
-// Daftarkan ke window agar bisa dipanggil dari file .blade (misal: window.Swal.fire)
+// Daftarkan ke window agar tetap bisa dipanggil dari file .blade jika diperlukan
 window.Swal = LabAlert;
 
 // Import Komponen
@@ -47,14 +47,46 @@ const app = createApp({
             document.body.style.overflow = 'auto';
         },
         
-        // Helper untuk memanggil alert dari instance Vue
+        // Helper untuk memanggil alert sukses/info umum
         notify(title, text, icon = 'success') {
             LabAlert.fire({ title, text, icon });
+        },
+
+        // Logic Konfirmasi Hapus khusus Inventaris
+        confirmDelete(id, name) {
+    // Panggil LabAlert langsung
+    LabAlert.fire({
+        title: 'Konfirmasi Hapus',
+        html: `Apakah Anda yakin ingin menghapus <br><b class="text-red-600 dark:text-red-400">${name}</b>?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus Aset',
+        cancelButtonText: 'Batalkan',
+        reverseButtons: true,
+        // Kita timpa customClass-nya secara manual saja, Bang
+        customClass: {
+            popup: 'rounded-[2.5rem] bg-white dark:bg-railway-card border border-slate-200 dark:border-railway-border shadow-2xl p-8',
+            title: 'text-2xl font-black uppercase italic tracking-tighter text-slate-800 dark:text-white',
+            htmlContainer: 'text-[11px] uppercase tracking-[0.1em] font-bold text-slate-500 dark:text-slate-400 my-4',
+            confirmButton: 'px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-black text-[11px] uppercase tracking-widest transition-all scale-100 active:scale-95 shadow-xl shadow-red-500/20 mx-2', // Warna Merah
+            cancelButton: 'px-8 py-3 bg-slate-100 dark:bg-railway-dark text-slate-600 dark:text-slate-400 rounded-full font-black text-[11px] uppercase tracking-widest mx-2',
+            icon: 'border-2'
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const form = document.getElementById(`delete-form-${id}`);
+            if (form) {
+                form.submit();
+            } else {
+                console.error(`Form delete-form-${id} tidak ditemukan.`);
+            }
         }
+    });
+}
     }
 });
 
-// Tambahkan Swal sebagai global property (Bisa dipanggil via this.$swal di komponen)
+// Tambahkan Swal sebagai global property (Bisa dipanggil via this.$swal di komponen .vue)
 app.config.globalProperties.$swal = LabAlert;
 
 // Registrasi Komponen
@@ -62,5 +94,5 @@ app.component('logic-gate', LogicGate);
 app.component('hbe-trainer', HBETrainer);
 app.component('virtual-trainer', VirtualTrainer);
 
-// Mount App
+// Mount App ke ID #app
 app.mount('#app');
