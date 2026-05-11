@@ -1,6 +1,7 @@
 import './bootstrap';
 import { createApp } from 'vue';
 import Swal from 'sweetalert2';
+import { ref } from 'vue'; 
 
 // 1. Konfigurasi SweetAlert2 Mixin (Theme: Railway Lab)
 const LabAlert = Swal.mixin({
@@ -33,11 +34,28 @@ const app = createApp({
     data() {
         return {
             activeTab: 'basic',
-            activeModal: null 
+            activeModal: null,
+            // 1. PINDAHKAN STATE KE SINI
+            selectedPinjam: null,
+            showRejectModal: false,
+            showNoteModal: false
         }
     },
     methods: {
-        // Kontrol Modal Katalog
+        // 2. PINDAHKAN LOGIC KE METHODS
+        openReject(item) {
+            this.selectedPinjam = item;
+            this.showRejectModal = true;
+        },
+        openNote(item) {
+            this.selectedPinjam = item;
+            this.showNoteModal = true;
+        },
+        closeReject() {
+            this.showRejectModal = false;
+            this.selectedPinjam = null;
+        },
+
         openModal(id) {
             this.activeModal = id;
             document.body.style.overflow = 'hidden';
@@ -47,11 +65,9 @@ const app = createApp({
             document.body.style.overflow = 'auto';
         },
         
-        // Helper untuk memanggil alert sukses/info umum
         notify(title, text, icon = 'success') {
             LabAlert.fire({ title, text, icon });
         },
-
         // Logic Konfirmasi Hapus khusus Inventaris
         confirmDelete(id, name) {
     // Panggil LabAlert langsung
@@ -85,6 +101,21 @@ const app = createApp({
 }
     }
 });
+
+// Jika pakai Vue 3 Composition API
+const selectedPinjam = ref(null); // Menyimpan objek pinjam yang aktif
+const showRejectModal = ref(false);
+const showNoteModal = ref(false);
+
+const openReject = (item) => {
+    selectedPinjam.value = item;
+    showRejectModal.value = true;
+}
+
+const openNote = (item) => {
+    selectedPinjam.value = item;
+    showNoteModal.value = true;
+}
 
 // Tambahkan Swal sebagai global property (Bisa dipanggil via this.$swal di komponen .vue)
 app.config.globalProperties.$swal = LabAlert;

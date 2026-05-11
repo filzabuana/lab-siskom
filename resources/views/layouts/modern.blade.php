@@ -80,6 +80,25 @@
 .dark input:focus::-webkit-calendar-picker-indicator {
     filter: invert(42%) sepia(93%) saturate(1352%) hue-rotate(209deg) brightness(92%) contrast(101%);
 }
+
+/* CSS Transisi Modal Vue */
+    .fade-enter-active, .fade-leave-active { 
+        transition: opacity 0.3s ease; 
+    }
+    .fade-enter-from, .fade-leave-to { 
+        opacity: 0; 
+    }
+
+    .zoom-enter-active { 
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+    }
+    .zoom-leave-active { 
+        transition: all 0.2s ease-in; 
+    }
+    .zoom-enter-from, .zoom-leave-to { 
+        opacity: 0; 
+        transform: scale(0.95) translateY(10px); 
+    }
     </style>
 </head>
 <body id="app" class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
