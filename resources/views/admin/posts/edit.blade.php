@@ -1,213 +1,154 @@
-@extends('layouts.app')
+@extends('layouts.modern')
 
 @section('content')
-<div class="container">
+<div class="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
     <form action="{{ route('admin.posts.update', $post->id) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
-        <div class="row g-4" style="align-items: flex-start !important;">
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
             
             {{-- Kolom Kiri: Editor Utama --}}
-            <div class="col-lg-8">
-                <div class="d-flex align-items-center mb-4">
-                    <a href="{{ route('admin.posts.index') }}" class="btn btn-outline-secondary rounded-circle me-3">
+            <div class="w-full lg:w-2/3">
+                <div class="flex items-center space-x-5 mb-8">
+                    <a href="{{ route('admin.posts.index') }}" 
+                       class="inline-flex items-center justify-center w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 transition-all">
                         <i class="bi bi-arrow-left"></i>
                     </a>
-                    <h2 class="fw-bold mb-0">Edit Artikel</h2>
+                    <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase italic">Edit Artikel</h2>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/50 rounded-[2rem] p-6 md:p-8">
                     {{-- Input Judul --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Judul Artikel</label>
-                        <input type="text" name="title" class="form-control form-control-lg rounded-3 @error('title') is-invalid @enderror" 
-                               value="{{ old('title', $post->title) }}" placeholder="Masukkan judul..." required>
-                        @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <div class="mb-8">
+                        <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-3 italic">Judul Artikel</label>
+                        <input type="text" name="title" 
+                               class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-2xl px-5 py-4 text-lg font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all @error('title') ring-2 ring-red-500 @enderror" 
+                               value="{{ old('title', $post->title) }}" placeholder="Masukkan judul yang menarik..." required>
+                        @error('title') <p class="text-red-500 text-xs mt-2 font-bold">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Input Konten --}}
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-end mb-2">
-                            <label class="form-label fw-bold mb-0">Konten (Markdown)</label>
-                            <span class="badge badge-markdown small">Support Markdown & HTML</span>
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest italic">Konten (Markdown)</label>
+                            <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-black rounded-lg uppercase tracking-tighter">Support MD & HTML</span>
                         </div>
-                        <textarea name="content" id="markdown-editor" rows="15" 
-                                  class="form-control font-monospace rounded-3 @error('content') is-invalid @enderror" 
-                                  placeholder="Tulis konten..." required>{{ old('content', $post->content) }}</textarea>
-                        @error('content') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <textarea name="content" id="markdown-editor" rows="18" 
+                                  class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-2xl p-6 font-mono text-sm leading-relaxed text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 transition-all @error('content') ring-2 ring-red-500 @enderror" 
+                                  placeholder="Mulai menulis keajaiban..." required>{{ old('content', $post->content) }}</textarea>
+                        @error('content') <p class="text-red-500 text-xs mt-2 font-bold">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Markdown Helper Box --}}
-                    <div class="helper-box border rounded-3 p-3">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="small fw-bold text-muted-custom">
-                                <i class="bi bi-code-slash me-1"></i> Bantuan Penulisan:
+                    <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center italic">
+                                <i class="bi bi-terminal me-2 text-blue-400"></i> Cheat Sheet Cepat:
                             </span>
-                            <a href="{{ route('admin.posts.guide') }}" target="_blank" class="text-decoration-none small fw-bold link-guide">
-                                Panduan Lengkap &rarr;
+                            <a href="{{ route('admin.posts.guide') }}" target="_blank" class="text-blue-400 hover:text-blue-300 text-[10px] font-black uppercase tracking-widest no-underline">
+                                Lihat Panduan <i class="bi bi-arrow-up-right ms-1"></i>
                             </a>
                         </div>
-                        <div class="row g-2 text-center">
-                            <div class="col-4 col-md-2"><code class="helper-item">## Judul</code></div>
-                            <div class="col-4 col-md-2"><code class="helper-item">**Tebal**</code></div>
-                            <div class="col-4 col-md-2"><code class="helper-item">*Miring*</code></div>
-                            <div class="col-4 col-md-2"><code class="helper-item">[Link](url)</code></div>
-                            <div class="col-4 col-md-2"><code class="helper-item">- List</code></div>
-                            <div class="col-4 col-md-2"><code class="helper-item">`Code`</code></div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                            @foreach(['## Judul', '**Tebal**', '*Miring*', '[Link](url)', '- List', '`Code`'] as $item)
+                                <div class="bg-slate-800 text-pink-400 text-[10px] font-mono py-2 px-1 rounded-lg border border-slate-700 text-center select-none">{{ $item }}</div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
-            </div> {{-- Akhir Kolom Kiri --}}
+            </div>
 
-            {{-- Kolom Kanan: Meta Data & Publish (Sticky) --}}
-            <div class="col-lg-4">
-                <div id="sticky-sidebar"> 
+            {{-- Kolom Kanan: Sidebar --}}
+            <div class="w-full lg:w-1/3 lg:sticky lg:top-10">
+                <div class="space-y-6">
                     {{-- Card Publikasi --}}
-                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                        <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-send me-2"></i>Publikasi</h5>
+                    <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/50 rounded-[2rem] p-8">
+                        <h5 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] mb-6 flex items-center italic">
+                            <span class="w-1.5 h-4 bg-blue-600 mr-2 rounded-full"></span> Konfigurasi
+                        </h5>
                         
                         {{-- Switch Status --}}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold d-block">Status Publikasi</label>
-                            <div class="form-check form-switch p-3 bg-switch-container rounded-3">
-                                <input class="form-check-input ms-0 me-2" type="checkbox" name="is_published" id="statusSwitch" 
-                                       value="1" {{ $post->is_published ? 'checked' : '' }}>
-                                <label class="form-check-label fw-semibold" for="statusSwitch">Terbitkan Artikel</label>
+                        <div class="mb-8">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Status Publikasi</label>
+                            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                <span class="text-xs font-bold text-slate-600 dark:text-slate-400">Terbitkan Artikel</span>
+                                <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out">
+                                    <input type="checkbox" name="is_published" id="statusSwitch" value="1" {{ $post->is_published ? 'checked' : '' }}
+                                           class="absolute w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:bg-blue-600 transition-all duration-300">
+                                    <label for="statusSwitch" class="block overflow-hidden h-6 rounded-full bg-slate-300 dark:bg-slate-700 cursor-pointer"></label>
+                                </div>
                             </div>
                         </div>
 
                         {{-- Upload Gambar --}}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Gambar Sampul</label>
-                            <div class="alert alert-custom py-2 px-3 border-0 rounded-3 mb-3" style="font-size: 0.85rem;">
-                                <i class="bi bi-aspect-ratio me-1"></i> Gunakan rasio **16:9** agar thumbnail tidak terpotong.
+                        <div class="mb-8">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Gambar Utama (16:9)</label>
+                            
+                            <div id="image-preview-wrapper" class="group relative aspect-video bg-slate-100 dark:bg-slate-900 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 dark:border-slate-700 mb-4 transition-all hover:border-blue-500/50">
+                                @if($post->image)
+                                    <img src="{{ asset('storage/' . $post->image) }}" class="w-full h-full object-cover" id="preview-img">
+                                @else
+                                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-400" id="placeholder-preview">
+                                        <i class="bi bi-image text-3xl mb-2"></i>
+                                        <span class="text-[10px] font-black uppercase tracking-widest">No Image</span>
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <span class="text-white text-[10px] font-black uppercase tracking-widest">Ganti Gambar</span>
+                                </div>
                             </div>
                             
-                            <div id="image-preview-wrapper" class="mb-2">
-                                @if($post->image)
-                                    <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid rounded-3 shadow-sm border" id="preview-img">
-                                @endif
-                            </div>
-                            <input type="file" name="image" class="form-control rounded-3" id="image-input" accept="image/*">
-                            @error('image') <small class="text-danger">{{ $message }}</small> @enderror
+                            <input type="file" name="image" id="image-input" class="block w-full text-[10px] text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition-all" accept="image/*">
+                            @error('image') <p class="text-red-500 text-[10px] mt-2 font-bold">{{ $message }}</p> @enderror
                         </div>
 
-                        <hr class="my-4">
-
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow">
-                            <i class="bi bi-save2 me-2"></i>Simpan Perubahan
+                        <button type="submit" class="group relative w-full inline-flex items-center justify-center px-8 py-4 font-black text-white transition-all duration-200 bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none shadow-lg shadow-blue-200 dark:shadow-none uppercase tracking-widest text-xs italic">
+                            <i class="bi bi-cloud-arrow-up-fill me-2 transition-transform group-hover:-translate-y-1"></i>
+                            Update Konten
                         </button>
                     </div>
 
-                    {{-- Card Info Tambahan --}}
-                    <div class="card border-0 bg-info-soft rounded-4 p-3 text-center">
-                        <small class="text-info-custom">
-                            <i class="bi bi-shield-check me-1"></i> Konten ini akan dipublikasikan ke portal berita Lab Pemrograman dan Komputasi.
-                        </small>
+                    {{-- Card Info --}}
+                    <div class="bg-blue-600 rounded-[2rem] p-6 text-white overflow-hidden relative shadow-xl shadow-blue-200 dark:shadow-none">
+                        <i class="bi bi-shield-check absolute -right-4 -bottom-4 text-7xl opacity-20"></i>
+                        <h6 class="text-[10px] font-black uppercase tracking-[0.2em] mb-2">Security Notice</h6>
+                        <p class="text-[11px] leading-relaxed opacity-90 italic">Pastikan seluruh link eksternal menggunakan HTTPS dan media yang diunggah tidak melanggar hak cipta.</p>
                     </div>
                 </div>
-            </div> {{-- Akhir Kolom Kanan --}}
+            </div>
             
         </div>
     </form>
 </div>
 
 <style>
-    /* --- Base Styling --- */
-    #markdown-editor {
-        background-color: #fcfcfc;
-        border: 1px solid #e0e0e0;
-        resize: vertical;
-        line-height: 1.6;
-    }
+    #markdown-editor::-webkit-scrollbar { width: 8px; }
+    #markdown-editor::-webkit-scrollbar-track { background: transparent; }
+    #markdown-editor::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    [data-bs-theme="dark"] #markdown-editor::-webkit-scrollbar-thumb { background: #334155; }
 
-    .form-switch .form-check-input {
-        width: 3em;
-        height: 1.5em;
-        cursor: pointer;
-    }
-
-    #preview-img {
-        aspect-ratio: 16 / 9;
-        object-fit: cover;
-        width: 100%;
-    }
-
-    /* --- Custom Colors (Light Mode) --- */
-    .helper-box { background-color: #f8f9fa; }
-    .helper-item { display: block; padding: 4px; border: 1px solid #dee2e6; border-radius: 4px; background-color: #fff; color: #212529; font-size: 0.75rem; }
-    .badge-markdown { background-color: #e9ecef; color: #495057; }
-    .bg-switch-container { background-color: #f8f9fa; }
-    .alert-custom { background-color: #e1f5fe; color: #01579b; }
-    .bg-info-soft { background-color: rgba(13, 110, 253, 0.1); }
-    .text-info-custom { color: #0d6efd; }
-    .text-muted-custom { color: #6c757d; }
-    .link-guide { color: #0d6efd; }
-
-    /* --- DARK MODE OVERRIDES --- */
-    [data-bs-theme="dark"] #markdown-editor {
-        background-color: #1e1e1e;
-        border-color: #333;
-        color: #fff;
-    }
-
-    [data-bs-theme="dark"] .card {
-        background-color: #2b3035 !important;
-        color: #dee2e6 !important;
-    }
-
-    [data-bs-theme="dark"] .helper-box {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-color: #444 !important;
-    }
-
-    [data-bs-theme="dark"] .helper-item {
-        background-color: #1e1e1e;
-        border-color: #444;
-        color: #e685b5;
-    }
-
-    [data-bs-theme="dark"] .badge-markdown {
-        background-color: #373b3e;
-        color: #adb5bd;
-    }
-
-    [data-bs-theme="dark"] .bg-switch-container {
-        background-color: rgba(0, 0, 0, 0.2);
-    }
-
-    [data-bs-theme="dark"] .alert-custom {
-        background-color: rgba(0, 150, 136, 0.1);
-        color: #4db6ac;
-    }
-
-    [data-bs-theme="dark"] .text-info-custom { color: #7abaff; }
-    [data-bs-theme="dark"] .text-muted-custom { color: #adb5bd; }
-    [data-bs-theme="dark"] .link-guide { color: #7abaff; }
-
-    /* Sticky Sidebar Logic */
-    @media (min-width: 992px) {
-        #sticky-sidebar {
-            position: sticky !important;
-            top: 100px !important;
-            z-index: 100;
-            align-self: flex-start;
-        }
-    }
+    /* Custom Checkbox Slider */
+    #statusSwitch:checked ~ label { background-color: #2563eb; }
+    #statusSwitch { right: auto; left: 0; }
+    #statusSwitch:checked { right: 0; left: auto; }
 </style>
 
 <script>
-    // Preview Gambar Instant
+    // Preview Gambar Logic
     document.getElementById('image-input').onchange = function (evt) {
         const [file] = this.files;
         if (file) {
-            let preview = document.getElementById('preview-img');
             const wrapper = document.getElementById('image-preview-wrapper');
+            let preview = document.getElementById('preview-img');
+            let placeholder = document.getElementById('placeholder-preview');
+            
+            if (placeholder) placeholder.remove();
+            
             if (!preview) {
                 preview = document.createElement('img');
                 preview.id = 'preview-img';
-                preview.className = 'img-fluid rounded-3 shadow-sm border mb-2';
+                preview.className = 'w-full h-full object-cover';
                 wrapper.appendChild(preview);
             }
             preview.src = URL.createObjectURL(file);

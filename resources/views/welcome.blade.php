@@ -3,6 +3,8 @@
 @section('content')
 <!-- Script Typed.js -->
 <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <style>
     /* Railway-style background effects */
@@ -29,6 +31,25 @@
     }
     #katalog {
          scroll-margin-top: 80px;
+    }
+
+    .railway-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(59, 130, 246, 0.06), transparent 40%);
+        z-index: 0;
+        pointer-events: none;
+    }
+    
+    /* Graphite-style: Border Glow on Hover */
+    .railway-card:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    /* Memastikan gambar tetap tajam */
+    .railway-card img {
+        image-rendering: -webkit-optimize-contrast;
     }
 </style>
 <!-- Background Star Canvas -->
@@ -116,53 +137,69 @@
 </section>
 
 <!-- FEATURED: VIRTUAL LAB HIGHLIGHT -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <a href="/apps" class="group relative block overflow-hidden rounded-[2rem] border border-blue-500/30 bg-slate-900 shadow-2xl transition-all hover:border-blue-500/60">
-            <!-- Glow Effect Background -->
-            <div class="absolute -inset-x-20 -top-40 h-[500px] bg-blue-600/20 blur-[120px] transition-opacity group-hover:opacity-70"></div>
-            
-            <div class="relative z-10 grid lg:grid-cols-2 gap-10 items-center p-8 md:p-12">
-                <div class="space-y-6 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest bg-blue-500 text-white uppercase mx-auto lg:mx-0">
-                        Featured App
-                    </div>
-                    <div class="space-y-3">
-                        <h2 class="text-3xl md:text-5xl font-black text-white leading-tight">
-                            Virtual Laboratory <br class="hidden sm:block">
-                            <span class="text-blue-400">Environment.</span>
-                        </h2>
-                        <p class="text-slate-400 text-sm md:text-lg max-w-md mx-auto lg:mx-0 leading-relaxed">
-                            Akses simulasi pemrograman, komputasi, dan eksperimen perangkat lunak secara virtual langsung dari browser Anda.
-                        </p>
-                    </div>
-                    <div class="flex items-center justify-center lg:justify-start gap-3 text-blue-400 font-mono text-xs md:text-sm">
-                        <span class="flex h-2 w-2 md:h-3 md:w-3 relative">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-blue-500"></span>
-                        </span>
-                        READY_TO_LAUNCH_INSTANCE
-                    </div>
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <a href="/apps" class="group relative block overflow-hidden rounded-[2rem] border border-blue-500/30 bg-slate-900 shadow-2xl transition-all duration-500 hover:border-blue-500/60 hover:-translate-y-2 hover:shadow-blue-500/10">
+        
+        <div class="absolute -inset-x-20 -top-40 h-[500px] bg-blue-600/20 blur-[120px] transition-opacity duration-500 group-hover:opacity-70"></div>
+        
+        <div class="relative z-10 grid lg:grid-cols-2 gap-10 items-center p-8 md:p-12">
+            <div class="space-y-6 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-mono font-bold tracking-widest bg-blue-500 text-white uppercase mx-auto lg:mx-0">
+                    Featured App
                 </div>
-
-                <!-- Visual Element: Now visible on mobile with adjusted sizing -->
-                <div class="relative flex justify-center lg:justify-end">
-                    <div class="relative w-40 h-40 md:w-64 md:h-64 lg:w-80 lg:h-80 flex items-center justify-center">
-                        <!-- Rotating Rings -->
-                        <div class="absolute inset-0 border-2 border-dashed border-blue-500/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
-                        <div class="absolute inset-6 md:inset-10 border border-blue-500/40 rounded-full animate-[spin_10s_linear_infinite_reverse]"></div>
-                        
-                        <!-- Icon Core -->
-                        <div class="relative bg-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.5)] w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl flex items-center justify-center text-white text-2xl md:text-4xl group-hover:scale-110 transition-transform duration-500">
-                            <i class="bi bi-rocket-takeoff-fill"></i>
-                        </div>
-                    </div>
+                <div class="space-y-3">
+                    <h2 class="text-3xl md:text-5xl font-black text-white leading-tight">
+                        Virtual Laboratory <br class="hidden sm:block">
+                        <span class="text-blue-400">Environment.</span>
+                    </h2>
+                    <p class="text-slate-400 text-sm md:text-lg max-w-md mx-auto lg:mx-0 leading-relaxed">
+                        Akses simulasi pemrograman, komputasi, dan eksperimen perangkat lunak secara virtual langsung dari browser Anda.
+                    </p>
+                </div>
+                <div class="flex items-center justify-center lg:justify-start gap-3 text-blue-400 font-mono text-xs md:text-sm">
+                    <span class="flex h-2 w-2 md:h-3 md:w-3 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 md:h-3 md:w-3 bg-blue-500"></span>
+                    </span>
+                    READY_TO_LAUNCH_INSTANCE
                 </div>
             </div>
 
-            <!-- Bottom Bar Decoration -->
-            <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
-        </a>
-    </section>
+            <div class="relative flex justify-center lg:justify-end">
+                <div class="relative w-40 h-40 md:w-64 md:h-64 lg:w-80 lg:h-80 flex items-center justify-center transition-transform duration-500 group-hover:-translate-y-4">
+                    
+                    <div class="absolute inset-0 border-2 border-dashed border-blue-500/20 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute inset-6 md:inset-10 border border-blue-500/40 rounded-full animate-[spin_10s_linear_infinite_reverse]"></div>
+                    
+                    <div class="absolute bottom-1/4 md:bottom-1/3 left-1/2 -translate-x-1/2 w-12 md:w-20 h-20 md:h-32 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm">
+                        <svg viewBox="0 0 50 100" class="w-full h-full text-blue-500">
+                            <path fill="currentColor" d="M25,0 C10,40 0,60 0,80 C0,100 50,100 50,80 C50,60 40,40 25,0 Z">
+                                <animate attributeName="d" 
+                                         values="M25,0 C10,40 0,60 0,80 C0,100 50,100 50,80 C50,60 40,40 25,0 Z;
+                                                 M25,5 C12,42 2,62 2,82 C2,102 48,102 48,82 C48,62 38,42 25,5 Z;
+                                                 M25,0 C10,40 0,60 0,80 C0,100 50,100 50,80 C50,60 40,40 25,0 Z"
+                                         dur="0.2s" repeatCount="indefinite" />
+                            </path>
+                            <path fill="#22d3ee" opacity="0.8" d="M25,20 C15,50 8,65 8,80 C8,95 42,95 42,80 C42,65 35,50 25,20 Z">
+                                <animate attributeName="d" 
+                                         values="M25,20 C15,50 8,65 8,80 C8,95 42,95 42,80 C42,65 35,50 25,20 Z;
+                                                 M25,23 C16,52 10,67 10,82 C10,97 40,97 40,82 C40,67 34,52 25,23 Z;
+                                                 M25,20 C15,50 8,65 8,80 C8,95 42,95 42,80 C42,65 35,50 25,20 Z"
+                                         dur="0.15s" repeatCount="indefinite" />
+                            </path>
+                        </svg>
+                    </div>
+
+                    <div class="relative bg-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.5)] w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-3xl flex items-center justify-center text-white text-2xl md:text-4xl transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(59,130,246,0.8)] group-hover:bg-cyan-400">
+                        <i class="bi bi-rocket-takeoff-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+    </a>
+</section>
 
     
    <!-- HIGHLIGHT LAYANAN -->
@@ -227,73 +264,267 @@
 </section>
 
    <!-- KATALOG ALAT -->
-<section id="katalog" class="max-w-7xl mx-auto px-4 md:px-0">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
-        <div class="space-y-1">
-            <h2 class="text-xl md:text-2xl font-bold dark:text-white flex items-center gap-3">
-                <i class="bi bi-box-seam text-blue-500"></i> Hardware Assets
-            </h2>
-        </div>
-
-    </div>
-
-    <!-- Container Grid: 2 Kolom di Mobile (grid-cols-2), 4 Kolom di Desktop (lg:grid-cols-4) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+<section id="virtual-lab" class="max-w-7xl mx-auto px-4 md:px-0 py-24 border-t border-slate-100 dark:border-slate-800/50 overflow-hidden">
+    <div class="flex flex-col lg:flex-row items-center gap-16">
         
-        @forelse($inventaris->take(4) as $item)
-        <div class="railway-card rounded-xl md:rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden group bg-white dark:bg-railway-card flex flex-col transition-all duration-300">
+        <div class="w-full lg:w-1/2 relative" data-aos="fade-right">
+            <div class="absolute -inset-4 bg-blue-500/10 blur-3xl rounded-full opacity-50"></div>
             
-            <!-- Area Gambar: Tinggi dikurangi sedikit (h-32) agar pas dalam grid 2x2 -->
-            <div class="relative h-32 md:h-48 bg-slate-100 dark:bg-slate-900/50">
-                @if($item->foto_barang)
-                    <img src="{{ asset('storage/inventaris/' . $item->foto_barang) }}" 
-                         class="w-full h-full object-cover grayscale mix-blend-luminosity opacity-80" 
-                         alt="{{ $item->nama_aset }}">
-                @else
-                    <div class="flex items-center justify-center h-full text-slate-400 dark:text-slate-600">
-                        <i class="bi bi-hash text-2xl md:text-4xl opacity-20"></i>
+            <div class="relative bg-slate-950 rounded-2xl border border-slate-800 p-8 shadow-2xl overflow-hidden group">
+                <div class="flex items-center gap-2 mb-6 border-b border-slate-800 pb-4">
+                    <div class="flex gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/20"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/20"></div>
+                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/20"></div>
                     </div>
-                @endif
-                
-                <!-- Badge Status: Ukuran teks diperkecil untuk mobile -->
-                <div class="absolute top-2 left-2">
-                    <span class="px-1.5 py-0.5 rounded-md text-[7px] md:text-[8px] font-mono font-bold backdrop-blur-md {{ $item->tipe_peminjaman == 'Bisa Dipinjam' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-slate-500/20 text-slate-400 border border-slate-500/30' }}">
-                        {{ strtoupper(str_replace(' ', '_', $item->tipe_peminjaman)) }}
-                    </span>
+                    <div class="text-[10px] font-mono text-slate-500 ml-4 tracking-widest">DIGITAL_LOGIC_SIMULATOR_V1.0</div>
                 </div>
-            </div>
 
-            <!-- Konten Kartu -->
-            <div class="p-3 md:p-5 flex flex-col flex-grow justify-between gap-3">
-                <div class="space-y-0.5">
-                    <!-- Text truncate agar tidak merusak layout grid -->
-                    <h3 class="font-bold text-slate-900 dark:text-white truncate text-[11px] md:text-sm">{{ $item->nama_aset }}</h3>
-                    <p class="font-mono text-[8px] md:text-[10px] text-slate-500 uppercase tracking-tighter">{{ $item->kode_barang }}</p>
-                </div>
-                
-                <div class="pt-2 md:pt-4 border-t border-slate-100 dark:border-slate-800">
-                    @auth
-                        <button class="w-full py-1.5 md:py-2.5 bg-blue-500 text-white rounded-lg md:rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-wider">Pinjam</button>
-                    @else
-                        <a href="{{ route('login') }}" class="w-full py-1.5 md:py-2.5 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 text-center rounded-lg md:rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5 border border-slate-200 dark:border-white/5">
-                            <i class="bi bi-lock-fill text-[8px]"></i> Sign in
-                        </a>
-                    @endauth
+                <svg viewBox="0 0 400 200" class="w-full h-auto">
+                    <path d="M 50 100 L 150 100 M 150 70 L 150 130 M 150 100 L 250 100" 
+                          stroke="currentColor" class="text-blue-500/30" stroke-width="2" fill="none" />
+                    
+                    <rect x="130" y="75" width="40" height="50" rx="4" class="fill-slate-900 stroke-blue-500" stroke-width="2" />
+                    <text x="138" y="105" class="fill-blue-500 font-mono text-[12px] font-bold">AND</text>
+
+                    <circle r="3" fill="#3b82f6">
+                        <animateMotion dur="3s" repeatCount="indefinite" path="M 50 100 L 130 100" />
+                        <animate attributeName="opacity" values="0;1;1;0" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                    <circle r="3" fill="#3b82f6">
+                        <animateMotion begin="1.5s" dur="3s" repeatCount="indefinite" path="M 170 100 L 250 100" />
+                        <animate attributeName="opacity" values="0;1;1;0" dur="3s" repeatCount="indefinite" />
+                    </circle>
+
+                    <text x="50" y="140" class="fill-slate-500 font-mono text-[10px]">INPUT_A: HIGH</text>
+                    <text x="220" y="140" class="fill-emerald-500 font-mono text-[10px]">OUTPUT: ACTIVE</text>
+                </svg>
+
+                <div class="absolute bottom-4 right-4 bg-blue-600/10 border border-blue-500/20 p-3 rounded-lg backdrop-blur-md transition-transform group-hover:-translate-y-2">
+                    <code class="text-[10px] text-blue-400 font-mono">Run(Circuit_01);</code>
                 </div>
             </div>
         </div>
-        @empty
-            <div class="col-span-full w-full text-center py-10 font-mono text-slate-500">STOK_EMPTY_NULL</div>
-        @endforelse
-    </div>
-    <div class="mt-8 flex justify-center">
-        <a href="{{ url('/katalog') }}" class="group flex items-center gap-3 text-[10px] md:text-xs font-mono text-slate-500 hover:text-blue-500 transition-all uppercase tracking-[0.2em] bg-slate-100 dark:bg-white/5 px-6 py-3 rounded-full border border-slate-200 dark:border-white/10 hover:border-blue-500/50 shadow-sm">
-            <span>lihat_semua_alat()</span>
-            <i class="bi bi-arrow-right transition-transform group-hover:translate-x-1"></i>
-        </a>
+
+        <div class="w-full lg:w-1/2 space-y-8" data-aos="fade-left">
+            <div class="space-y-4">
+                <h2 class="text-sm font-mono text-blue-500 font-bold tracking-[0.4em] uppercase">Phase 01: Simulation</h2>
+                <h3 class="text-4xl font-black dark:text-white leading-tight italic">
+                    Eksperimen Tanpa <br> Batas Fisik.
+                </h3>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-lg">
+                    Laboratorium Virtual kami menyediakan platform berbasis web untuk mensimulasikan sirkuit digital, algoritma, dan lingkungan komputasi secara instan.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <div class="text-blue-500 font-bold font-mono text-xl">01.</div>
+                    <h4 class="font-bold dark:text-white">Logic Simulator</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">Rancang dan uji gerbang logika dasar hingga kompleks secara visual.</p>
+                </div>
+                <div class="space-y-2">
+                    <div class="text-blue-500 font-bold font-mono text-xl">02.</div>
+                    <h4 class="font-bold dark:text-white">Remote Access</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">Gunakan environment lab melalui browser tanpa instalasi software tambahan.</p>
+                </div>
+            </div>
+
+            <div class="pt-6">
+                <a href="{{ url('/apps') }}" class="inline-flex items-center gap-4 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-500/25 group">
+                    BUKA_VIRTUAL_LAB()
+                    <i class="bi bi-arrow-right transition-transform group-hover:translate-x-2"></i>
+                </a>
+            </div>
+        </div>
+        
     </div>
 </section>
 
+<section id="peminjaman-alat" class="max-w-7xl mx-auto px-4 md:px-0 py-24 border-t border-slate-100 dark:border-slate-800/50">
+    <div class="grid lg:grid-cols-12 gap-16 items-start">
+        
+        <div class="lg:col-span-4 space-y-8" data-aos="fade-right">
+            <div class="space-y-4">
+                <h3 class="text-sm font-mono text-indigo-500 font-bold tracking-[0.4em] uppercase">Phase 02: Hardware</h3>
+                <h4 class="text-4xl font-black dark:text-white leading-tight">
+                    Inventaris di <br> Ujung Jari.
+                </h4>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Kami mendigitalisasi setiap aset laboratorium untuk memastikan transparansi ketersediaan dan kemudahan prosedur peminjaman bagi mahasiswa.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex items-center gap-4 group">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-xs font-mono font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all">01</div>
+                    <span class="text-sm text-slate-600 dark:text-slate-400">Pilih alat dari katalog digital</span>
+                </div>
+                <div class="flex items-center gap-4 group">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-xs font-mono font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all">02</div>
+                    <span class="text-sm text-slate-600 dark:text-slate-400">Verifikasi melalui akun SSO UNTAN</span>
+                </div>
+                <div class="flex items-center gap-4 group">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-xs font-mono font-bold group-hover:bg-indigo-500 group-hover:text-white transition-all">03</div>
+                    <span class="text-sm text-slate-600 dark:text-slate-400">Ambil alat di Lab Pemrograman</span>
+                </div>
+            </div>
+
+            <div class="pt-4">
+                <a href="{{ url('/katalog') }}" class="group inline-flex items-center gap-3 text-xs font-mono font-bold text-indigo-500 tracking-widest uppercase">
+                    LIHAT_SEMUA_INVENTARIS <i class="bi bi-arrow-right transition-transform group-hover:translate-x-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6" data-aos="fade-left">
+            
+            <div class="railway-card group relative rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a]/50 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(79,70,229,0.1)]">
+                <div class="relative h-48 bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1553406830-ef2513450d76?q=80&w=600" 
+                         class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" 
+                         alt="Microcontroller">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-3 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-500 border border-green-500/20 backdrop-blur-md">AVAILABLE</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h5 class="font-bold dark:text-white mb-1">ESP32 DevKit V1</h5>
+                    <p class="text-[10px] font-mono text-slate-500 mb-4 tracking-tighter uppercase">Category: IoT_Infrastructure</p>
+                    <button class="w-full py-3 bg-slate-900 dark:bg-white/5 border border-slate-800 dark:border-white/10 text-white dark:text-slate-300 rounded-xl text-[10px] font-bold uppercase tracking-widest group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-all">
+                        Reserve Asset
+                    </button>
+                </div>
+            </div>
+
+            <div class="railway-card group relative rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a]/50 overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_30px_60px_rgba(79,70,229,0.1)]">
+                <div class="relative h-48 bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600" 
+                         class="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" 
+                         alt="Equipment">
+                    <div class="absolute top-4 right-4">
+                        <span class="px-3 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-400 border border-green-500/20 backdrop-blur-md">AVAILABLE</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h5 class="font-bold dark:text-white mb-1">Digital Oscilloscope</h5>
+                    <p class="text-[10px] font-mono text-slate-500 mb-4 tracking-tighter uppercase">Category: Measurement_Tools</p>
+                    <button class="w-full py-3 bg-slate-900 dark:bg-white/5 border border-slate-800 dark:border-white/10 text-white dark:text-slate-300 rounded-xl text-[10px] font-bold uppercase tracking-widest group-hover:bg-indigo-600 group-hover:border-indigo-500 transition-all">
+                        Reserve Asset
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section id="bebas-lab" class="max-w-7xl mx-auto px-4 md:px-0 py-24 border-t border-slate-100 dark:border-slate-800/50">
+    <div class="flex flex-col lg:flex-row items-center gap-16">
+        
+        <div class="w-full lg:w-[40%]" data-aos="fade-right">
+            <div class="relative group">
+                <div class="absolute -inset-4 bg-emerald-500/10 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                
+                <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-emerald-500/20 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden">
+                    <div class="flex flex-col gap-6">
+                        <div class="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
+                            <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                <i class="bi bi-person-badge text-xl"></i>
+                            </div>
+                            <div>
+                                <div class="h-2.5 w-32 bg-slate-200 dark:bg-slate-800 rounded-full mb-2"></div>
+                                <div class="text-[10px] font-mono text-emerald-500 uppercase tracking-tighter">H1091XXXXX@student.untan.ac.id</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                                <span>VERIFICATION_STATUS</span>
+                                <span class="text-emerald-500">100%_CLEAN</span>
+                            </div>
+                            <div class="relative h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div class="absolute inset-y-0 left-0 bg-emerald-500 rounded-full transition-all duration-1000 w-[100%]" data-aos="width-full"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex flex-col items-center gap-1">
+                                <i class="bi bi-check-circle-fill text-emerald-500 text-lg"></i>
+                                <span class="text-[9px] font-mono text-slate-400">NO_ASSET_DEBT</span>
+                            </div>
+                            <div class="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 flex flex-col items-center gap-1">
+                                <i class="bi bi-shield-check text-emerald-500 text-lg"></i>
+                                <span class="text-[9px] font-mono text-slate-400">ID_VERIFIED</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-2 py-4 bg-emerald-500 text-white rounded-2xl text-center text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                            Download_Certificate.pdf
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-[60%] space-y-10" data-aos="fade-left">
+            <div class="space-y-4">
+                <h3 class="text-sm font-mono text-emerald-500 font-bold tracking-[0.4em] uppercase">Phase 03: Administration</h3>
+                <h4 class="text-4xl font-black dark:text-white leading-tight">
+                    Bebas Lab Tanpa <br> Antrean Fisik.
+                </h4>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed text-lg">
+                    Sistem otomatisasi kami memverifikasi status peminjaman Anda secara instan menggunakan integrasi email institusi UNTAN.
+                </p>
+            </div>
+
+            <div class="space-y-8 relative">
+                <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100 dark:bg-slate-800"></div>
+
+                <div class="relative pl-12 group">
+                    <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-500 flex items-center justify-center z-10 transition-transform group-hover:scale-110">
+                        <i class="bi bi-envelope-at text-xs text-emerald-500"></i>
+                    </div>
+                    <h5 class="font-bold dark:text-white text-base">Login Email Institusi</h5>
+                    <p class="text-sm text-slate-500 leading-relaxed">Gunakan email berawalan 'H' Anda untuk verifikasi identitas mahasiswa FMIPA secara otomatis.</p>
+                </div>
+
+                <div class="relative pl-12 group">
+                    <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-500 flex items-center justify-center z-10 transition-transform group-hover:scale-110">
+                        <i class="bi bi-search text-xs text-emerald-500"></i>
+                    </div>
+                    <h5 class="font-bold dark:text-white text-base">Pengecekan Inventaris Otomatis</h5>
+                    <p class="text-sm text-slate-500 leading-relaxed">Sistem memindai database peminjaman untuk memastikan tidak ada aset yang tertunggak.</p>
+                </div>
+
+                <div class="relative pl-12 group">
+                    <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-500 flex items-center justify-center z-10 transition-transform group-hover:scale-110">
+                        <i class="bi bi-file-earmark-pdf text-xs text-emerald-500"></i>
+                    </div>
+                    <h5 class="font-bold dark:text-white text-base">Unduh Surat Keterangan</h5>
+                    <p class="text-sm text-slate-500 leading-relaxed">Surat Bebas Lab (Bebas Pustaka Lab) diterbitkan secara digital dalam hitungan detik.</p>
+                </div>
+            </div>
+
+           <div class="pt-6">
+    <a href="{{ url('/bebas-lab') }}" 
+       class="inline-flex items-center justify-center gap-3 w-full sm:w-auto px-6 md:px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold transition-all shadow-lg shadow-emerald-500/25 group overflow-hidden">
+        
+        <span class="block sm:hidden text-[11px] font-mono tracking-tighter">
+            START_BEBAS_LAB()
+        </span>
+
+        <span class="hidden sm:block text-xs md:text-sm font-mono">
+            MULAI_PROSES_BEBAS_LAB()
+        </span>
+
+        <i class="bi bi-lightning-fill text-xs transition-transform group-hover:translate-x-1"></i>
+    </a>
+</div>
+        </div>
+        
+    </div>
+</section>
     <!-- ARTIKEL -->
 <section id="blog" class="max-w-7xl mx-auto py-12 px-4 border-t border-slate-200 dark:border-slate-800">
     <div class="grid lg:grid-cols-4 gap-12">
@@ -599,5 +830,17 @@
         animate();
     });
     window.addEventListener('resize', resize);
+</script>
+
+<script>
+  // Pastikan AOS jalan setelah DOM siap
+  document.addEventListener("DOMContentLoaded", function() {
+    AOS.init({
+      duration: 800, // Kecepatan animasi (ms)
+      once: true,    // Animasi hanya jalan sekali saat scroll ke bawah
+      mirror: false,
+      offset: 120,   // Jarak pemicu animasi dari bawah layar
+    });
+  });
 </script>
 @endsection

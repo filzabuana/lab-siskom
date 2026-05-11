@@ -1,116 +1,117 @@
-@extends('layouts.app')
+@extends('layouts.modern')
 
 @section('content')
-<div class="container py-4">
+<div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
     {{-- Header Section --}}
-    <div class="row align-items-center mb-4">
-        <div class="col-md-6">
-            <h2 class="fw-bold mb-0 text-dark">Manajemen Blog</h2>
-            <p class="text-muted mb-0">Kelola artikel dan warta laboratorium melalui antarmuka terpadu.</p>
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-6">
+        <div>
+            <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center uppercase italic">
+                <span class="w-2 h-7 bg-blue-600 rounded-full mr-3"></span>
+                Manajemen Blog
+            </h2>
+            <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm mt-1">Kelola artikel dan warta laboratorium.</p>
         </div>
-        <div class="col-md-6 text-md-end mt-3 mt-md-0">
-            <a href="{{ route('admin.posts.create') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-                <i class="bi bi-pencil-square me-2"></i>Tulis Artikel Baru
+        <div class="w-full md:w-auto">
+            <a href="{{ route('admin.posts.create') }}" 
+               class="flex items-center justify-center px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-blue-600/20 transition-all active:scale-95 w-full md:w-auto">
+                <i class="bi bi-pencil-square mr-2 text-base"></i> Tulis Artikel Baru
             </a>
         </div>
     </div>
 
-    {{-- Stats Cards (Opsional tapi keren) --}}
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
-                <div class="d-flex align-items-center">
-                    <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-4 me-3">
-                        <i class="bi bi-journal-text fs-4"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted d-block">Total Artikel</small>
-                        <h4 class="fw-bold mb-0">{{ $posts->count() }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {{-- Kamu bisa tambah stats lain seperti 'Draft' atau 'Published' di sini --}}
-    </div>
-
-    {{-- Main Table Card --}}
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light border-bottom">
-                    <tr>
-                        <th class="ps-4 py-3 text-muted small fw-bold text-uppercase">Konten</th>
-                        <th class="py-3 text-muted small fw-bold text-uppercase">Info Publikasi</th>
-                        <th class="py-3 text-muted small fw-bold text-uppercase">Status</th>
-                        <th class="py-3 text-muted small fw-bold text-uppercase text-center">Aksi</th>
+    {{-- Main Container --}}
+    <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700/50 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
+        
+        {{-- Desktop View (Hidden on Mobile) --}}
+        <div class="hidden md:block overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700/50">
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Konten</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Info</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                        <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-700/50">
                     @forelse($posts as $post)
-                    <tr>
-                        <td class="ps-4">
-                            <div class="d-flex align-items-center">
+                    <tr class="group hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
+                        <td class="px-6 py-5">
+                            <div class="flex items-center">
                                 <img src="{{ $post->image ? asset('storage/' . $post->image) : 'https://placehold.co/120x80?text=No+Image' }}" 
-                                     class="rounded-3 shadow-sm me-3" 
-                                     style="width: 100px; height: 60px; object-fit: cover;">
-                                <div>
-                                    <div class="fw-bold text-dark mb-0">{{ $post->title }}</div>
-                                    <small class="text-muted d-flex align-items-center">
-                                        <i class="bi bi-link-45deg me-1"></i>/blog/{{ $post->slug }}
-                                    </small>
+                                     class="w-20 h-14 rounded-xl object-cover shadow-sm ring-2 ring-white dark:ring-slate-700">
+                                <div class="ml-4 max-w-[200px] lg:max-w-xs">
+                                    <div class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{{ $post->title }}</div>
+                                    <div class="text-[11px] text-slate-400 truncate italic">/blog/{{ $post->slug }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td>
-                            <div class="small">
-                                <div class="text-dark"><i class="bi bi-calendar-event me-2"></i>{{ $post->created_at->format('d M Y') }}</div>
-                                <div class="text-muted"><i class="bi bi-clock me-2"></i>{{ $post->created_at->format('H:i') }} WIB</div>
+                        <td class="px-6 py-5">
+                            <div class="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                                {{ $post->created_at->format('d M Y') }}
                             </div>
                         </td>
-                        <td>
-                            @if($post->is_published)
-                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
-                                    <i class="bi bi-check-circle me-1"></i> Published
-                                </span>
-                            @else
-                                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-3 py-2">
-                                    <i class="bi bi-pause-circle me-1"></i> Draft
-                                </span>
-                            @endif
+                        <td class="px-6 py-5">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider {{ $post->is_published ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100' }}">
+                                {{ $post->is_published ? 'Published' : 'Draft' }}
+                            </span>
                         </td>
-                        <td class="text-center pe-4">
-                            <div class="btn-group shadow-sm rounded-pill">
-                                <a href="{{ route('blog.show', $post->slug) }}" target="_blank" class="btn btn-white btn-sm px-3" title="Lihat">
-                                    <i class="bi bi-eye text-primary"></i>
-                                </a>
-                                <a href="{{ route('admin.posts.edit', $post->id) }}" class="btn btn-white btn-sm px-3" title="Edit">
-                                    <i class="bi bi-pencil-square text-info"></i>
-                                </a>
-                                <form action="{{ route('admin.posts.destroy', $post->id) }}" method="POST" class="d-inline">
+                        <td class="px-6 py-5">
+                            <div class="flex items-center justify-center space-x-2">
+                                <a href="{{ route('admin.posts.edit', $post->id) }}" class="p-2 text-slate-400 hover:text-blue-600 transition-colors"><i class="bi bi-pencil-square"></i></a>
+                                <form action="{{ route('admin.posts.destroy', $post->id) }}" method="POST" class="inline">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-white btn-sm px-3" title="Hapus" onclick="return confirm('Hapus artikel ini?')">
-                                        <i class="bi bi-trash text-danger"></i>
-                                    </button>
+                                    <button type="submit" class="p-2 text-slate-400 hover:text-red-600" onclick="return confirm('Hapus?')"><i class="bi bi-trash"></i></button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                     @empty
-                    <tr>
-                        <td colspan="4" class="text-center py-5">
-                            <div class="text-muted">
-                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
-                                Belum ada artikel yang dibuat.
-                            </div>
-                        </td>
-                    </tr>
+                    <tr><td colspan="4" class="py-20 text-center text-slate-400 italic">Belum ada artikel.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        
+
+        {{-- Mobile View (Hidden on Desktop) --}}
+        <div class="md:hidden divide-y divide-slate-100 dark:divide-slate-700/50">
+            @forelse($posts as $post)
+            <div class="p-5 flex flex-col space-y-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center space-x-3">
+                        <img src="{{ $post->image ? asset('storage/' . $post->image) : 'https://placehold.co/80x80?text=No+Image' }}" 
+                             class="w-16 h-16 rounded-xl object-cover shadow-sm border border-slate-100 dark:border-slate-700">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate-2-lines uppercase">{{ $post->title }}</h4>
+                            <p class="text-[10px] text-slate-400 mt-1 italic truncate">/blog/{{ $post->slug }}</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-tighter {{ $post->is_published ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600' }}">
+                        {{ $post->is_published ? 'LIVE' : 'DRAFT' }}
+                    </span>
+                </div>
+                
+                <div class="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-700/30">
+                    <div class="text-[10px] text-slate-500 font-medium italic">
+                        <i class="bi bi-calendar-event mr-1"></i> {{ $post->created_at->format('d/m/y') }}
+                    </div>
+                    <div class="flex space-x-3">
+                        <a href="{{ route('blog.show', $post->slug) }}" class="p-2 text-blue-500"><i class="bi bi-eye"></i></a>
+                        <a href="{{ route('admin.posts.edit', $post->id) }}" class="p-2 text-slate-400"><i class="bi bi-pencil-square"></i></a>
+                        <form action="{{ route('admin.posts.destroy', $post->id) }}" method="POST">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="p-2 text-red-400" onclick="return confirm('Hapus?')"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="p-10 text-center text-slate-400 italic">Belum ada artikel.</div>
+            @endforelse
+        </div>
+
         @if($posts->hasPages())
-        <div class="card-footer bg-white border-top py-3">
+        <div class="px-6 py-4 bg-slate-50/50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-700/50">
             {{ $posts->links() }}
         </div>
         @endif
@@ -118,19 +119,12 @@
 </div>
 
 <style>
-    .btn-white {
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-    }
-    .btn-white:hover {
-        background-color: #f8f9fa;
-    }
-    .table-hover tbody tr:hover {
-        background-color: rgba(var(--bs-primary-rgb), 0.02);
-    }
-    .badge {
-        font-size: 0.75rem;
-        letter-spacing: 0.3px;
+    /* Menangani judul yang terlalu panjang di mobile agar tetap rapi */
+    .truncate-2-lines {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 </style>
 @endsection
