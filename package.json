@@ -10,7 +10,6 @@
         "@tailwindcss/forms": "^0.5.2",
         "@tailwindcss/typography": "^0.5.19",
         "@tailwindcss/vite": "^4.0.0",
-        "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.2",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
@@ -21,7 +20,9 @@
     },
     "dependencies": {
         "@vitejs/plugin-vue": "^6.0.6",
+        "bootstrap-icons": "^1.13.1",
         "mermaid": "^11.14.0",
+        "sweetalert2": "^11.26.24",
         "vue": "^3.5.34"
     }
 }

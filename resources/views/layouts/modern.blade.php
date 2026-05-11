@@ -10,8 +10,7 @@
 
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
 
     <script>
         (function() {
@@ -41,6 +40,46 @@
             background-color: #3b82f6; transition: width 0.3s ease;
         }
         .nav-link:hover::after { width: 100%; }
+        [v-cloak] {
+            display: none !important;
+        }
+
+        /* CSS untuk "menjinakkan" SweetAlert2 agar sesuai tema Bapak */
+.swal2-popup {
+    padding: 2rem !important;
+    font-family: inherit !important;
+}
+
+.swal2-title {
+    padding-top: 1rem !important;
+}
+
+/* Mengubah bentuk icon agar tidak terlalu kaku */
+.swal2-icon {
+    border-width: 3px !important;
+    transform: scale(0.8);
+}
+
+/* Dark mode support paksa jika auto-detect gagal */
+.dark .swal2-popup {
+    background: #1e293b !important; /* railway-card color */
+    color: white !important;
+}
+
+.dark input::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(100%) contrast(100%);
+    cursor: pointer;
+}
+
+
+.dark input::-webkit-inner-spin-button,
+.dark input::-webkit-outer-spin-button {
+    filter: invert(1);
+}
+
+.dark input:focus::-webkit-calendar-picker-indicator {
+    filter: invert(42%) sepia(93%) saturate(1352%) hue-rotate(209deg) brightness(92%) contrast(101%);
+}
     </style>
 </head>
 <body class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
@@ -178,51 +217,65 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const themeToggle = document.getElementById('checkbox-theme');
-            const html = document.documentElement;
-            const mobileMenu = document.getElementById('mobileMenu');
-            const menuButton = document.getElementById('menuButton');
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggle = document.getElementById('checkbox-theme');
+        const html = document.documentElement;
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuButton = document.getElementById('menuButton');
 
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            themeToggle.checked = (currentTheme === 'dark');
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        themeToggle.checked = (currentTheme === 'dark');
 
-            themeToggle.addEventListener('change', function() {
-                const isDark = this.checked;
-                html.classList.toggle('dark', isDark);
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                updateSwalTheme(isDark);
-            });
+        // 1. Fungsi ini SEHARUSNYA cuma buat setup warna default Swal, bukan trigger api fire
+        function getSwalConfig() {
+            const isDark = document.documentElement.classList.contains('dark');
+            return { 
+                background: isDark ? '#1e293b' : '#fff', // Pakai railway-card Bapak
+                color: isDark ? '#fff' : '#000', 
+            };
+        }
 
-            // Fitur Click Outside
-            window.addEventListener('click', (e) => {
-                if (!mobileMenu.classList.contains('hidden')) {
-                    if (!mobileMenu.contains(e.target) && !menuButton.contains(e.target)) {
-                        mobileMenu.classList.add('hidden');
-                    }
-                }
-            });
-
-            function updateSwalTheme(isDark) {
-                const swalConfig = { 
-                    background: isDark ? '#111111' : '#fff', // Menggunakan warna railway.card Bapak
-                    color: isDark ? '#fff' : '#000', 
-                    confirmButtonColor: '#3b82f6' 
-                };
-                
-                @if(session('success'))
-                    Swal.fire({ ...swalConfig, icon: 'success', title: 'Berhasil', text: "{{ session('success') }}", timer: 3000, showConfirmButton: false });
-                @endif
-                @if(session('error'))
-                    Swal.fire({ ...swalConfig, icon: 'error', title: 'Error', text: "{{ session('error') }}" });
-                @endif
-            }
-            updateSwalTheme(themeToggle.checked);
+        themeToggle.addEventListener('change', function() {
+            const isDark = this.checked;
+            html.classList.toggle('dark', isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            // Saat ganti tema, tidak perlu panggil Swal.fire lagi di sini
         });
 
-        function toggleMenu() { 
-            document.getElementById('mobileMenu').classList.toggle('hidden'); 
-        }
-    </script>
+        // 2. Picu SweetAlert HANYA SEKALI saat halaman dimuat (DOMContentLoaded)
+        @if(session('success'))
+            Swal.fire({ 
+                ...getSwalConfig(), 
+                icon: 'success', 
+                title: 'SYSTEM_STABLE', 
+                text: "{{ session('success') }}", 
+                timer: 3000, 
+                showConfirmButton: false 
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({ 
+                ...getSwalConfig(), 
+                icon: 'error', 
+                title: 'ERROR_DETECTED', 
+                text: "{{ session('error') }}" 
+            });
+        @endif
+
+        // Fitur Click Outside
+        window.addEventListener('click', (e) => {
+            if (!mobileMenu.classList.contains('hidden')) {
+                if (!mobileMenu.contains(e.target) && !menuButton.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            }
+        });
+    });
+
+    function toggleMenu() { 
+        document.getElementById('mobileMenu').classList.toggle('hidden'); 
+    }
+</script>
 </body>
 </html>

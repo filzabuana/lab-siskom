@@ -1,169 +1,142 @@
-@extends('layouts.app')
+{{-- File: views/admin/dashboard.blade.php --}}
+{{-- Tanpa @extends karena sudah di-include di file induk --}}
 
-@section('content')
-<div class="container py-3">
-    {{-- Header --}}
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <h4 class="fw-bold mb-0 text-body">Panel Kendali Admin</h4>
-                    <p class="text-body-secondary small mb-0">Lab. Pemrograman & Komputasi - Untan</p>
-                </div>
-                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill border border-primary-subtle small">
-                    <i class="bi bi-shield-lock-fill"></i> Admin Access
+<div class="max-w-7xl mx-auto px-4 py-6 sm:py-8 antialiased">
+    
+    {{-- Header Section --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div class="space-y-1">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                    Panel Kendali Admin
+                </h1>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-blue-600/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-200 dark:border-blue-800 uppercase tracking-widest">
+                    <i class="bi bi-shield-lock-fill me-1"></i> Admin Access
                 </span>
             </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                Lab. Pemrograman & Komputasi — FMIPA UNTAN
+            </p>
         </div>
     </div>
 
-    {{-- Row 1: Statistik Ringkas --}}
-    <div class="row g-2 mb-4">
-        <!-- Statistik SOP -->
-        <div class="col-4">
-            <div class="card border-0 shadow-sm rounded-3 h-100 custom-card-bg">
-                <div class="card-body p-2 p-md-3 text-center text-md-start d-md-flex align-items-center">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2 p-md-3 mb-1 mb-md-0 me-md-3 d-inline-block">
-                        <i class="bi bi-file-earmark-text-fill fs-5 fs-md-4"></i>
-                    </div>
-                    <div class="text-truncate w-100">
-                        <div class="text-secondary d-none d-md-block" style="font-size: 0.8rem;">Total SOP</div>
-                        <div class="text-secondary d-md-none" style="font-size: 0.65rem;">SOP</div>
-                        <h5 class="fw-bold mb-0 mt-md-1 fs-6 fs-md-4 text-body">{{ \App\Models\Sop::count() }}</h5>
-                    </div>
+    {{-- Row 1: Statistik Utama --}}
+    <div class="grid grid-cols-3 gap-4 md:gap-6 mb-10">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-center md:text-left">
+                <div class="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl transition-colors">
+                    <i class="bi bi-file-earmark-text-fill text-xl md:text-2xl"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-slate-400 mb-0.5">Total SOP</p>
+                    <h5 class="text-lg md:text-2xl font-black text-slate-900 dark:text-white leading-none">
+                        {{ \App\Models\Sop::count() }}
+                    </h5>
                 </div>
             </div>
         </div>
-        <!-- Statistik Surat Bebas Lab -->
-        <div class="col-4">
-            <div class="card border-0 shadow-sm rounded-3 h-100 custom-card-bg">
-                <div class="card-body p-2 p-md-3 text-center text-md-start d-md-flex align-items-center">
-                    <div class="bg-success bg-opacity-10 text-success rounded-3 p-2 p-md-3 mb-1 mb-md-0 me-md-3 d-inline-block">
-                        <i class="bi bi-patch-check-fill fs-5 fs-md-4"></i>
-                    </div>
-                    <div class="text-truncate w-100">
-                        <div class="text-secondary d-none d-md-block" style="font-size: 0.8rem;">Surat Selesai</div>
-                        <div class="text-secondary d-md-none" style="font-size: 0.65rem;">Surat</div>
-                        <h5 class="fw-bold mb-0 mt-md-1 fs-6 fs-md-4 text-body">{{ \App\Models\SuratBebasLab::where('status', 'disetujui')->count() }}</h5>
-                    </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-center md:text-left">
+                <div class="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl">
+                    <i class="bi bi-patch-check-fill text-xl md:text-2xl"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-slate-400 mb-0.5">Surat Selesai</p>
+                    <h5 class="text-lg md:text-2xl font-black text-slate-900 dark:text-white leading-none">
+                        {{ \App\Models\SuratBebasLab::where('status', 'disetujui')->count() }}
+                    </h5>
                 </div>
             </div>
         </div>
-        <!-- Statistik Peminjaman -->
-        <div class="col-4">
-            <div class="card border-0 shadow-sm rounded-3 h-100 custom-card-bg">
-                <div class="card-body p-2 p-md-3 text-center text-md-start d-md-flex align-items-center">
-                    <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2 p-md-3 mb-1 mb-md-0 me-md-3 d-inline-block">
-                        <i class="bi bi-arrow-repeat fs-5 fs-md-4"></i>
-                    </div>
-                    <div class="text-truncate w-100">
-                        <div class="text-secondary d-none d-md-block" style="font-size: 0.8rem;">Total Pinjam</div>
-                        <div class="text-secondary d-md-none" style="font-size: 0.65rem;">Pinjam</div>
-                        <h5 class="fw-bold mb-0 mt-md-1 fs-6 fs-md-4 text-body">{{ \App\Models\Peminjaman::count() }}</h5>
-                    </div>
+
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all">
+            <div class="flex flex-col md:flex-row items-center gap-3 md:gap-4 text-center md:text-left">
+                <div class="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-2xl">
+                    <i class="bi bi-arrow-repeat text-xl md:text-2xl"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-[9px] md:text-xs font-bold uppercase tracking-widest text-slate-400 mb-0.5">Total Pinjam</p>
+                    <h5 class="text-lg md:text-2xl font-black text-slate-900 dark:text-white leading-none">
+                        {{ \App\Models\Peminjaman::count() }}
+                    </h5>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Row 2: Shortcut Cards --}}
-    <div class="row g-3">
-        <!-- 1. Bebas Lab (Paling Kiri) -->
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center custom-card-bg">
-                <div class="card-body p-3">
-                    <div class="bg-success bg-opacity-10 p-2 p-md-3 rounded-4 d-inline-block mb-2 position-relative">
-                        <i class="bi bi-person-check-fill text-success fs-3"></i>
-                        @php $notifBebasLab = \App\Models\SuratBebasLab::where('status', 'verified_email')->count(); @endphp
-                        @if($notifBebasLab > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style="font-size: 0.7rem;">
-                                {{ $notifBebasLab }}
-                            </span>
-                        @endif
-                    </div>
-                    <h6 class="fw-bold mb-2 text-body">Bebas Lab</h6>
-                    <a href="{{ route('admin.bebas-lab.index') }}" class="btn btn-success btn-sm w-100 rounded-pill fw-bold">Cek</a>
-                </div>
+    {{-- Row 2: Menu Utama (Shortcut Cards) --}}
+    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">Manajemen Layanan</h3>
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+        
+        <div class="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-6 text-center transition-all hover:border-emerald-500/50 hover:shadow-2xl hover:shadow-emerald-500/10 active:scale-95">
+            <div class="relative w-16 h-16 mx-auto mb-5 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-6">
+                <i class="bi bi-person-check-fill text-emerald-600 text-3xl"></i>
+                @php $notifBebasLab = \App\Models\SuratBebasLab::where('status', 'verified_email')->count(); @endphp
+                @if($notifBebasLab > 0)
+                    <span class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-4 ring-white dark:ring-slate-900 animate-bounce">
+                        {{ $notifBebasLab }}
+                    </span>
+                @endif
             </div>
+            <h6 class="font-bold text-slate-900 dark:text-white mb-4 text-sm tracking-tight">Bebas Lab</h6>
+            <a href="{{ route('admin.bebas-lab.index') }}" class="block w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all uppercase tracking-widest">
+                Cek Berkas
+            </a>
         </div>
 
-        <!-- 2. Peminjaman -->
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center custom-card-bg">
-                <div class="card-body p-3">
-                    <div class="bg-warning bg-opacity-10 p-2 p-md-3 rounded-4 d-inline-block mb-2 position-relative">
-                        <i class="bi bi-cart-check-fill text-warning fs-3"></i>
-                        @php $notifPeminjaman = \App\Models\Peminjaman::where('status', 'pending')->count(); @endphp
-                        @if($notifPeminjaman > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style="font-size: 0.7rem;">
-                                {{ $notifPeminjaman }}
-                            </span>
-                        @endif
-                    </div>
-                    <h6 class="fw-bold mb-2 text-body">Peminjaman</h6>
-                    <a href="{{ route('admin.peminjaman.index') }}" class="btn btn-warning btn-sm w-100 rounded-pill fw-bold text-white">Kelola</a>
-                </div>
+        <div class="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-6 text-center transition-all hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10 active:scale-95">
+            <div class="relative w-16 h-16 mx-auto mb-5 bg-amber-50 dark:bg-amber-900/20 rounded-2xl flex items-center justify-center transition-transform group-hover:-rotate-6">
+                <i class="bi bi-cart-check-fill text-amber-600 text-3xl"></i>
+                @php $notifPeminjaman = \App\Models\Peminjaman::where('status', 'pending')->count(); @endphp
+                @if($notifPeminjaman > 0)
+                    <span class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white ring-4 ring-white dark:ring-slate-900">
+                        {{ $notifPeminjaman }}
+                    </span>
+                @endif
             </div>
+            <h6 class="font-bold text-slate-900 dark:text-white mb-4 text-sm tracking-tight">Peminjaman</h6>
+            <a href="{{ route('admin.peminjaman.index') }}" class="block w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold rounded-xl shadow-lg shadow-amber-500/30 transition-all uppercase tracking-widest">
+                Kelola
+            </a>
         </div>
 
-        <!-- 3. Inventaris -->
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center custom-card-bg">
-                <div class="card-body p-3">
-                    <div class="bg-info bg-opacity-10 p-2 p-md-3 rounded-4 d-inline-block mb-2">
-                        <i class="bi bi-boxes text-info fs-3"></i>
-                    </div>
-                    <h6 class="fw-bold mb-2 text-body">Inventaris</h6>
-                    <a href="{{ route('admin.inventaris.index') }}" class="btn btn-info btn-sm w-100 rounded-pill fw-bold text-white">Buka</a>
-                </div>
+        <div class="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-6 text-center transition-all hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-500/10 active:scale-95">
+            <div class="w-16 h-16 mx-auto mb-5 bg-cyan-50 dark:bg-cyan-900/20 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                <i class="bi bi-boxes text-cyan-600 text-3xl"></i>
             </div>
+            <h6 class="font-bold text-slate-900 dark:text-white mb-4 text-sm tracking-tight">Inventaris</h6>
+            <a href="{{ route('admin.inventaris.index') }}" class="block w-full py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-[10px] font-bold rounded-xl shadow-lg shadow-cyan-500/30 transition-all uppercase tracking-widest">
+                Buka Aset
+            </a>
         </div>
 
-        <!-- 4. SOP -->
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center custom-card-bg">
-                <div class="card-body p-3">
-                    <div class="bg-primary bg-opacity-10 p-2 p-md-3 rounded-4 d-inline-block mb-2">
-                        <i class="bi bi-journal-plus text-primary fs-3"></i>
-                    </div>
-                    <h6 class="fw-bold mb-2 text-body">Kelola SOP</h6>
-                    <a href="{{ route('sop.index') }}" class="btn btn-primary btn-sm w-100 rounded-pill fw-bold">Atur</a>
-                </div>
+        <div class="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-6 text-center transition-all hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 active:scale-95">
+            <div class="w-16 h-16 mx-auto mb-5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12">
+                <i class="bi bi-journal-plus text-blue-600 text-3xl"></i>
             </div>
+            <h6 class="font-bold text-slate-900 dark:text-white mb-4 text-sm tracking-tight">Kelola SOP</h6>
+            <a href="{{ route('sop.index') }}" class="block w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all uppercase tracking-widest">
+                Update
+            </a>
         </div>
 
-        <!-- 5. Manajemen User (Tambahan Baru) -->
-        <div class="col-6 col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 h-100 text-center custom-card-bg">
-                <div class="card-body p-3">
-                    <div class="bg-danger bg-opacity-10 p-2 p-md-3 rounded-4 d-inline-block mb-2">
-                        <i class="bi bi-people-fill text-danger fs-3"></i>
-                    </div>
-                    <h6 class="fw-bold mb-2 text-body">User & Akun</h6>
-                    {{-- Ganti ke route user index milik Bapak --}}
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-danger btn-sm w-100 rounded-pill fw-bold">Kelola</a>
-                </div>
+        <div class="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[2.5rem] p-6 text-center transition-all hover:border-rose-500/50 hover:shadow-2xl hover:shadow-rose-500/10 active:scale-95">
+            <div class="w-16 h-16 mx-auto mb-5 bg-rose-50 dark:bg-rose-900/20 rounded-2xl flex items-center justify-center transition-transform group-hover:-translate-y-1">
+                <i class="bi bi-people-fill text-rose-600 text-3xl"></i>
             </div>
+            <h6 class="font-bold text-slate-900 dark:text-white mb-4 text-sm tracking-tight">User & Akun</h6>
+            <a href="{{ route('admin.users.index') }}" class="block w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-bold rounded-xl shadow-lg shadow-rose-500/30 transition-all uppercase tracking-widest">
+                Manajemen
+            </a>
         </div>
+
     </div>
 </div>
 
 <style>
-    body { background-color: #f8f9fa; }
-    .custom-card-bg { background-color: #ffffff; }
-
-    /* Dark Mode Handling */
-    [data-bs-theme="dark"] body { background-color: #121212; }
-    [data-bs-theme="dark"] .custom-card-bg { background-color: #1e1e1e; border: 1px solid #2d2d2d !important; }
-    [data-bs-theme="dark"] .text-secondary { color: #a0a0a0 !important; }
-
-    .card { transition: all 0.2s; border-radius: 16px !important; }
-    .card:hover { transform: translateY(-3px); }
-    
-    @media (max-width: 576px) {
-        .container { padding-left: 12px; padding-right: 12px; }
-        h4 { font-size: 1.15rem; }
-        .card-body { padding: 0.75rem !important; }
+    /* Utility tambahan untuk menghaluskan transisi */
+    .group, .group i, .group a {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 </style>
-@endsection

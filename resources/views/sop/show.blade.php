@@ -1,201 +1,145 @@
-@extends('layouts.app')
+@extends('layouts.modern')
 
 @section('content')
-<div class="container py-4 py-md-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-7">
-            
-            <div class="mb-4 text-center">
-                <!-- text-secondary -> text-body-secondary -->
-                <a href="{{ route('sop.index') }}" class="btn btn-link text-decoration-none p-0 text-body-secondary mb-3 small">
-                    <i class="bi bi-arrow-left me-1"></i>Kembali ke Repository
-                </a>
-                <!-- text-dark -> text-body -->
-                <h2 class="fw-bold text-body mb-2">{{ $sop->judul }}</h2>
-                <span class="badge bg-primary px-3 py-2 rounded-pill shadow-sm" style="font-size: 0.7rem;">
-                    {{ $sop->kategori }}
-                </span>
-            </div>
+<div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+    
+    <div class="mb-8 text-center space-y-4">
+        <a href="{{ route('sop.index') }}" class="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors group">
+            <i class="bi bi-arrow-left me-2 transition-transform group-hover:-translate-x-1"></i>
+            Kembali ke Repository
+        </a>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {{ $sop->judul }}
+        </h2>
+        
+        <span class="inline-block px-4 py-1.5 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg shadow-blue-500/20">
+            {{ $sop->kategori }}
+        </span>
+    </div>
 
-            <!-- bg-white -> bg-body-tertiary -->
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-body-tertiary">
-                <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
-                    <div class="mb-3 mb-md-0 text-center text-md-start">
-                        <h6 class="fw-bold m-0 text-body">Dokumen resmi tersedia</h6>
-                        <small class="text-body-secondary">Versi lengkap dalam format PDF</small>
-                    </div>
-                    <a href="{{ asset('dokumen-sop/' . $sop->file_pdf) }}" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" download>
-                        <i class="bi bi-file-earmark-arrow-down-fill me-1"></i> Download PDF
-                    </a>
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 mb-8 shadow-sm overflow-hidden relative group">
+        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <i class="bi bi-file-earmark-pdf text-6xl"></i>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
+            <div class="text-center md:text-left">
+                <h6 class="font-bold text-slate-900 dark:text-white">Dokumen Resmi Tersedia</h6>
+                <p class="text-sm text-slate-500">Unduh versi lengkap untuk keperluan administrasi offline.</p>
+            </div>
+            <a href="{{ asset('dokumen-sop/' . $sop->file_pdf) }}" 
+               class="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-emerald-500/20 active:scale-95" 
+               download>
+                <i class="bi bi-file-earmark-arrow-down-fill"></i> Download PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 mb-10 shadow-sm">
+        <h6 class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.2em] mb-4">Ringkasan Prosedur</h6>
+        <p class="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line text-sm md:text-base">
+            {{ $sop->deskripsi }}
+        </p>
+    </div>
+
+    <div class="space-y-6">
+        <div class="text-center">
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">--- Visualisasi Alur Kerja ---</span>
+        </div>
+
+        <div class="bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-slate-800 rounded-2xl p-4">
+            <div class="text-center mb-3">
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Legenda Pelaksana</span>
+            </div>
+            <div class="flex flex-wrap justify-center gap-3">
+                @php
+                    $actors = [
+                        ['name' => 'Kepala Lab', 'color' => 'bg-blue-500'],
+                        ['name' => 'Laboran/PLP', 'color' => 'bg-emerald-500'],
+                        ['name' => 'Dosen', 'color' => 'bg-amber-500'],
+                        ['name' => 'Asisten', 'color' => 'bg-cyan-500'],
+                        ['name' => 'Mahasiswa', 'color' => 'bg-slate-500']
+                    ];
+                @endphp
+                @foreach($actors as $actor)
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <span class="w-2 h-2 rounded-full {{ $actor['color'] }}"></span>
+                    <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300">{{ $actor['name'] }}</span>
                 </div>
-            </div>
-
-            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-body-tertiary">
-                <div class="card-body p-4 text-body">
-                    <h6 class="fw-bold text-primary mb-2 small text-uppercase tracking-wider">Ringkasan</h6>
-                    <p class="text-body-secondary mb-0" style="line-height: 1.7; white-space: pre-line; font-size: 0.95rem;">
-                        {{ $sop->deskripsi }}
-                    </p>
-                </div>
-            </div>
-
-            <div class="mb-5">
-                <h6 class="fw-bold text-body-tertiary mb-4 text-center small">--- KLIK TAHAPAN UNTUK MEMBUKA ALUR ---</h6>
-                    <!-- Bagian Legenda Warna -->
-                    <div class="card border-0 shadow-sm rounded-4 mb-4 bg-body-tertiary">
-                        <div class="card-body p-3">
-                            <div class="text-center mb-2">
-                                <small class="fw-bold text-body-secondary text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Legenda Pelaksana (Aktor)</small>
-                            </div>
-                            <div class="d-flex flex-wrap justify-content-center gap-2">
-                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
-                                    <span class="badge bg-primary me-2">&nbsp;</span>
-                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Kepala Lab</small>
-                                </div>
-                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
-                                    <span class="badge bg-success me-2">&nbsp;</span>
-                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Laboran/PLP</small>
-                                </div>
-                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
-                                    <span class="badge bg-warning me-2">&nbsp;</span>
-                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Dosen</small>
-                                </div>
-                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
-                                    <span class="badge bg-info me-2">&nbsp;</span>
-                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Asisten</small>
-                                </div>
-                                <div class="d-flex align-items-center bg-body p-2 rounded-3 border border-secondary-subtle">
-                                    <span class="badge bg-secondary me-2">&nbsp;</span>
-                                    <small class="text-body fw-medium" style="font-size: 0.75rem;">Mahasiswa</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                @php $semuaAlur = json_decode($sop->gambar_alur, true); @endphp
-
-                @if(is_array($semuaAlur))
-                    <div class="accordion border-0 shadow-none" id="accordionSOP">
-                        @foreach($semuaAlur as $index => $alur)
-                            <div class="accordion-item border-0 shadow-sm mb-3 rounded-4 overflow-hidden bg-body-tertiary">
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed fw-bold py-3 px-4 bg-body-tertiary text-body" 
-                                            type="button" 
-                                            data-bs-toggle="collapse" 
-                                            data-bs-target="#collapse{{ $index }}" 
-                                            aria-expanded="false">
-                                        <span class="text-primary me-2">{{ $index + 1 }}.</span> {{ $alur['judul'] }}
-                                    </button>
-                                </h2>
-                                <div id="collapse{{ $index }}" class="accordion-collapse collapse" data-bs-parent="#accordionSOP">
-                                    <!-- bg-white -> bg-body -->
-                                    <div class="accordion-body p-0 bg-body">
-                                        <div class="mermaid-outer border-top border-secondary-subtle">
-                                            <div class="mermaid-inner">
-                                                <div class="mermaid-container" data-code="{{ $alur['kode'] }}">
-                                                    <div class="text-body-tertiary small py-3 text-center">Memuat alur...</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-                {{-- Catatan Pengecualian BHP --}}
-            <div class="mt-4 p-3 rounded-4 border-0 shadow-sm bg-body-tertiary">
-                <div class="d-flex align-items-start">
-                    <i class="bi bi-info-circle-fill text-primary me-2 mt-1"></i>
-                    <small class="text-body-secondary" style="line-height: 1.5;">
-                        <strong>Catatan:</strong> Kerusakan pada barang habis pakai (BHP) dikecualikan dari prosedur penggantian barang rusak.
-                    </small>
-                </div>
-            </div>
+                @endforeach
             </div>
         </div>
+
+        @php $semuaAlur = json_decode($sop->gambar_alur, true); @endphp
+        @if(is_array($semuaAlur))
+        <div class="space-y-4" id="accordionSOP">
+            @foreach($semuaAlur as $index => $alur)
+            <div class="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 transition-all shadow-sm">
+                <button class="w-full flex items-center justify-between p-5 text-left group transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.02]" 
+                        onclick="toggleAccordion('{{ $index }}')">
+                    <span class="font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                        <span class="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-600/10 text-blue-600 text-xs">
+                            {{ $index + 1 }}
+                        </span>
+                        {{ $alur['judul'] }}
+                    </span>
+                    <i id="icon-{{ $index }}" class="bi bi-chevron-down text-slate-400 transition-transform duration-300"></i>
+                </button>
+                
+                <div id="collapse-{{ $index }}" class="hidden border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-black/20">
+                    <div class="overflow-x-auto p-6 flex justify-center">
+                        <div class="mermaid-container min-w-full" data-code="{{ $alur['kode'] }}">
+                            <div class="text-slate-400 text-[10px] italic py-4 text-center">Inisialisasi diagram...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+    </div>
+
+    <div class="mt-12 p-5 rounded-2xl bg-blue-50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/10 flex gap-4">
+        <i class="bi bi-info-circle-fill text-blue-500 text-lg"></i>
+        <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+            <strong>Catatan Penting:</strong> Kerusakan pada barang habis pakai (BHP) dikecualikan dari prosedur penggantian barang rusak. Pastikan Anda telah membaca dokumen PDF untuk rincian sanksi dan ketentuan lainnya.
+        </p>
     </div>
 </div>
 
+{{-- Mermaid JS & Logic --}}
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
-    // Fungsi untuk mendapatkan tema Mermaid berdasarkan atribut data-bs-theme
-    function getMermaidTheme() {
-        const theme = document.documentElement.getAttribute('data-bs-theme');
-        return (theme === 'dark') ? 'dark' : 'neutral';
-    }
+    // Inisialisasi awal
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    mermaid.initialize({ 
+        theme: isDarkMode ? 'dark' : 'neutral',
+        flowchart: { htmlLabels: true, curve: 'stepAfter' }
+    });
 
-   mermaid.initialize({ 
-    // ... setting lainnya
-    flowchart: { 
-        htmlLabels: true, 
-        curve: 'stepAfter' // Pastikan ini 'stepAfter' untuk mode siku
-    }
-});
+    // Fungsi Toggle Accordion Manual (karena kita lepas dari bootstrap.js)
+    function toggleAccordion(index) {
+        const content = document.getElementById(`collapse-${index}`);
+        const icon = document.getElementById(`icon-${index}`);
+        const container = content.querySelector('.mermaid-container');
+        
+        content.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const accordionSOP = document.getElementById('accordionSOP');
-
-        if (accordionSOP) {
-            accordionSOP.addEventListener('shown.bs.collapse', function (event) {
-                const target = event.target;
-                const container = target.querySelector('.mermaid-container');
-                const code = container.getAttribute('data-code');
-
-                if (container && !container.classList.contains('rendered')) {
-                    // Reset konten untuk render ulang dengan tema yang benar
-                    container.innerHTML = `<div class="mermaid">${code}</div>`;
-                    const mermaidDiv = container.querySelector('.mermaid');
-                    
-                    mermaid.init(undefined, mermaidDiv).then(() => {
-                        container.classList.add('rendered');
-                    });
-                }
+        if (!content.classList.contains('hidden') && !container.classList.contains('rendered')) {
+            const code = container.getAttribute('data-code');
+            container.innerHTML = `<div class="mermaid">${code}</div>`;
+            mermaid.init(undefined, container.querySelector('.mermaid')).then(() => {
+                container.classList.add('rendered');
             });
         }
-    });
-
-    // Listener tambahan jika user mengganti tema saat accordion sudah terbuka
-    window.addEventListener('click', function(e) {
-        if (e.target.id === 'bd-theme' || e.target.closest('#bd-theme')) {
-            // Beri sedikit jeda agar atribut data-bs-theme berubah dulu
-            setTimeout(() => {
-                location.reload(); // Cara paling aman agar Mermaid me-render ulang seluruh tema
-            }, 100);
-        }
-    });
+    }
 </script>
 
 <style>
-    /* Hapus inline background-color pada body agar ikut config global app.blade.php */
-    
-    .accordion-item { border-radius: 12px !important; }
-    .accordion-button { border-radius: 12px !important; font-size: 0.9rem; border: none; }
-    
-    /* Adaptasi Accordion Aktif */
-    .accordion-button:not(.collapsed) { 
-        background-color: var(--bs-body-bg); 
-        color: var(--bs-primary); 
-        box-shadow: none; 
-        border-bottom: 1px solid var(--bs-border-color); 
-    }
-    .accordion-button:focus { box-shadow: none; }
-
-    /* Mermaid Layout Adaptif */
-    .mermaid-outer { 
-        width: 100%; 
-        overflow-x: auto; 
-        background: transparent; 
-        -webkit-overflow-scrolling: touch; 
-    }
-    .mermaid-inner { display: inline-flex; min-width: 100%; justify-content: center; padding: 25px 15px; }
-    .mermaid { width: 100%; max-width: 700px; margin: 0 auto; }
-    
-    /* Scrollbar Adaptif */
-    .mermaid-outer::-webkit-scrollbar { height: 4px; }
-    .mermaid-outer::-webkit-scrollbar-thumb { 
-        background: var(--bs-secondary-bg); 
-        border-radius: 10px; 
-    }
+    /* Styling scrollbar tipis untuk diagram lebar */
+    .overflow-x-auto::-webkit-scrollbar { height: 4px; }
+    .overflow-x-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .dark .overflow-x-auto::-webkit-scrollbar-thumb { background: #334155; }
 </style>
 @endsection
