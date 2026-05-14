@@ -27,7 +27,7 @@
         </div>
         @endif
 
-        <form action="{{ route('sop.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8" id="mainSopForm">
+        <form action="{{ route('admin.sop.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8" id="mainSopForm">
             @csrf
 
             {{-- 1. Informasi Dasar --}}

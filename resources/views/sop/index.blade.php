@@ -17,7 +17,7 @@
         </div>
 
         @if(Auth::check() && Auth::user()->is_admin)
-            <a href="{{ route('sop.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 group">
+            <a href="{{ route('admin.sop.create') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 group">
                 <i class="bi bi-plus-lg transition-transform group-hover:rotate-90"></i> 
                 Tambah SOP Baru
             </a>
@@ -59,10 +59,10 @@
                 {{-- ADMIN CONTROLS --}}
                 @if(Auth::check() && Auth::user()->is_admin)
                 <div class="pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-end gap-2">
-                    <a href="{{ route('sop.edit', $sop->id) }}" class="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors" title="Edit SOP">
+                    <a href="{{ route('admin.sop.edit', $sop->id) }}" class="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors" title="Edit SOP">
                         <i class="bi bi-pencil-square"></i>
                     </a>
-                    <form action="{{ route('sop.destroy', $sop->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus SOP ini?')">
+                    <form action="{{ route('admin.sop.destroy', $sop->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus SOP ini?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Hapus SOP">

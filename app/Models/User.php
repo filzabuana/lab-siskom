@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'role',
         'google_id', // Ditambahkan untuk Socialite
         'avatar',    // Ditambahkan untuk Socialite
     ];

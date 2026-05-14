@@ -102,6 +102,30 @@
     </style>
 </head>
 <body  class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
+@if(session()->has('impersonate'))
+    <div class="sticky top-0 z-[9999] bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 shadow-lg">
+        <div class="max-w-7xl mx-auto py-2 px-4 flex items-center justify-between">
+            <div class="flex items-center gap-3 text-white">
+                <div class="animate-pulse bg-white/20 p-1 rounded-full">
+                    <i class="bi bi-incognito text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] leading-none">Mode Impersonasi Aktif</span>
+                    <span class="text-[9px] font-medium opacity-90">Melihat sistem sebagai: <strong>{{ Auth::user()->name }} ({{ Auth::user()->role }})</strong></span>
+                </div>
+            </div>
+            
+            <a href="{{ route('admin.stop-impersonate') }}" 
+               class="bg-white/10 hover:bg-white text-white hover:text-amber-600 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/20 transition-all active:scale-95 flex items-center gap-2">
+                <i class="bi bi-door-open-fill"></i> Keluar Mode Simulasi
+            </a>
+        </div>
+    </div>
+    
+    {{-- Efek Border di sekeliling layar agar makin jelas --}}
+    <div class="fixed inset-0 border-[6px] border-amber-500/30 pointer-events-none z-[9998]"></div>
+@endif
+
 
 <!-- NAVBAR -->
 <nav id="mainNavbar" class="sticky top-0 z-50 bg-white/90 dark:bg-railway-dark/90 border-b border-slate-200 dark:border-railway-border nav-blur py-3 px-4 transition-colors duration-300">

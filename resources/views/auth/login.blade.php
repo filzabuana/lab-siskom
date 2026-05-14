@@ -35,12 +35,15 @@
                     <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">Selamat Datang</h2>
                     <p class="text-slate-500 dark:text-slate-400 font-medium">Masuk dengan akun institusi Anda.</p>
                 </div>
-                <div class="mb-8">
+
+                {{-- REVISI TOTAL: Tombol Google yang Rapi & Proporsional --}}
+                <div class="mb-6">
                     <a href="{{ route('google.login') }}" 
-                    class="w-full flex items-center justify-center gap-3 py-4 bg-white/50 dark:bg-railway-dark/50 backdrop-blur-md border border-slate-200 dark:border-railway-border rounded-2xl text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest transition-all hover:bg-white dark:hover:bg-railway-card hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 active:scale-[0.98] group">
+                    class="group relative w-full flex items-center justify-center h-14 bg-white/10 dark:bg-white/[0.03] backdrop-blur-md border border-white/20 dark:border-railway-border rounded-2xl transition-all hover:bg-white/20 dark:hover:bg-railway-card hover:shadow-lg active:scale-[0.98]">
                         
-                        <div class="bg-white p-1.5 rounded-lg shadow-sm group-hover:shadow-md transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+                        {{-- Ikon: Dibuat Absolute di Kiri agar tidak mendorong teks --}}
+                        <div class="absolute left-2 flex items-center justify-center w-10 h-10 bg-white rounded-xl shadow-sm group-hover:scale-105 transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
                                 <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
                                 <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
                                 <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
@@ -48,16 +51,19 @@
                             </svg>
                         </div>
                         
-                        <span>Masuk dengan Akun Google</span>
+                        {{-- Teks: Font size disesuaikan agar pas satu baris --}}
+                        <span class="text-[13px] font-bold text-slate-700 dark:text-slate-200 tracking-normal pl-6">
+                            Masuk dengan Google
+                        </span>
                     </a>
 
-                    {{-- Divider: Atau Masuk dengan Email --}}
-                    <div class="relative my-8">
+                    {{-- Divider yang lebih tipis agar clean --}}
+                    <div class="relative my-6">
                         <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-slate-200 dark:border-railway-border"></div>
+                            <div class="w-full border-t border-white/10 dark:border-white/5"></div>
                         </div>
-                        <div class="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black">
-                            <span class="bg-white dark:bg-[#1a1c2e] px-4 text-slate-400 dark:text-slate-500">Atau</span>
+                        <div class="relative flex justify-center">
+                            <span class="bg-[#0f172a] px-4 text-[10px] uppercase tracking-[0.3em] font-medium text-slate-500">Atau</span>
                         </div>
                     </div>
                 </div>
@@ -111,7 +117,7 @@
                     </div>
 
                     <button type="submit" class="w-full py-4 bg-blue-600 dark:bg-railway-accent hover:bg-blue-700 text-white rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-500/25 transition-all transform hover:-translate-y-1 active:scale-95">
-                        Masuk Sekarang <i class="bi bi-arrow-right-short ms-2 text-xl"></i>
+                        Masuk <i class="bi bi-arrow-right-short ms-2 text-xl"></i>
                     </button>
                 </form>
             </div>
@@ -120,7 +126,6 @@
 </div>
 
 <script>
-    // Hanya sisakan script toggle password karena canvas sudah di-handle modern.blade.php
     document.addEventListener('DOMContentLoaded', () => {
         const toggleButton = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
@@ -136,6 +141,5 @@
         }
     });
 </script>
-
 
 @endsection
