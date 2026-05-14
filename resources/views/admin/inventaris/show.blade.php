@@ -1,6 +1,7 @@
 @extends('layouts.modern')
 
 @section('content')
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-10">
 {{-- Ganti bagian Top Navigation & Actions dengan ini --}}
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
     <a href="{{ $isKatalog ? route('katalog.index') : route('admin.inventaris.index') }}" 

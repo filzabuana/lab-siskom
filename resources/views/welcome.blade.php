@@ -53,7 +53,6 @@
     }
 </style>
 <!-- Background Star Canvas -->
-<canvas id="starCanvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none bg-slate-50 dark:bg-[#0a0f1c]"></canvas>
 <div class="railway-grid space-y-20 py-10 px-4 sm:px-6 lg:px-8 min-h-screen">
     
    <!-- HERO SECTION -->
@@ -750,86 +749,6 @@
             });
         }
     });
-</script>
-
-<script>
-    const canvas = document.getElementById('starCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    
-    // Deteksi tema untuk menyesuaikan warna titik
-    const isDark = document.documentElement.classList.contains('dark');
-
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        init();
-    }
-
-    function init() {
-        particles = [];
-        // Mengurangi jumlah partikel di mobile agar tidak berat
-        const density = window.innerWidth < 768 ? 20000 : 12000;
-        const count = Math.floor((canvas.width * canvas.height) / density); 
-        
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 1.8+ 0.6,
-                vx: (Math.random() - 0.5) * 0.3, // Sedikit lebih lambat agar elegan
-                vy: (Math.random() - 0.5) * 0.3,
-                opacity: Math.random(),
-                blinkSpeed: Math.random() * 0.02 + 0.005
-            });
-        }
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Sesuaikan warna titik berdasarkan tema
-        const dotColor = document.documentElement.classList.contains('dark') ? '255, 255, 255' : '15, 23, 42';
-        const lineColor = '37, 99, 235'; // Blue-600
-
-        particles.forEach((p, i) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.opacity += p.blinkSpeed;
-            if (p.opacity > 1 || p.opacity < 0.1) p.blinkSpeed *= -1;
-            
-            // Loop balik partikel jika keluar layar
-            if (p.x < 0) p.x = canvas.width;
-            if (p.x > canvas.width) p.x = 0;
-            if (p.y < 0) p.y = canvas.height;
-            if (p.y > canvas.height) p.y = 0;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${dotColor}, ${Math.abs(p.opacity) * 0.4})`;
-            ctx.fill();
-
-            for (let j = i + 1; j < particles.length; j++) {
-                const p2 = particles[j];
-                const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                if (dist < 130) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(${lineColor}, ${0.18 * (1 - dist / 130)})`;
-                    ctx.lineWidth = 0.6;
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                }
-            }
-        });
-        requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('load', () => {
-        resize();
-        animate();
-    });
-    window.addEventListener('resize', resize);
 </script>
 
 <script>

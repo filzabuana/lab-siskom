@@ -101,7 +101,7 @@
     }
     </style>
 </head>
-<body id="app" class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
+<body  class="bg-white dark:bg-railway-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
 
 <!-- NAVBAR -->
 <nav id="mainNavbar" class="sticky top-0 z-50 bg-white/90 dark:bg-railway-dark/90 border-b border-slate-200 dark:border-railway-border nav-blur py-3 px-4 transition-colors duration-300">
@@ -217,10 +217,97 @@
         @endauth
     </div>
 </nav>
+@if(Route::is('welcome') || Route::is('about') || Route::is('sop.index') || Route::is('bebas-lab.*'))
+<canvas id="starCanvas" class="fixed inset-0 -z-10 pointer-events-none bg-transparent"></canvas>
 
+<script>
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    
+    // Deteksi tema untuk menyesuaikan warna titik
+    const isDark = document.documentElement.classList.contains('dark');
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        init();
+    }
+
+    function init() {
+        particles = [];
+        // Mengurangi jumlah partikel di mobile agar tidak berat
+        const density = window.innerWidth < 768 ? 20000 : 12000;
+        const count = Math.floor((canvas.width * canvas.height) / density); 
+        
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.8+ 0.6,
+                vx: (Math.random() - 0.5) * 0.3, // Sedikit lebih lambat agar elegan
+                vy: (Math.random() - 0.5) * 0.3,
+                opacity: Math.random(),
+                blinkSpeed: Math.random() * 0.02 + 0.005
+            });
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Sesuaikan warna titik berdasarkan tema
+        const dotColor = document.documentElement.classList.contains('dark') ? '255, 255, 255' : '15, 23, 42';
+        const lineColor = '37, 99, 235'; // Blue-600
+
+        particles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.opacity += p.blinkSpeed;
+            if (p.opacity > 1 || p.opacity < 0.1) p.blinkSpeed *= -1;
+            
+            // Loop balik partikel jika keluar layar
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${dotColor}, ${Math.abs(p.opacity) * 0.4})`;
+            ctx.fill();
+
+            for (let j = i + 1; j < particles.length; j++) {
+                const p2 = particles[j];
+                const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (dist < 130) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(${lineColor}, ${0.18 * (1 - dist / 130)})`;
+                    ctx.lineWidth = 0.6;
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+        });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('load', () => {
+        resize();
+        animate();
+    });
+    window.addEventListener('resize', resize);
+</script>
+
+
+@endif
+    
+    <div id="app" class="min-h-screen flex flex-col bg-transparent">
     <main class="container mx-auto pt-4 md:pt-6 pb-10 px-4 flex-grow">
         @yield('content')
     </main>
+    </div>
 
     <footer class="bg-slate-50 dark:bg-railway-dark py-12 border-t border-slate-200 dark:border-railway-border mt-auto">
         <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-sm">
@@ -296,5 +383,7 @@
         document.getElementById('mobileMenu').classList.toggle('hidden'); 
     }
 </script>
+
+
 </body>
 </html>

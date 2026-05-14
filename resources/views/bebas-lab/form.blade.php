@@ -1,7 +1,7 @@
 @extends('layouts.modern')
 
 @section('content')
-<div class="min-h-screen bg-slate-50 dark:bg-[#0f172a] py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+<div class="min-h-screen bg-transparent py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
     <div class="max-w-2xl mx-auto">
         
         <div class="text-center mb-10">

@@ -15,4 +15,7 @@ export default defineConfig({
             'vue': 'vue/dist/vue.esm-bundler.js', 
         },
     },
+    optimizeDeps: {
+        exclude: ['@vue-flow/core', '@vue-flow/background', '@vue-flow/controls']
+    }
 });

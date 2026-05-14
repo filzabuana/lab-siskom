@@ -16,7 +16,7 @@
                 <span class="text-blue-600 dark:text-blue-400 font-mono text-xs tracking-[0.3em] uppercase font-bold">System.Assets.Inventory</span>
             </div>
             <h2 class="text-5xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 uppercase italic leading-none">
-                Katalog <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Alat</span>
+                Katalog <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">Alat &nbsp;</span>
             </h2>
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <p class="text-slate-500 dark:text-slate-400 font-medium max-w-xl uppercase text-[10px] tracking-widest leading-relaxed">

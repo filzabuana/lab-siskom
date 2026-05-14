@@ -2,7 +2,6 @@
 
 @section('content')
 {{-- Container utama dibuat transparan agar canvas di layout tembus --}}
-<canvas id="starCanvas" class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none bg-slate-50 dark:bg-[#0a0f1c]"></canvas>
 <div class="relative min-h-[80vh] flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 font-sans antialiased overflow-hidden bg-transparent">
     
     <div class="max-w-5xl w-full z-20">
