@@ -35,6 +35,32 @@
                     <h2 class="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-2">Selamat Datang</h2>
                     <p class="text-slate-500 dark:text-slate-400 font-medium">Masuk dengan akun institusi Anda.</p>
                 </div>
+                <div class="mb-8">
+                    <a href="{{ route('google.login') }}" 
+                    class="w-full flex items-center justify-center gap-3 py-4 bg-white/50 dark:bg-railway-dark/50 backdrop-blur-md border border-slate-200 dark:border-railway-border rounded-2xl text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest transition-all hover:bg-white dark:hover:bg-railway-card hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 active:scale-[0.98] group">
+                        
+                        <div class="bg-white p-1.5 rounded-lg shadow-sm group-hover:shadow-md transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 48 48">
+                                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+                                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+                                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+                                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+                            </svg>
+                        </div>
+                        
+                        <span>Masuk dengan Akun Google</span>
+                    </a>
+
+                    {{-- Divider: Atau Masuk dengan Email --}}
+                    <div class="relative my-8">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-slate-200 dark:border-railway-border"></div>
+                        </div>
+                        <div class="relative flex justify-center text-[10px] uppercase tracking-[0.3em] font-black">
+                            <span class="bg-white dark:bg-[#1a1c2e] px-4 text-slate-400 dark:text-slate-500">Atau</span>
+                        </div>
+                    </div>
+                </div>
 
                 @if (session('status'))
                     <div class="mb-6 p-4 bg-emerald-50 dark:bg-emerald-500/10 border-l-4 border-emerald-500 rounded-r-xl text-emerald-700 dark:text-emerald-400 text-sm font-bold">
@@ -111,85 +137,5 @@
     });
 </script>
 
-
-<script>
-    const canvas = document.getElementById('starCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    
-    // Deteksi tema untuk menyesuaikan warna titik
-    const isDark = document.documentElement.classList.contains('dark');
-
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        init();
-    }
-
-    function init() {
-        particles = [];
-        // Mengurangi jumlah partikel di mobile agar tidak berat
-        const density = window.innerWidth < 768 ? 20000 : 12000;
-        const count = Math.floor((canvas.width * canvas.height) / density); 
-        
-        for (let i = 0; i < count; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 1.5 + 0.5,
-                vx: (Math.random() - 0.5) * 0.3, // Sedikit lebih lambat agar elegan
-                vy: (Math.random() - 0.5) * 0.3,
-                opacity: Math.random(),
-                blinkSpeed: Math.random() * 0.02 + 0.005
-            });
-        }
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Sesuaikan warna titik berdasarkan tema
-        const dotColor = document.documentElement.classList.contains('dark') ? '255, 255, 255' : '15, 23, 42';
-        const lineColor = '37, 99, 235'; // Blue-600
-
-        particles.forEach((p, i) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.opacity += p.blinkSpeed;
-            if (p.opacity > 1 || p.opacity < 0.1) p.blinkSpeed *= -1;
-            
-            // Loop balik partikel jika keluar layar
-            if (p.x < 0) p.x = canvas.width;
-            if (p.x > canvas.width) p.x = 0;
-            if (p.y < 0) p.y = canvas.height;
-            if (p.y > canvas.height) p.y = 0;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${dotColor}, ${Math.abs(p.opacity) * 0.3})`;
-            ctx.fill();
-
-            for (let j = i + 1; j < particles.length; j++) {
-                const p2 = particles[j];
-                const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                if (dist < 130) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = `rgba(${lineColor}, ${0.1 * (1 - dist / 130)})`;
-                    ctx.lineWidth = 0.4;
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                }
-            }
-        });
-        requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('load', () => {
-        resize();
-        animate();
-    });
-    window.addEventListener('resize', resize);
-</script>
 
 @endsection

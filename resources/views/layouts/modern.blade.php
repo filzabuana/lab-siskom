@@ -217,7 +217,7 @@
         @endauth
     </div>
 </nav>
-@if(Route::is('welcome') || Route::is('about') || Route::is('sop.index') || Route::is('bebas-lab.*'))
+@if(Route::is('welcome') || Route::is('about') || Route::is('sop.index') || Route::is('bebas-lab.*') || Route::is('login')) 
 <canvas id="starCanvas" class="fixed inset-0 -z-10 pointer-events-none bg-transparent"></canvas>
 
 <script>

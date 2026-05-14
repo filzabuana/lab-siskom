@@ -9,7 +9,16 @@ use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController; // Pastikan ini diimport
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\GoogleController;
 
+/*
+|--------------------------------------------------------------------------
+| 0. LOGIN GOOGLE
+|--------------------------------------------------------------------------
+*/
+
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 /*
 |--------------------------------------------------------------------------
 | 1. HALAMAN PUBLIK
