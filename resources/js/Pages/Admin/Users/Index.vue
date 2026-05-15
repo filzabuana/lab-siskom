@@ -17,7 +17,7 @@
                 <div class="flex items-center gap-3">
                     <button 
                         v-if="auth.isAdmin"
-                        @click="router.get(route('admin.users.create'))"
+                        @click="navigateTo('admin.users.create')"
                         class="bg-railway-accent hover:bg-blue-600 text-white h-[56px] rounded-2xl font-black italic tracking-widest text-[10px] px-8 shadow-xl shadow-blue-600/20 transition-all flex items-center gap-2"
                     >
                         <i class="mdi mdi-account-plus text-base"></i>
@@ -87,7 +87,7 @@
 
                             <td class="px-8 py-5 text-right">
                                 <button 
-                                    @click="router.get(route('admin.users.show', user.id))" 
+                                    @click="navigateTo('admin.users.show', user.id)" 
                                     class="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all inline-flex items-center justify-center"
                                     title="Manage Authority"
                                 >
@@ -135,7 +135,7 @@
                         </div>
 
                         <button 
-                            @click="router.get(route('admin.users.show', user.id))"
+                            @click="navigateTo('admin.users.show', user.id)"
                             class="bg-slate-900 text-white dark:bg-white dark:text-zinc-950 rounded-2xl font-black italic tracking-widest text-[10px] px-6 py-3 transition-all active:scale-95 shadow-lg"
                         >MANAGE USER</button>
                     </div>
@@ -156,6 +156,15 @@ const props = defineProps({
 });
 
 const auth = useAuthStore();
+
+// Fungsi Navigasi Manual (Solusi klik mobile)
+const navigateTo = (routeName, id = null) => {
+    if (id) {
+        router.visit(route(routeName, id));
+    } else {
+        router.visit(route(routeName));
+    }
+};
 
 const getAvatarBg = (user) => {
     if (user.is_admin) return 'rgba(245, 158, 11, 0.1)'; 

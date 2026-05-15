@@ -30,10 +30,8 @@ class UserController extends Controller
                     'email'             => $user->email,
                     'avatar'            => $user->avatar,
                     'is_admin'          => (bool) $user->is_admin,
-                    // Sesuai dengan v-for="role in user.roles_list" di Vue
                     'roles_list'        => $user->getRoleNames(), 
                     'peminjamans_count' => $user->peminjamans_count,
-                    // Sesuai dengan v-if="user.bebas_lab" di Vue
                     'bebas_lab'         => (bool) $user->bebas_lab_status, 
                 ];
             });
@@ -44,38 +42,17 @@ class UserController extends Controller
     }
 
     /**
-     * SHOW: Detail otoritas dan riwayat peminjaman user.
+     * CREATE: Menampilkan form registrasi user baru (SOLUSI ERROR 500)
      */
-    public function show(User $user)
+    public function create()
     {
-        // Load count peminjaman disetujui
-        $user->loadCount(['peminjamans' => function($query) {
-            $query->where('status', 'disetujui');
-        }]);
-
-        $riwayat = Peminjaman::with('inventaris') 
-            ->where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return Inertia::render('Admin/Users/Show', [
-            'user' => [
-                'id'                => $user->id,
-                'name'              => $user->name,
-                'email'             => $user->email,
-                'avatar'            => $user->avatar,
-                'is_admin'          => (bool) $user->is_admin,
-                'roles_list'        => $user->getRoleNames(),
-                'peminjamans_count' => $user->peminjamans_count,
-                'bebas_lab'         => (bool) $user->bebas_lab_status,
-            ],
-            'riwayat'        => $riwayat,
-            'availableRoles' => Role::all()->pluck('name') 
+        return Inertia::render('Admin/Users/Create', [
+            'roles' => Role::all()->pluck('name')
         ]);
     }
 
     /**
-     * STORE: Mendaftarkan user baru
+     * STORE: Mendaftarkan user baru ke database
      */
     public function store(Request $request)
     {
@@ -102,7 +79,37 @@ class UserController extends Controller
     }
 
     /**
-     * UPDATE ROLE: Update otoritas user (dipanggil dari Show.vue)
+     * SHOW: Detail otoritas dan riwayat peminjaman user.
+     */
+    public function show(User $user)
+    {
+        $user->loadCount(['peminjamans' => function($query) {
+            $query->where('status', 'disetujui');
+        }]);
+
+        $riwayat = Peminjaman::with('inventaris') 
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('Admin/Users/Show', [
+            'user' => [
+                'id'                => $user->id,
+                'name'              => $user->name,
+                'email'             => $user->email,
+                'avatar'            => $user->avatar,
+                'is_admin'          => (bool) $user->is_admin,
+                'roles_list'        => $user->getRoleNames(),
+                'peminjamans_count' => $user->peminjamans_count,
+                'bebas_lab'         => (bool) $user->bebas_lab_status,
+            ],
+            'riwayat'        => $riwayat,
+            'availableRoles' => Role::all()->pluck('name') 
+        ]);
+    }
+
+    /**
+     * UPDATE ROLE: Update otoritas user
      */
     public function updateRole(Request $request, User $user)
     {
@@ -110,19 +117,17 @@ class UserController extends Controller
             'roles' => 'array',
         ]);
 
-        // Update status superadmin di tabel users
         $user->update([
             'is_admin' => $request->is_admin ? 1 : 0,
         ]);
 
-        // Sinkronisasi role Spatie
         $user->syncRoles($request->roles ?? []);
 
         return back()->with('message', 'Otoritas ' . $user->name . ' berhasil diperbarui!');
     }
 
     /**
-     * IMPERSONATION
+     * IMPERSONATION: Bertindak sebagai user lain
      */
     public function impersonate(User $user)
     {
@@ -138,7 +143,7 @@ class UserController extends Controller
     }
 
     /**
-     * STOP IMPERSONATE
+     * STOP IMPERSONATE: Kembali ke akun Admin
      */
     public function stopImpersonate()
     {
@@ -147,8 +152,9 @@ class UserController extends Controller
             $admin = User::find($adminId);
             
             if ($admin) {
-                Auth::login($admin);
                 session()->forget('impersonate');
+                Auth::login($admin);
+                session()->save(); 
                 
                 return redirect()->route('admin.users.index')
                     ->with('message', 'Kembali sebagai: ' . $admin->name);

@@ -27,9 +27,17 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user(), //
+                'user' => $request->user() ? [
+                    'id'       => $request->user()->id,
+                    'name'     => $request->user()->name,
+                    'email'    => $request->user()->email,
+                    'nim'      => $request->user()->nim, // Penting untuk isMahasiswa
+                    'is_admin' => $request->user()->is_admin,
+                    // Ambil nama roles-nya saja untuk dicocokkan dengan getter Pinia
+                    'roles'    => $request->user()->getRoleNames(), 
+                ] : null,
+                'impersonator' => $request->session()->has('impersonate'),
             ],
-            // Pastikan ini tidak menyebabkan error null
             'flash' => [
                 'message' => fn () => $request->session()->get('message'),
             ],

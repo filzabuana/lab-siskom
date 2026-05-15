@@ -170,6 +170,11 @@ const updateOtoritas = () => {
 };
 
 const handleImpersonate = () => {
-    form.post(route('admin.users.impersonate', props.user.id));
+    form.post(route('admin.users.impersonate', props.user.id), {
+        onSuccess: () => {
+            // Hard reload ke dashboard setelah impersonasi berhasil
+            window.location.href = route('dashboard');
+        }
+    });
 };
 </script>

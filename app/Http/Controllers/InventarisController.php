@@ -4,28 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Inventaris;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\File;
 
 class InventarisController extends Controller
 {
     /**
-     * Menampilkan daftar inventaris dengan filter dan pagination.
-     * Terintegrasi dengan filter Kategori, Ruangan, dan Lokasi.
+     * Menampilkan daftar inventaris untuk Admin (Inertia)
      */
     public function index(Request $request)
     {
-        // 1. Ambil data unik untuk mengisi pilihan Dropdown di View
-        // Menggunakan distinct() agar pilihan tidak duplikat
         $listKategori = Inventaris::distinct()->whereNotNull('kategori')->pluck('kategori');
         $listRuangan = Inventaris::distinct()->whereNotNull('ruangan')->pluck('ruangan');
         $listLokasi = Inventaris::distinct()->whereNotNull('catatan_lokasi')->pluck('catatan_lokasi');
 
-        // 2. Tentukan limit data per halaman (default 10)
-        $limit = $request->get('per_page', 10);
+        $query = Inventaris::with('peminjaman');
 
-        // 3. Inisialisasi Query
-        $query = Inventaris::query();
-
-        // 4. Filter Pencarian (Nama Aset atau Kode Barang)
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('nama_aset', 'like', '%' . $request->search . '%')
@@ -33,39 +27,46 @@ class InventarisController extends Controller
             });
         }
 
-        // 5. Filter Kategori
-        if ($request->filled('kategori')) {
-            $query->where('kategori', $request->kategori);
-        }
+        if ($request->filled('kategori')) $query->where('kategori', $request->kategori);
+        if ($request->filled('ruangan')) $query->where('ruangan', $request->ruangan);
+        if ($request->filled('lokasi')) $query->where('catatan_lokasi', $request->lokasi);
 
-        // 6. Filter Ruangan
-        if ($request->filled('ruangan')) {
-            $query->where('ruangan', $request->ruangan);
-        }
+        $semuaInventaris = $query->latest()
+            ->paginate($request->get('per_page', 10))
+            ->withQueryString()
+            ->through(function ($item) {
+                $stokKeluar = $item->peminjaman
+                    ->whereIn('status', ['dipinjam', 'sedang dipinjam', 'disetujui'])
+                    ->sum('jumlah_pinjam');
 
-        // 7. Filter Lokasi Spesifik (Berdasarkan catatan_lokasi)
-        if ($request->filled('lokasi')) {
-            $query->where('catatan_lokasi', $request->lokasi);
-        }
+                return [
+                    'id'              => $item->id,
+                    'kode_barang'     => $item->kode_barang,
+                    'nama_aset'       => $item->nama_aset,
+                    'kategori'        => $item->kategori,
+                    'ruangan'         => $item->ruangan,
+                    'jumlah_stok'     => $item->jumlah_stok,
+                    'jumlah_rusak'    => $item->jumlah_rusak,
+                    'sisa_stok'       => max(0, $item->jumlah_stok - $stokKeluar), 
+                    'kondisi'         => $item->kondisi,
+                    'foto_barang'     => $item->foto_barang,
+                    'tipe_peminjaman' => $item->tipe_peminjaman,
+                    'catatan_lokasi'  => $item->catatan_lokasi,
+                ];
+            });
 
-        // 8. Eksekusi dengan Pagination & Urutkan Terbaru
-        $semuaInventaris = $query->latest()->paginate($limit);
-
-        // Menjaga agar parameter filter tetap ada di URL saat pindah halaman pagination
-        $semuaInventaris->appends($request->all());
-
-        // 9. Kirim semua data ke view
-        return view('admin.inventaris.index', compact(
-            'semuaInventaris', 
-            'listKategori', 
-            'listRuangan', 
-            'listLokasi'
-        ));
+        return Inertia::render('Admin/Inventaris/Index', [
+            'semuaInventaris' => $semuaInventaris,
+            'filters'         => $request->only(['search', 'kategori', 'ruangan', 'lokasi']),
+            'listKategori'    => $listKategori,
+            'listRuangan'     => $listRuangan,
+            'listLokasi'      => $listLokasi
+        ]);
     }
 
     public function create()
     {
-        return view('admin.inventaris.create');
+        return Inertia::render('Admin/Inventaris/Create');
     }
 
     public function store(Request $request)
@@ -81,42 +82,53 @@ class InventarisController extends Controller
             'jumlah_rusak'    => 'required|integer|min:0',
             'kondisi'         => 'required',
             'tipe_peminjaman' => 'required',
-            'deskripsi'       => 'nullable|string',
         ]);
 
-        $data = $request->all();
+        $data = $request->except('foto_barang');
 
         if ($request->hasFile('foto_barang')) {
             $file = $request->file('foto_barang');
             $namaFile = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-            $tujuanFolder = public_path('storage/inventaris');
-            
-            if (!file_exists($tujuanFolder)) {
-                mkdir($tujuanFolder, 0755, true);
-            }
-            
-            $file->move($tujuanFolder, $namaFile);
+            $file->move(public_path('storage/inventaris'), $namaFile);
             $data['foto_barang'] = $namaFile;
         }
 
         Inventaris::create($data);
 
         return redirect()->route('admin.inventaris.index')
-                         ->with('success', 'Aset baru berhasil didaftarkan dengan data lengkap.');
+                         ->with('message', 'Aset baru berhasil didaftarkan.');
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $item = Inventaris::findOrFail($id);
-        $isKatalog = request()->is('katalog*');
+        $item = Inventaris::with('peminjaman')->findOrFail($id);
 
-        return view('admin.inventaris.show', compact('item', 'isKatalog'));
+        $totalDipinjam = (int) $item->peminjaman
+            ->whereIn('status', ['dipinjam', 'sedang dipinjam', 'disetujui'])
+            ->sum('jumlah_pinjam');
+
+        $stokTersedia = max(0, $item->jumlah_stok - $totalDipinjam);
+        $isKatalog = $request->routeIs('katalog.*');
+
+        if ($request->wantsJson() || $request->header('X-Inertia')) {
+            return Inertia::render('Admin/Inventaris/Show', [
+                'item'          => $item,
+                'stok_tersedia' => $stokTersedia,
+                'totalDipinjam' => $totalDipinjam,
+                'isKatalog'     => $isKatalog
+            ]);
+        }
+
+        return view('admin.inventaris.show', compact('item', 'isKatalog', 'stokTersedia', 'totalDipinjam'));
     }
 
     public function edit($id)
     {
-        $item = Inventaris::findOrFail($id);
-        return view('admin.inventaris.edit', compact('item'));
+        // PENTING: Menggunakan key 'inventaris' agar sesuai dengan props di Edit.vue
+        $inventaris = Inventaris::findOrFail($id);
+        return Inertia::render('Admin/Inventaris/Edit', [
+            'inventaris' => $inventaris
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -124,21 +136,26 @@ class InventarisController extends Controller
         $item = Inventaris::findOrFail($id);
 
         $request->validate([
+            // Validasi unique kode_barang diabaikan untuk ID yang sedang diedit
+            'kode_barang'     => 'required|unique:inventaris,kode_barang,' . $id,
             'nama_aset'       => 'required|string|max:255',
             'foto_barang'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'tahun_perolehan' => 'required|digits:4',
             'jumlah_stok'     => 'required|integer|min:0',
             'jumlah_rusak'    => 'required|integer|min:0',
             'kondisi'         => 'required',
-            'deskripsi'       => 'nullable|string',
+            'kategori'        => 'required',
+            'ruangan'         => 'required',
+            'tipe_peminjaman' => 'required',
         ]);
 
-        $data = $request->all();
+        // Buang foto_barang dan _method agar tidak masuk ke query update
+        $data = $request->except(['foto_barang', '_method']);
 
         if ($request->hasFile('foto_barang')) {
-            // Hapus foto lama jika ada
-            if ($item->foto_barang && file_exists(public_path('storage/inventaris/' . $item->foto_barang))) {
-                unlink(public_path('storage/inventaris/' . $item->foto_barang));
+            // Hapus file lama jika ada
+            if ($item->foto_barang && File::exists(public_path('storage/inventaris/' . $item->foto_barang))) {
+                File::delete(public_path('storage/inventaris/' . $item->foto_barang));
             }
             
             $file = $request->file('foto_barang');
@@ -149,28 +166,38 @@ class InventarisController extends Controller
 
         $item->update($data);
 
-        return redirect()->route('admin.inventaris.index')->with('success', 'Data aset berhasil diperbarui.');
+        return redirect()->route('admin.inventaris.index')->with('message', 'Data aset berhasil diperbarui.');
     }
 
     public function destroy($id)
     {
         $item = Inventaris::findOrFail($id);
 
-        if ($item->foto_barang && file_exists(public_path('storage/inventaris/' . $item->foto_barang))) {
-            unlink(public_path('storage/inventaris/' . $item->foto_barang));
+        if ($item->foto_barang && File::exists(public_path('storage/inventaris/' . $item->foto_barang))) {
+            File::delete(public_path('storage/inventaris/' . $item->foto_barang));
         }
 
         $item->delete();
 
         return redirect()->route('admin.inventaris.index')
-                         ->with('success', 'Aset berhasil dihapus secara permanen.');
+                         ->with('message', 'Aset berhasil dihapus.');
     }
 
     public function katalog()
     {
-        // Tetap menggunakan get() untuk katalog publik, menampilkan yang tidak rusak saja
-        $inventaris = Inventaris::where('kondisi', '!=', 'Rusak')->get();
+        $inventaris = Inventaris::with('peminjaman')
+            ->where('kondisi', '!=', 'Rusak Berat')
+            ->where('tipe_peminjaman', 'Bisa Dipinjam')
+            ->get()
+            ->map(function ($item) {
+                $stokKeluar = $item->peminjaman
+                    ->whereIn('status', ['dipinjam', 'sedang dipinjam', 'disetujui'])
+                    ->sum('jumlah_pinjam');
+                
+                $item->sisa_stok = max(0, $item->jumlah_stok - $stokKeluar);
+                return $item;
+            });
 
-        return view('katalog.index', compact('inventaris'));
+        return Inertia::render('Katalog/Index', ['inventaris' => $inventaris]);
     }
 }
