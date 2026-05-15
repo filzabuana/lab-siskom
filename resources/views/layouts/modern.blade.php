@@ -6,7 +6,7 @@
     <title>Lab Pemrograman & Komputasi - Siskom Untan</title>
     
     <!-- Vite: Menggunakan Tailwind Lokal Project -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app-blade.js'])
 
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -327,7 +327,7 @@
 
 @endif
     
-    <div id="app" class="min-h-screen flex flex-col bg-transparent">
+    <div id="app-site" class="min-h-screen flex flex-col bg-transparent">
     <main class="container mx-auto pt-4 md:pt-6 pb-10 px-4 flex-grow">
         @yield('content')
     </main>

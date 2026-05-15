@@ -6,7 +6,7 @@
     <title>Virtual Lab - Lab Pemrograman & Komputasi</title>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     {{-- Tetap panggil Vite untuk Tailwind-nya --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app-blade.js'])
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');

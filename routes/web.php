@@ -4,13 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     ProfileController, SopController, SiteMapController, 
     SuratBebasLabController, InventarisController, 
-    PeminjamanController, PostController, UserController
+    PeminjamanController, PostController, UserController,
+    DashboardController
 };
 use App\Http\Controllers\Auth\GoogleController;
 
 /*
 |--------------------------------------------------------------------------
-| 1. AUTHENTICATION (Google & Default)
+| 1. AUTHENTICATION (Google & Global)
 |--------------------------------------------------------------------------
 */
 Route::controller(GoogleController::class)->group(function () {
@@ -18,46 +19,31 @@ Route::controller(GoogleController::class)->group(function () {
     Route::get('auth/google/callback', 'handleGoogleCallback');
 });
 
-// Route untuk keluar dari mode impersonasi (Bisa diakses selama session ada)
-Route::get('/admin/stop-impersonate', [UserController::class, 'stopImpersonate'])
-    ->name('admin.stop-impersonate')
-    ->middleware('auth');
+Route::middleware('auth')->group(function () {
+    // Stop Impersonate ditaruh di sini agar bisa diakses saat sedang "menyamar"
+    Route::get('/admin/stop-impersonate', [UserController::class, 'stopImpersonate'])->name('admin.stop-impersonate');
+});
 
 /*
 |--------------------------------------------------------------------------
-| 2. PUBLIC ROUTES
+| 2. PUBLIC ROUTES (Blade & Inertia)
 |--------------------------------------------------------------------------
 */
 Route::get('/', [PostController::class, 'welcome'])->name('welcome');
-Route::get('/about', function () { return view('about'); })->name('about');
+Route::get('/about', fn() => view('about'))->name('about');
 
-// Blog & SOP
-Route::controller(PostController::class)->group(function () {
-    Route::get('/blog', 'index')->name('blog.index');
-    Route::get('/blog/{slug}', 'show')->name('blog.show');
-});
+// Blog & Katalog
+Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
+Route::get('/katalog', [InventarisController::class, 'katalog'])->name('katalog.index');
+Route::get('/katalog/{id}', [InventarisController::class, 'show'])->name('katalog.show');
 
-Route::controller(SopController::class)->group(function () {
-    Route::get('/sop', 'index')->name('sop.index');
-    Route::get('/sop/{slug}', 'show')->name('sop.show');
-});
-
-// Katalog Inventaris Publik
-Route::controller(InventarisController::class)->group(function () {
-    Route::get('/katalog', 'katalog')->name('katalog.index');
-    Route::get('/katalog/{id}', 'show')->name('katalog.show');
-});
-
-// Bebas Lab Form (Public/Student)
+// Public Bebas Lab Form
 Route::controller(SuratBebasLabController::class)->group(function () {
     Route::get('/bebas-lab', 'create')->name('bebas-lab.form');
     Route::post('/bebas-lab', 'store')->name('bebas-lab.store');
     Route::get('/bebas-lab/verify/{id}', 'verifyEmail')->name('bebas-lab.verify');
 });
-
-// SEO & Tools
-Route::get('/sitemap.xml', [SiteMapController::class, 'index']);
-Route::get('/peta-situs', [SiteMapController::class, 'visual']);
 
 // Simulator & Apps
 Route::name('simulator.')->group(function () {
@@ -68,84 +54,51 @@ Route::view('/apps', 'apps.index')->name('apps.index');
 
 /*
 |--------------------------------------------------------------------------
-| 3. PROTECTED ROUTES (Auth Required)
+| 3. PROTECTED ROUTES (Inertia - Login Required)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     
-    Route::get('/dashboard', [SuratBebasLabController::class, 'dashboardAdmin'])->name('dashboard');
+    // Dashboard Utama
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // User Profile
+    // Profile Management
     Route::controller(ProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
 
-    // Peminjaman (Student Side)
-    Route::controller(PeminjamanController::class)->group(function () {
-        Route::get('/peminjaman', 'index')->name('peminjaman.index');
-        Route::post('/peminjaman', 'store')->name('peminjaman.store');
+    // Fitur Mahasiswa (Peminjaman Alat)
+    Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+        Route::get('/', [PeminjamanController::class, 'index'])->name('index');
+        Route::post('/', [PeminjamanController::class, 'store'])->name('store');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | 4. ADMIN AREA (Superadmin / PLP)
+    | 4. ADMIN & PLP AREA (Spatie Roles)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:superadmin|plp'])->prefix('admin')->name('admin.')->group(function () {
         
-        Route::get('/dashboard', [SuratBebasLabController::class, 'dashboardAdmin'])->name('dashboard');
+        // Manajemen Inventaris
+        Route::resource('inventaris', InventarisController::class);
 
-        // Admin: Blog Management
-        Route::controller(PostController::class)->prefix('posts')->name('posts.')->group(function () {
-            Route::get('/guide', 'guide')->name('guide');
-            Route::get('/', 'indexAdmin')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
-
-        // Admin: Inventaris Management
-        Route::controller(InventarisController::class)->prefix('inventaris')->name('inventaris.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/tambah', 'create')->name('create');
-            Route::post('/simpan', 'store')->name('store');
-            Route::get('/{id}', 'show')->name('show');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
-
-        // Admin: Bebas Lab & Peminjaman
-        Route::post('/bebas-lab/{id}/update', [SuratBebasLabController::class, 'updateStatus'])->name('bebas-lab.update');
+        // Manajemen Bebas Lab (Admin Side)
         Route::get('/bebas-lab', [SuratBebasLabController::class, 'indexAdmin'])->name('bebas-lab.index');
-        
-        Route::get('/peminjaman', [PeminjamanController::class, 'index'])->name('peminjaman.index');
-        Route::patch('/peminjaman/{id}/update-status', [PeminjamanController::class, 'updateStatus'])->name('peminjaman.update');
+        Route::patch('/bebas-lab/{id}', [SuratBebasLabController::class, 'updateStatus'])->name('bebas-lab.update');
 
-        // Admin: SOP Management
-        Route::controller(SopController::class)->prefix('sop')->name('sop.')->group(function () {
-            Route::get('/tambah', 'create')->name('create');
-            Route::post('/simpan', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update');
-            Route::delete('/{id}', 'destroy')->name('destroy');
-        });
+        // Manajemen User
+        // Menggunakan {user} agar sinkron dengan Route Model Binding di UserController
+        Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
+        Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+        Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
 
-        // Admin: User Management & Impersonation
-        Route::controller(UserController::class)->prefix('users')->name('users.')->group(function () {
-            Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store');
-            Route::get('/{id}', 'show')->name('show');
-            Route::patch('/{id}/role', 'updateRole')->name('update-role');
-            Route::post('/{id}/impersonate', 'impersonate')->name('impersonate');
-        });
-
-    }); // End Admin
-}); // End Auth
+        // Konten & SOP
+        Route::resource('posts', PostController::class);
+        Route::resource('sop', SopController::class);
+    });
+});
 
 require __DIR__.'/auth.php';

@@ -8,47 +8,74 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
+    /**
+     * INDEX: List semua user untuk manajemen laboratorium.
+     */
     public function index()
     {
-        $users = User::withCount(['peminjamans' => function($query) {
-            $query->where('status', 'disetujui'); 
-        }])->orderBy('name', 'asc')->get();
+        $users = User::with('roles')
+            ->withCount(['peminjamans' => function($query) {
+                $query->where('status', 'disetujui'); 
+            }])
+            ->orderBy('name', 'asc')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id'                => $user->id,
+                    'name'              => $user->name,
+                    'email'             => $user->email,
+                    'avatar'            => $user->avatar,
+                    'is_admin'          => (bool) $user->is_admin,
+                    // Sesuai dengan v-for="role in user.roles_list" di Vue
+                    'roles_list'        => $user->getRoleNames(), 
+                    'peminjamans_count' => $user->peminjamans_count,
+                    // Sesuai dengan v-if="user.bebas_lab" di Vue
+                    'bebas_lab'         => (bool) $user->bebas_lab_status, 
+                ];
+            });
 
-        return view('admin.users.index', compact('users'));
+        return Inertia::render('Admin/Users/Index', [
+            'users' => $users
+        ]);
     }
 
-    public function show($id)
+    /**
+     * SHOW: Detail otoritas dan riwayat peminjaman user.
+     */
+    public function show(User $user)
     {
-        $user = User::withCount(['peminjamans' => function($query) {
+        // Load count peminjaman disetujui
+        $user->loadCount(['peminjamans' => function($query) {
             $query->where('status', 'disetujui');
-        }])->findOrFail($id);
-        
+        }]);
+
         $riwayat = Peminjaman::with('inventaris') 
-            ->where('user_id', $id)
+            ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('admin.users.show', compact('user', 'riwayat'));
+        return Inertia::render('Admin/Users/Show', [
+            'user' => [
+                'id'                => $user->id,
+                'name'              => $user->name,
+                'email'             => $user->email,
+                'avatar'            => $user->avatar,
+                'is_admin'          => (bool) $user->is_admin,
+                'roles_list'        => $user->getRoleNames(),
+                'peminjamans_count' => $user->peminjamans_count,
+                'bebas_lab'         => (bool) $user->bebas_lab_status,
+            ],
+            'riwayat'        => $riwayat,
+            'availableRoles' => Role::all()->pluck('name') 
+        ]);
     }
 
     /**
-     * FORM CREATE: Mengambil semua role untuk checkbox
-     */
-    public function create()
-    {
-        if (!auth()->user()->is_admin) {
-            abort(403);
-        }
-
-        $roles = Role::all(); 
-        return view('admin.users.create', compact('roles'));
-    }
-
-    /**
-     * STORE: Menyimpan user baru dengan multi-role
+     * STORE: Mendaftarkan user baru
      */
     public function store(Request $request)
     {
@@ -56,72 +83,90 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|min:8',
-            'roles'    => 'required|array', 
+            'roles'    => 'array', 
         ]);
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
-            'password' => Hash::make($request->password), // Menggunakan Hash::make (lebih modern dari bcrypt)
-            'is_admin' => $request->has('is_admin') ? 1 : 0,
+            'password' => Hash::make($request->password),
+            'is_admin' => $request->is_admin ? 1 : 0,
         ]);
 
-        // Menggunakan syncRoles agar lebih aman saat assign banyak role sekaligus
-        $user->syncRoles($request->roles);
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles);
+        }
 
-        return redirect()->route('admin.users.index')->with('status', 'User baru berhasil didaftarkan!');
+        return redirect()->route('admin.users.index')
+            ->with('message', 'User ' . $user->name . ' berhasil ditambahkan.');
     }
 
     /**
-     * EDIT: Menampilkan form edit user (jika Anda memisahkan form edit dari halaman profile)
+     * UPDATE ROLE: Update otoritas user (dipanggil dari Show.vue)
      */
-    public function edit($id)
-    {
-        $user = User::findOrFail($id);
-        $roles = Role::all();
-        return view('admin.users.edit', compact('user', 'roles'));
-    }
-
-    /**
-     * UPDATE ROLE: Memperbarui akses dan status admin
-     */
-    public function updateRole(Request $request, $id)
+    public function updateRole(Request $request, User $user)
     {
         $request->validate([
-            'roles' => 'required|array',
+            'roles' => 'array',
         ]);
 
-        $user = User::findOrFail($id);
-        
-        // Update status super admin
+        // Update status superadmin di tabel users
         $user->update([
-            'is_admin' => $request->has('is_admin') ? 1 : 0,
+            'is_admin' => $request->is_admin ? 1 : 0,
         ]);
 
-        // Sinkronisasi multi-role (menambah yang baru, menghapus yang tidak dicentang)
-        $user->syncRoles($request->roles);
+        // Sinkronisasi role Spatie
+        $user->syncRoles($request->roles ?? []);
 
-        return back()->with('success', 'Akses pengguna berhasil diperbarui!');
+        return back()->with('message', 'Otoritas ' . $user->name . ' berhasil diperbarui!');
     }
 
-    public function impersonate($id)
+    /**
+     * IMPERSONATION
+     */
+    public function impersonate(User $user)
     {
-        $user = User::findOrFail($id);
+        if ($user->id === Auth::id()) {
+            return back()->with('message', 'Anda sudah login sebagai diri sendiri.');
+        }
+
         session()->put('impersonate', Auth::id());
         Auth::login($user);
-        return redirect()->route('dashboard')->with('status', 'Mode impersonasi: ' . $user->name);
+
+        return redirect()->route('dashboard')
+            ->with('message', 'Sekarang bertindak sebagai: ' . $user->name);
     }
 
+    /**
+     * STOP IMPERSONATE
+     */
     public function stopImpersonate()
     {
         if (session()->has('impersonate')) {
-            $admin = User::find(session()->get('impersonate'));
+            $adminId = session()->get('impersonate');
+            $admin = User::find($adminId);
+            
             if ($admin) {
-                auth()->login($admin);
+                Auth::login($admin);
                 session()->forget('impersonate');
-                return redirect()->route('admin.users.index')->with('status', 'Kembali sebagai Admin.');
+                
+                return redirect()->route('admin.users.index')
+                    ->with('message', 'Kembali sebagai: ' . $admin->name);
             }
         }
+        
         return redirect('/dashboard');
+    }
+
+    /**
+     * DESTROY: Hapus user
+     */
+    public function destroy(User $user)
+    {
+        $userName = $user->name;
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('message', 'User ' . $userName . ' telah dihapus.');
     }
 }
