@@ -6,39 +6,42 @@ export const useAuthStore = defineStore('auth', {
     }),
     
     getters: {
-        // Mengembalikan array peran, jika kosong return array kosong agar tidak crash
+        // Tambahkan getter untuk avatar agar aman diakses
+        userAvatar: (state) => state.user?.avatar || null,
+
         userRoles: (state) => Array.isArray(state.user?.roles) ? state.user.roles : [],
 
-        // Format nama peran untuk tampilan (misal: asisten_praktikum -> Asisten Praktikum)
         displayRole: (state) => {
-            const role = Array.isArray(state.user?.roles) ? state.user.roles[0] : 'User';
-            return role.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const roles = Array.isArray(state.user?.roles) ? state.user.roles : [];
+            if (roles.length === 0) return 'User';
+            // Ambil role pertama, ganti snake_case jadi Capital Case
+            return roles[0].replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         },
 
-        // Pengecekan Admin atau PLP
         isAdmin: (state) => {
             const roles = Array.isArray(state.user?.roles) ? state.user.roles : [];
             return roles.includes('admin') || roles.includes('plp') || !!state.user?.is_admin;
         },
 
-        // Cek NIM dengan awalan 'H' untuk Mahasiswa FMIPA UNTAN
+        isPlp: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('plp'),
+
         isMahasiswa: (state) => {
             return typeof state.user?.nim === 'string' && state.user.nim.toUpperCase().startsWith('H');
         },
 
-        // Pengecekan peran lainnya
         isAsisten: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('asisten_praktikum'),
         isDosen: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('dosen'),
-        isKepalaLab: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('kepala_lab'),
+        isKalab: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('kepala_lab'),
         
         isAuthenticated: (state) => !!state.user,
     },
 
     actions: {
+        /**
+         * Pastikan saat setUser dipanggil, seluruh object user (termasuk avatar) disimpan.
+         */
         setUser(userData) {
-            if (userData) {
-                this.user = userData;
-            }
+            this.user = userData;
         },
         clearUser() {
             this.user = null;

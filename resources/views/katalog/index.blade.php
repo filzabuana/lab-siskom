@@ -33,17 +33,18 @@
         {{-- Grid Katalog: Lebih rapat & responsif --}}
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             @forelse($inventaris as $item)
-                {{-- Card Item: Compact Style --}}
-                <div class="group relative bg-white dark:bg-railway-card rounded-2xl sm:rounded-[2rem] border border-slate-200 dark:border-railway-border transition-all duration-500 transform-gpu hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/15 flex flex-col h-full overflow-hidden"
-                    style="isolation: isolate;">
+                {{-- Card Item: Compact Style (Klik mengarah ke Detail Alat) --}}
+                <div onclick="window.location='{{ route('katalog.show', $item->id) }}';"
+                     class="group relative bg-white dark:bg-railway-card rounded-2xl sm:rounded-[2rem] border border-slate-200 dark:border-railway-border transition-all duration-500 transform-gpu hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/15 flex flex-col h-full overflow-hidden cursor-pointer"
+                     style="isolation: isolate;">
                     
                     {{-- Area Gambar: Lebih kecil & efisien --}}
                     <div class="relative block overflow-hidden bg-slate-100 dark:bg-railway-dark/50 aspect-square sm:aspect-[4/3] rounded-t-2xl sm:rounded-t-[2rem]">
                         @if($item->foto_barang)
                             <img src="{{ asset('storage/inventaris/' . $item->foto_barang) }}" 
-                                alt="{{ $item->nama_aset }}" 
-                                class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 transform-gpu"
-                                onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=No+Data';">
+                                 alt="{{ $item->nama_aset }}" 
+                                 class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 transform-gpu"
+                                 onerror="this.onerror=null; this.src='https://placehold.co/400x300?text=No+Data';">
                         @else
                             <div class="flex flex-col items-center justify-center h-full text-slate-300 dark:text-slate-700">
                                 <i class="bi bi-cpu text-3xl sm:text-4xl mb-1"></i>
@@ -71,28 +72,27 @@
                             <div class="font-mono text-[8px] sm:text-[10px] text-blue-600 dark:text-blue-400 mb-0.5 font-bold opacity-70">
                                 #{{ $item->kode_barang }}
                             </div>
-                            <a href="{{ route('katalog.show', $item->id) }}" class="block">
-                                <h6 class="text-xs sm:text-lg font-black text-slate-800 dark:text-white leading-tight mb-1 uppercase tracking-tighter group-hover:text-blue-600 transition-colors line-clamp-2">
-                                    {{ $item->nama_aset }}
-                                </h6>
-                            </a>
+                            <h6 class="text-xs sm:text-lg font-black text-slate-800 dark:text-white leading-tight mb-1 uppercase tracking-tighter group-hover:text-blue-600 transition-colors line-clamp-2">
+                                {{ $item->nama_aset }}
+                            </h6>
                         </div>
 
-                        <div class="mt-auto space-y-3">
+                        {{-- Section Stok & Tombol Aksi --}}
+                        <div class="mt-auto space-y-3" onclick="event.stopPropagation();">
                             @auth
                                 @if($item->tipe_peminjaman == 'Bisa Dipinjam')
                                     <div class="flex items-center justify-between px-0.5 border-b border-slate-100 dark:border-railway-border pb-2">
                                         <span class="font-mono text-[7px] sm:text-[9px] text-slate-400 dark:text-slate-500 uppercase">Stock</span>
-                                        <span class="font-mono text-[10px] sm:text-xs font-bold {{ $item->jumlah_stok > 0 ? 'text-blue-600' : 'text-red-500' }}">
-                                            {{ str_pad($item->jumlah_stok, 2, '0', STR_PAD_LEFT) }}
+                                        <span class="font-mono text-[10px] sm:text-xs font-bold {{ $item->sisa_stok > 0 ? 'text-blue-600' : 'text-red-500' }}">
+                                            {{ str_pad($item->sisa_stok, 2, '0', STR_PAD_LEFT) }}
                                         </span>
                                     </div>
                                     
-                                    <button @click="openModal({{ $item->id }})" 
-                                            class="w-full py-2 sm:py-3 bg-slate-900 dark:bg-blue-600 text-white rounded-lg sm:rounded-xl font-bold text-[8px] sm:text-[10px] uppercase tracking-widest transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-40"
-                                            {{ $item->jumlah_stok <= 0 ? 'disabled' : '' }}>
-                                        Request_Alat
-                                    </button>
+                                    {{-- Mengarahkan Langsung ke Fitur Peminjaman Katalog Berbasis Inertia --}}
+                                    <a href="{{ route('peminjaman.katalog') }}" 
+                                       class="block w-full py-2 sm:py-3 text-center bg-slate-900 dark:bg-blue-600 text-white rounded-lg sm:rounded-xl font-bold text-[8px] sm:text-[10px] uppercase tracking-widest transition-all hover:bg-blue-700 active:scale-95 {{ $item->sisa_stok <= 0 ? 'pointer-events-none opacity-40' : '' }}">
+                                        Pinjam_Alat
+                                    </a>
                                 @else
                                     <div class="py-2 px-2 bg-slate-50 dark:bg-white/5 rounded-lg border border-dashed border-slate-200 dark:border-railway-border text-center">
                                         <span class="font-mono text-[7px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
@@ -101,7 +101,8 @@
                                     </div>
                                 @endif
                             @else
-                                <a href="{{ route('login') }}" class="block w-full py-2 sm:py-3 border border-slate-200 dark:border-railway-border text-center rounded-lg sm:rounded-xl transition-all hover:border-blue-500 bg-slate-50 dark:bg-transparent">
+                                {{-- Tombol Login Tetap Menuju Layanan Autentikasi Google --}}
+                                <a href="{{ route('google.login') }}" class="block w-full py-2 sm:py-3 border border-slate-200 dark:border-railway-border text-center rounded-lg sm:rounded-xl transition-all hover:border-blue-500 bg-slate-50 dark:bg-transparent">
                                     <span class="font-mono text-[8px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
                                         Login()
                                     </span>
@@ -116,14 +117,6 @@
                 </div>
             @endforelse
         </div>
-
-    
-    @auth
-        @foreach($inventaris as $item)
-            @if($item->tipe_peminjaman == 'Bisa Dipinjam')
-                @include('peminjaman.partials.modal_pinjam')
-            @endif
-        @endforeach
-    @endauth
+    </div>
 </div>
 @endsection

@@ -26,17 +26,20 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| 2. PUBLIC ROUTES (Blade & Inertia)
+| 2. PUBLIC ROUTES (Blade Only - Visitor & Guest Accessible)
 |--------------------------------------------------------------------------
 */
 Route::get('/', [PostController::class, 'welcome'])->name('welcome');
 Route::get('/about', fn() => view('about'))->name('about');
 
-// Blog & Katalog
+// Blog (Publik - Read Only)
 Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
-Route::get('/katalog', [InventarisController::class, 'katalog'])->name('katalog.index');
-Route::get('/katalog/{id}', [InventarisController::class, 'show'])->name('katalog.show');
+
+// --- UPDATE: Katalog Publik Khusus Berbasis BLADE ---
+// Mengarah ke views/katalog/index.blade.php dan views/admin/inventaris/show.blade.php
+Route::get('/katalog', [InventarisController::class, 'katalogPublicIndex'])->name('katalog.index');
+Route::get('/katalog/{id}', [InventarisController::class, 'katalogPublicShow'])->name('katalog.show');
 
 // Public Bebas Lab Form
 Route::controller(SuratBebasLabController::class)->group(function () {
@@ -69,19 +72,31 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
 
-    // Fitur Mahasiswa (Peminjaman Alat)
+    // Fitur Peminjaman Mahasiswa (Pure Inertia System)
     Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
-        Route::get('/', [PeminjamanController::class, 'index'])->name('index');
-        Route::post('/', [PeminjamanController::class, 'store'])->name('store');
+        Route::get('/katalog', [PeminjamanController::class, 'indexKatalog'])->name('katalog');
+        Route::get('/keranjang', [PeminjamanController::class, 'viewCart'])->name('cart.view');
+        Route::post('/keranjang/add', [PeminjamanController::class, 'addToCart'])->name('cart.add');
+        Route::patch('/keranjang/{id}', [PeminjamanController::class, 'updateCart'])->name('cart.update');
+        Route::delete('/keranjang/{id}', [PeminjamanController::class, 'destroyCart'])->name('cart.destroy');
+        Route::post('/checkout', [PeminjamanController::class, 'checkout'])->name('checkout');
+        Route::get('/riwayat', [PeminjamanController::class, 'history'])->name('history');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | 4. ADMIN & PLP AREA (Spatie Roles)
+| 4. ADMIN & PLP AREA (Spatie Roles)
     |--------------------------------------------------------------------------
     */
     Route::middleware(['role:superadmin|plp'])->prefix('admin')->name('admin.')->group(function () {
         
+        // Manajemen Peminjaman (Admin/PLP)
+        Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+            Route::get('/', [PeminjamanController::class, 'indexAdmin'])->name('index');
+            Route::patch('/{id}/status', [PeminjamanController::class, 'updateStatus'])->name('update-status');
+            Route::delete('/detail/{detail_id}', [PeminjamanController::class, 'destroyDetail'])->name('destroy-detail');
+        });
+
         // Manajemen Inventaris
         Route::resource('inventaris', InventarisController::class);
 
@@ -90,7 +105,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/bebas-lab/{id}', [SuratBebasLabController::class, 'updateStatus'])->name('bebas-lab.update');
 
         // Manajemen User
-        // Menggunakan {user} agar sinkron dengan Route Model Binding di UserController
         Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
         Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
         Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');

@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index()
+    /**
+     * Menampilkan Dashboard Utama
+     * Path: resources/js/Pages/Admin/Dashboard/Index.vue
+     */
+    public function index(): Response
     {
-        return Inertia::render('Dashboard');
+        return Inertia::render('Admin/Dashboard/Index');
     }
 }

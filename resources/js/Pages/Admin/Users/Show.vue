@@ -63,13 +63,13 @@
 
                         <div v-if="$page.props.auth.user.is_admin" class="pt-6 border-t border-slate-50 dark:border-white/5">
                             <form @submit.prevent="updateOtoritas" class="space-y-4">
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Konfigurasi Otoritas</label>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Konfigurasi Role (Spatie)</label>
                                 
-                                <div class="space-y-2">
+                                <div class="grid grid-cols-1 gap-2">
                                     <label 
                                         v-for="roleOption in availableRoles" 
                                         :key="roleOption"
-                                        class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl cursor-pointer hover:bg-blue-50 transition-all border border-slate-100"
+                                        class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-all border border-slate-100 dark:border-slate-700"
                                     >
                                         <input 
                                             type="checkbox" 
@@ -91,15 +91,19 @@
                                         v-model="form.is_admin" 
                                         class="w-5 h-5 rounded-lg border-amber-500/30 text-amber-500 focus:ring-amber-500/20"
                                     >
-                                    <span class="text-[10px] font-black text-amber-600 uppercase italic">Hak Akses Admin Utama</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-black text-amber-600 uppercase italic">Superadmin Access</span>
+                                        <span class="text-[8px] text-amber-500/60 font-bold uppercase tracking-tighter italic leading-none">Bypass all permissions</span>
+                                    </div>
                                 </label>
 
                                 <button 
                                     type="submit" 
                                     :disabled="form.processing"
-                                    class="w-full py-4 bg-blue-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg hover:bg-blue-700 transition-all italic"
+                                    class="w-full py-4 bg-blue-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-lg hover:bg-blue-700 transition-all italic flex items-center justify-center gap-2"
                                 >
-                                    {{ form.processing ? 'Updating...' : 'Update Otoritas' }}
+                                    <i v-if="form.processing" class="mdi mdi-loading mdi-spin text-lg"></i>
+                                    {{ form.processing ? 'SAVING CHANGES...' : 'UPDATE OTORITAS' }}
                                 </button>
                             </form>
                         </div>
@@ -108,33 +112,40 @@
 
                 <div class="lg:col-span-2 space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                            <span class="text-[10px] font-black text-slate-400 uppercase block mb-2">Pinjaman Aktif</span>
+                        <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span class="text-[10px] font-black text-slate-400 uppercase block mb-2 tracking-widest">Pinjaman Aktif</span>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-4xl font-black text-slate-800 dark:text-white italic">{{ user.peminjamans_count || 0 }}</span>
                                 <span class="text-xs font-black text-slate-400 uppercase italic">Item Alat</span>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                            <span class="text-[10px] font-black text-slate-400 uppercase block mb-2">Status Bebas Lab</span>
+                        <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <span class="text-[10px] font-black text-slate-400 uppercase block mb-2 tracking-widest">Status Bebas Lab</span>
                             <span class="text-3xl font-black italic" :class="user.bebas_lab ? 'text-emerald-500' : 'text-amber-500'">
-                                {{ user.bebas_lab ? 'CLEARED' : 'ON PROGRESS' }}
+                                {{ user.bebas_lab ? 'CLEARED' : 'PENDING' }}
                             </span>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
-                        <div class="px-8 py-6 bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 flex justify-between items-center">
-                            <h3 class="text-xs font-black uppercase italic tracking-widest text-slate-800 dark:text-white">Informasi Lab & Inventori</h3>
-                            <span v-if="isPLP" class="text-[9px] bg-emerald-500 text-white px-3 py-1 rounded-full font-black italic uppercase">Petugas Lab</span>
+                    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 overflow-hidden shadow-sm">
+                        <div class="px-8 py-6 bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <h3 class="text-xs font-black uppercase italic tracking-widest text-slate-800 dark:text-white">Informasi Hak Akses Sistem</h3>
                         </div>
                         <div class="p-8">
-                            <div v-if="isPLP || user.is_admin" class="p-6 bg-blue-500/5 rounded-3xl border border-blue-500/10">
-                                <p class="text-sm text-slate-600 italic">User memiliki hak akses pengelolaan lab.</p>
+                            <div v-if="user.is_admin || user.roles_list?.includes('plp')" class="p-6 bg-blue-500/5 rounded-3xl border border-blue-500/10">
+                                <div class="flex items-center gap-4">
+                                    <i class="mdi mdi-shield-check text-blue-500 text-3xl"></i>
+                                    <div>
+                                        <p class="text-xs font-black text-blue-600 uppercase italic">Akses Manajemen Terdeteksi</p>
+                                        <p class="text-[10px] text-slate-500 dark:text-slate-400 italic mt-1">User ini memiliki wewenang untuk mengelola inventaris atau validasi surat mahasiswa.</p>
+                                    </div>
+                                </div>
                             </div>
                             <div v-else class="text-center py-8">
-                                <p class="text-xs font-black text-slate-400 uppercase italic">Akses Manajemen Inventori Terbatas</p>
+                                <i class="mdi mdi-account-lock-outline text-slate-300 dark:text-slate-600 text-4xl mb-3"></i>
+                                <p class="text-xs font-black text-slate-400 uppercase italic tracking-widest">Akses Manajemen Terbatas</p>
+                                <p class="text-[9px] text-slate-400 italic mt-1 uppercase">User hanya memiliki akses sebagai peminjam (Mahasiswa/Dosen)</p>
                             </div>
                         </div>
                     </div>
@@ -145,35 +156,39 @@
 </template>
 
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { computed } from 'vue';
 
 const props = defineProps({
     user: Object,
-    availableRoles: Array // Dikirim dari controller
+    availableRoles: Array
 });
 
-// Sync data dengan roles_list dari Controller
+// Inisialisasi form dengan data is_admin dan roles dari database
 const form = useForm({
     roles: props.user.roles_list || [], 
-    is_admin: !!props.user.is_admin,
+    is_admin: props.user.is_admin === 1 || props.user.is_admin === true,
 });
 
 const getInitials = (name) => name ? name.substring(0, 2).toUpperCase() : '??';
 
-// Fix: Cek isPLP lewat roles_list
-const isPLP = computed(() => props.user.roles_list?.includes('plp'));
-
+// Update Otoritas via Controller
 const updateOtoritas = () => {
-    form.patch(route('admin.users.update-role', props.user.id));
+    form.patch(route('admin.users.update-role', props.user.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Bisa tambah toast notification di sini
+        }
+    });
 };
 
+// Fungsi untuk Impersonasi (Login sebagai user tersebut)
 const handleImpersonate = () => {
     form.post(route('admin.users.impersonate', props.user.id), {
         onSuccess: () => {
-            // Hard reload ke dashboard setelah impersonasi berhasil
-            window.location.href = route('dashboard');
+            // Gunakan replace agar history browser bersih saat impersonasi
+            window.location.replace(route('dashboard'));
         }
     });
 };
