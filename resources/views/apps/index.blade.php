@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Lab - Lab Pemrograman & Komputasi</title>
-    
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     {{-- Tetap panggil Vite untuk Tailwind-nya --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app-blade.js'])
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -44,8 +44,123 @@
 
         .content-wrapper {
             position: relative;
-            z-index: 10; /* Konten harus lebih tinggi dari z-0 dan z-1 */
+            z-index: 10; 
         }
+
+        /* --- STYLES UNTUK ROBOT FOLO --- */
+        .robot-float { animation: float 3s ease-in-out infinite; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .eye-blink { transform-origin: center; animation: blink 4s infinite; }
+        @keyframes blink {
+            0%, 45%, 47%, 100% { transform: scaleY(1); }
+            46% { transform: scaleY(0.1); }
+        }
+
+        @keyframes waving {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-35deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .is-waving #left-arm { animation: waving 0.5s infinite ease-in-out !important; }
+
+        /* --- FIXED SPEECH BUBBLE --- */
+        #speech-bubble {
+    position: absolute;
+    bottom: 115%; /* Sedikit lebih tinggi agar tidak menempel kepala */
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    transform-origin: bottom center;
+    
+    background: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    
+    padding: 12px 16px; /* Padding lebih lega */
+    
+    /* --- PERUBAHAN UTAMA DI SINI --- */
+    width: 240px; /* Ukuran lebar tetap yang ideal */
+    max-width: 80vw; /* Agar tidak meluap di layar HP yang sangat kecil */
+    /* ------------------------------- */
+    
+    border-radius: 12px 20px 12px 20px;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    
+    font-size: 12px; /* Sedikit lebih besar agar enak dibaca */
+    line-height: 1.5;
+    font-weight: 600;
+    color: #f1f5f9;
+    text-align: center;
+    
+    white-space: normal; 
+    word-wrap: break-word;
+    
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 50;
+    pointer-events: none;
+}
+
+/* Penyesuaian untuk Mobile agar tidak terlalu lebar */
+@media (max-width: 768px) {
+    #speech-bubble {
+        width: 180px; 
+        font-size: 11px;
+        bottom: 110%;
+    }
+}
+
+        /* Dekorasi Siku Biru */
+        #speech-bubble::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            width: 6px;
+            height: 6px;
+            border-top: 1.5px solid #38bdf8;
+            border-left: 1.5px solid #38bdf8;
+        }
+
+        /* Panah Bawah Futuristik */
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid rgba(56, 189, 248, 0.5);
+        }
+
+        #speech-bubble.active {
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* Animasi teks berkedip halus saat muncul */
+        #speech-bubble.active span {
+            animation: text-flicker 2s linear infinite;
+        }
+
+        @keyframes text-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        #typed-text {
+    display: inline-block;
+    white-space: normal; /* Sangat penting agar teks tetap turun ke bawah */
+    word-break: break-word;
+}
+
+/* Hilangkan animasi flicker manual kita tadi karena sudah diganti efek mengetik */
+#speech-bubble.active span {
+    animation: none;
+}
     </style>
 </head>
 <body class="antialiased text-slate-200">
@@ -74,7 +189,7 @@
                 
                 <a href="/" class="group flex items-center gap-3 px-6 py-2.5 rounded-full border border-slate-700 text-[10px] font-black tracking-widest hover:bg-white hover:text-black transition-all duration-300">
                     <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                    Kembali ke Portal Utama
+                    Ke Portal Utama
                 </a>
             </div>
         </header>
@@ -104,8 +219,44 @@
                                 </svg>
                                 PC Recommended
                             </div>
+
+                            <!-- CONTAINER ROBOT DI TENGAH (MOBILE) & KANAN ATAS (PC) -->
+                    <div class="flex justify-center items-center py-8 relative md:static">
+                        <div id="robot-container" class="w-[120px] md:w-[220px] md:absolute md:top-[220px] md:right-[20%] relative cursor-pointer" onclick="handleSpeechAction()">
+                           <div id="speech-bubble">
+                                <span id="typed-text"></span>
+                            </div>
+                            <div class="robot-float">
+                                <svg viewBox="0 0 800 1000" class="w-full h-auto drop-shadow-2xl">
+                                    <g id="head">
+                                        <rect x="180" y="80" width="440" height="300" rx="110" fill="#FACC15" stroke="#111" stroke-width="12"/>
+                                        <rect x="220" y="120" width="360" height="220" rx="70" fill="#111827"/>
+                                        <g class="eye-blink">
+                                            <ellipse cx="330" cy="230" rx="45" ry="65" fill="#60A5FA" />
+                                            <ellipse cx="470" cy="230" rx="45" ry="65" fill="#60A5FA" />
+                                        </g>
+                                    </g>
+                                    <rect x="270" y="370" width="260" height="220" rx="40" fill="#FACC15" stroke="#111" stroke-width="10"/>
+                                    <g id="left-arm" style="transform-origin: 270px 420px;">
+                                        <circle cx="270" cy="420" r="35" fill="#111"/>
+                                        <rect x="130" y="395" width="140" height="45" rx="22" fill="#FACC15" stroke="#111" stroke-width="8"/>
+                                    </g>
+                                    <g style="transform-origin: 530px 420px;">
+                                        <circle cx="530" cy="420" r="35" fill="#111"/>
+                                        <rect x="530" y="395" width="140" height="45" rx="22" fill="#FACC15" stroke="#111" stroke-width="8" transform="rotate(15 530 395)"/>
+                                    </g>
+                                    <g id="legs">
+                                        <rect x="230" y="590" width="100" height="200" rx="50" fill="#FACC15" stroke="#111" stroke-width="10"/>
+                                        <rect x="470" y="590" width="100" height="200" rx="50" fill="#FACC15" stroke="#111" stroke-width="10"/>
+                                    </g>
+                                </svg>
+                            </div>
                         </div>
                     </div>
+
+                        </div>
+                    </div>
+
 
                     {{-- Grid Modul --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
@@ -192,22 +343,20 @@
                             <span class="text-[10px] font-black text-white tracking-[0.3em] uppercase">Laravel</span>
                         </div>
                         <div class="flex items-center gap-3">
-    <svg class="h-6 w-auto" viewBox="0 0 261.76 226.69" xmlns="http://www.w3.org/2000/svg">
-        <g transform="matrix(1.3333 0 0 -1.3333 -76.311 313.34)">
-            {{-- Bagian Luar - Tetap Putih Bersih --}}
-            <g transform="translate(178.06 235.01)">
-                <path d="m0 0-22.669-39.264-22.669 39.264h-75.491l98.16-170.02 98.16 170.02z" 
-                      fill="#FFFFFF"/>
-            </g>
-            {{-- Bagian Atas/Dalam - Dibuat Gelap (Abu-abu Tua) --}}
-            <g transform="translate(178.06 235.01)">
-                <path d="m0 0-22.669-39.264-22.669 39.264h-36.227l58.896-102.01 58.896 102.01z" 
-                      fill="#475569"/>
-            </g>
-        </g>
-    </svg>
-    <span class="text-[10px] font-black text-white tracking-[0.3em] uppercase">Vue.js</span>
-</div>
+                            <svg class="h-6 w-auto" viewBox="0 0 261.76 226.69" xmlns="http://www.w3.org/2000/svg">
+                                <g transform="matrix(1.3333 0 0 -1.3333 -76.311 313.34)">
+                                    <g transform="translate(178.06 235.01)">
+                                        <path d="m0 0-22.669-39.264-22.669 39.264h-75.491l98.16-170.02 98.16 170.02z" 
+                                              fill="#FFFFFF"/>
+                                    </g>
+                                    <g transform="translate(178.06 235.01)">
+                                        <path d="m0 0-22.669-39.264-22.669 39.264h-36.227l58.896-102.01 58.896 102.01z" 
+                                              fill="#475569"/>
+                                    </g>
+                                </g>
+                            </svg>
+                            <span class="text-[10px] font-black text-white tracking-[0.3em] uppercase">Vue.js</span>
+                        </div>
                         <div class="flex items-center gap-3">
                             <svg class="h-5 w-auto text-[#38BDF8]" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8 1.123.28 1.926 1.096 2.814 1.998C14.457 11.263 15.823 12.65 19.2 12.65c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-1.123-.28-1.926-1.096-2.814-1.998-1.442-1.464-2.808-2.852-6.185-2.852zm-7.2 7.85c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8 1.123.28 1.926 1.096 2.814 1.998 1.442 1.464 2.808 2.852 6.185 2.852 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-1.123-.28-1.926-1.096-2.814-1.998-1.442-1.464-2.808-2.852-6.185-2.852z"/>
@@ -252,68 +401,188 @@
     </div> {{-- Penutup content-wrapper --}}
 
     <script>
-        const canvas = document.getElementById('starCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            init();
-        }
+    // --- KONFIGURASI CANVAS ---
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+    }
 
-        function init() {
-            particles = [];
-            const count = Math.floor((canvas.width * canvas.height) / 12000); 
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 1.5 + 0.5,
-                    vx: (Math.random() - 0.5) * 0.4,
-                    vy: (Math.random() - 0.5) * 0.4,
-                    opacity: Math.random(),
-                    blinkSpeed: Math.random() * 0.02 + 0.005
-                });
-            }
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach((p, i) => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.opacity += p.blinkSpeed;
-                if (p.opacity > 1 || p.opacity < 0.1) p.blinkSpeed *= -1;
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(p.opacity) * 0.5})`;
-                ctx.fill();
-
-                for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < 150) {
-                        ctx.beginPath();
-                        ctx.strokeStyle = `rgba(37, 99, 235, ${0.15 * (1 - dist / 150)})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                    }
-                }
+    function initParticles() {
+        particles = [];
+        const count = Math.floor((canvas.width * canvas.height) / 12000); 
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.5 + 0.5,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                opacity: Math.random(),
+                blinkSpeed: Math.random() * 0.02 + 0.005
             });
-            requestAnimationFrame(animate);
+        }
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.opacity += p.blinkSpeed;
+            if (p.opacity > 1 || p.opacity < 0.1) p.blinkSpeed *= -1;
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(p.opacity) * 0.5})`;
+            ctx.fill();
+
+            for (let j = i + 1; j < particles.length; j++) {
+                const p2 = particles[j];
+                const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (dist < 150) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = `rgba(37, 99, 235, ${0.15 * (1 - dist / 150)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+        });
+        requestAnimationFrame(animate);
+    }
+
+    // --- KONFIGURASI ROBOT & TYPED.JS ---
+    const robotContainer = document.getElementById('robot-container');
+    const bubble = document.getElementById('speech-bubble');
+    let typedInstance = null;
+    let idleTimer = null;
+
+    const welcomeMessages = [
+        "Selamat datang di Lab Virtual!",
+        "Gunakan PC agar simulasi lancar.",
+        "Silakan pilih simulasi di bawah.",
+        "Have fun!"
+    ];
+
+    const idleMessages = [
+    "Tahukah kamu? Gerbang AND hanya aktif jika semua input bernilai 1.",
+    "Logika digital adalah dasar dari semua komputer modern.",
+    "Sudah mencoba simulasi Gerbang Logika di bawah?",
+    "Laboratorium ini dikembangkan untuk simulasi interaktif.",
+    "Istilah 'Bug' pertama kali digunakan karena ada serangga asli di dalam komputer.",
+    "IPv6 diciptakan karena dunia kehabisan alamat IP dari sistem IPv4.",
+    "Arduino pertama kali dikembangkan di Italia untuk membantu desain interaksi mahasiswa.",
+    "RAM adalah memori volatil, artinya data akan hilang saat listrik dimatikan.",
+    "Protokol HTTP adalah bahasa utama yang digunakan browser untuk meminta data web.",
+    "Sistem biner hanya menggunakan angka 0 dan 1 untuk memproses semua data digital.",
+    "IoT memungkinkan benda mati seperti lampu rumah berbicara satu sama lain via internet.",
+    "Linux adalah jantung dari hampir semua server cloud dan superkomputer di dunia.",
+    "Raspberry Pi awalnya dibuat untuk meningkatkan minat anak sekolah pada ilmu komputer.",
+    "Kabel serat optik mengirimkan data menggunakan pulsa cahaya secepat kilat.",
+    "Sistem Tertanam (Embedded System) biasanya dirancang untuk satu tugas spesifik saja.",
+    "Sensor ultrasonik bekerja dengan memantulkan gelombang suara, mirip seperti kelelawar.",
+    "DNS sering disebut sebagai 'buku telepon' untuk internet.",
+    "Kernel adalah bagian inti dari sistem operasi yang mengelola hardware.",
+    "Firmware adalah software yang 'ditanam' permanen di dalam hardware.",
+    "Teknologi 5G dirancang untuk latensi sangat rendah, penting untuk kendali jarak jauh.",
+    "Kriptografi kunci publik menggunakan matematika kompleks untuk menjaga keamanan pesan.",
+    "Mikrokontroler ESP32 sangat populer untuk IoT karena sudah punya Wi-Fi dan Bluetooth.",
+    "Compiler mengubah bahasa pemrograman yang kita tulis menjadi bahasa mesin.",
+    "Prinsip 'Open Source' memungkinkan siapa saja melihat dan memperbaiki kode program.",
+    "Satu Gigabyte setara dengan sekitar 1.000 Megabyte data.",
+    "Routing adalah proses menentukan jalur terbaik untuk paket data di jaringan.",
+    "Bahasa pemrograman C sering disebut sebagai 'Ibu' dari banyak bahasa modern.",
+    "Artificial Intelligence membutuhkan jutaan data untuk belajar mengenali pola.",
+    "Internet dan World Wide Web (WWW) adalah dua hal yang berbeda!"
+];
+
+    function handleSpeechAction(mode = 'random') {
+    // Pastikan animasi lambaian ter-trigger
+    robotContainer.classList.remove('is-waving');
+    void robotContainer.offsetWidth; 
+    robotContainer.classList.add('is-waving');
+    
+    if(bubble) {
+        bubble.classList.add('active');
+        
+        if (typedInstance) {
+            typedInstance.destroy();
         }
 
-        window.addEventListener('load', () => {
-            resize();
-            animate();
+        let stringsToPlay;
+        if (mode === 'welcome') {
+            stringsToPlay = welcomeMessages.map(m => ` ${m}`);
+        } else {
+            // Pilih SATU pesan random saja tiap kali muncul
+            const randomMsg = idleMessages[Math.floor(Math.random() * idleMessages.length)];
+            stringsToPlay = [` ${randomMsg}`];
+        }
+
+        typedInstance = new Typed('#typed-text', {
+            strings: stringsToPlay,
+            typeSpeed: 30,
+            backSpeed: 20,
+            backDelay: 1500,
+            loop: false, // Kita matikan loop bawaan agar kita bisa kontrol jedanya manual
+            smartBackspace: true,
+            showCursor: false,
+            onComplete: () => {
+                // Tunggu sebentar agar user selesai membaca kalimat terakhir
+                setTimeout(() => {
+                    bubble.classList.remove('active');
+                    robotContainer.classList.remove('is-waving');
+                    
+                    // Setelah bubble tertutup, baru jalankan timer untuk info selanjutnya
+                    // Ini yang akan memberikan jeda "diam" bagi si robot
+                    resetIdleTimer(); 
+                }, 3000); // Bubble terbuka selama 3 detik setelah teks selesai diketik
+            }
         });
-        window.addEventListener('resize', resize);
-    </script>
+    }
+}
+
+    function resetIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
+    
+    // Robot akan diam selama 20 detik sebelum memberikan info random baru
+    idleTimer = setTimeout(() => {
+        // Hanya munculkan info jika chat AI sedang tidak dibuka
+        // (Asumsi chat container memiliki id 'chat-container')
+        const chatBox = document.getElementById('chat-container');
+        const isChatOpen = chatBox && chatBox.style.display === 'flex';
+        
+        if (!isChatOpen) {
+            handleSpeechAction('random');
+        }
+    }, 5000); // 20 detik waktu diam
+}
+
+    // --- INITIALIZATION ---
+    window.addEventListener('load', () => {
+        resize();
+        animate();
+
+        // Trigger sapaan awal
+        setTimeout(() => {
+            handleSpeechAction('welcome');
+        }, 1000);
+    });
+
+    window.addEventListener('resize', resize);
+
+    // Event Klik Robot
+    robotContainer.addEventListener('click', () => {
+        handleSpeechAction('random');
+        resetIdleTimer();
+    });
+</script>
 </body>
 </html>

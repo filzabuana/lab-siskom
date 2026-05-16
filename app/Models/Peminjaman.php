@@ -2,25 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Peminjaman extends Model
 {
-    protected $table = 'peminjamans'; 
+    use HasFactory;
+
+    protected $table = 'peminjamans';
 
     protected $guarded = [];
 
-    // Relasi ke User
+    // Relasi ke Mahasiswa yang meminjam
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Inventaris (Alat)
-    public function inventaris(): BelongsTo
+    // Relasi ke rincian alat yang dipinjam (Opsi B: Bisa disetujui sebagian)
+    public function details(): HasMany
     {
-        // Pastikan kolom di tabel peminjamans adalah inventaris_id
-        return $this->belongsTo(Inventaris::class, 'inventaris_id');
+        return $this->hasMany(PeminjamanDetail::class, 'peminjaman_id');
     }
 }

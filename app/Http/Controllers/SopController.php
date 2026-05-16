@@ -18,7 +18,11 @@ class SopController extends Controller
     public function show($slug)
     {
         $sop = Sop::where('slug', $slug)->firstOrFail();
-        return view('sop.show', compact('sop'));
+        
+        // Karena sudah di-cast di Model, ini sudah otomatis jadi array PHP
+        $flowchartsData = $sop->flowchart_data ?? [];
+
+        return view('sop.show', compact('sop', 'flowchartsData'));
     }
 
     public function create()
@@ -30,14 +34,13 @@ class SopController extends Controller
     {
         // 1. Validasi input
         $request->validate([
-    'judul' => 'required',
-    'kategori' => 'required',
-    'deskripsi' => 'required',
-    'file_pdf' => 'required|mimes:pdf|max:2048',
-    'alur_judul' => 'required|array|min:1', // Pastikan minimal ada 1 judul
-    'alur_kode' => 'required|array|min:1',  // Pastikan minimal ada 1 kode
-    'kategori_input_manual' => 'required_if:kategori,Lainnya',
-    ]);
+            'judul' => 'required',
+            'kategori' => 'required',
+            'deskripsi' => 'required',
+            'file_pdf' => 'required|mimes:pdf|max:2048',
+            'flowchart_data' => 'required', 
+            'kategori_input_manual' => 'required_if:kategori,Lainnya',
+        ]);
 
         // 2. Logika Penentuan Kategori
         $kategoriFinal = ($request->kategori === 'Lainnya') ? $request->kategori_input_manual : $request->kategori;
@@ -47,104 +50,73 @@ class SopController extends Controller
         $pdfName = time() . '_' . $pdfFile->getClientOriginalName();
         $pdfFile->move(public_path('dokumen-sop'), $pdfName);
 
-        // 4. Menggabungkan Banyak Alur menjadi JSON
-        $dataAlur = [];
-        if ($request->has('alur_judul')) {
-            foreach ($request->alur_judul as $index => $judul) {
-                $dataAlur[] = [
-                    'judul' => $judul,
-                    'kode'  => $request->alur_kode[$index]
-                ];
-            }
-        }
-        $alurJson = json_encode($dataAlur);
-
-        // 5. Simpan ke Database
+        // 4. Simpan ke Database
         Sop::create([
             'judul' => $request->judul,
             'slug' => Str::slug($request->judul),
             'kategori' => $kategoriFinal,
             'deskripsi' => $request->deskripsi,
             'file_pdf' => $pdfName,
-            'gambar_alur' => $alurJson, // Tersimpan sebagai teks JSON
+            // Penting: decode JSON string dari input hidden menjadi array PHP
+            'flowchart_data' => json_decode($request->flowchart_data, true),
         ]);
 
-        return redirect()->route('sop.index')->with('success', 'SOP dengan multi-alur berhasil disimpan!');
+        return redirect()->route('sop.index')->with('success', 'SOP berhasil disimpan!');
+    }
+
+    public function edit($id)
+    {
+        $sop = Sop::findOrFail($id);
+        return view('sop.edit', compact('sop'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $sop = Sop::findOrFail($id);
+
+        $request->validate([
+            'judul' => 'required',
+            'kategori' => 'required',
+            'deskripsi' => 'required',
+            'file_pdf' => 'nullable|mimes:pdf|max:2048',
+            'flowchart_data' => 'nullable', // Gunakan nama yang konsisten tanpa 's'
+        ]);
+
+        // 1. Update File PDF jika ada upload baru
+        if ($request->hasFile('file_pdf')) {
+            if (File::exists(public_path('dokumen-sop/' . $sop->file_pdf))) {
+                File::delete(public_path('dokumen-sop/' . $sop->file_pdf));
+            }
+            $pdfFile = $request->file('file_pdf');
+            $pdfName = time() . '_' . $pdfFile->getClientOriginalName();
+            $pdfFile->move(public_path('dokumen-sop'), $pdfName);
+            $sop->file_pdf = $pdfName;
+        }
+
+        // 2. Logika Penentuan Kategori
+        $kategoriFinal = ($request->kategori === 'Lainnya') ? $request->kategori_input_manual : $request->kategori;
+
+        // 3. Update data lainnya
+        $sop->update([
+            'judul' => $request->judul,
+            'slug' => Str::slug($request->judul),
+            'kategori' => $kategoriFinal,
+            'deskripsi' => $request->deskripsi,
+            'flowchart_data' => $request->flowchart_data ? json_decode($request->flowchart_data, true) : $sop->flowchart_data
+        ]);
+
+        return redirect()->route('sop.index')->with('success', 'SOP berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
         $sop = Sop::findOrFail($id);
 
-        // 1. Hapus file PDF dari folder public
         if (File::exists(public_path('dokumen-sop/' . $sop->file_pdf))) {
             File::delete(public_path('dokumen-sop/' . $sop->file_pdf));
-        }
-
-        // 2. Logika hapus file gambar (jika ada file lama yang bukan JSON)
-        // Karena sekarang kita pakai JSON, kita cek dulu apakah isinya file atau bukan
-        if (!Str::contains($sop->gambar_alur, ['{', '['])) {
-            if (File::exists(public_path('alur-sop/' . $sop->gambar_alur))) {
-                File::delete(public_path('alur-sop/' . $sop->gambar_alur));
-            }
         }
 
         $sop->delete();
-
         return redirect()->route('sop.index')->with('success', 'SOP berhasil dihapus!');
     }
-
-    public function edit($id)
-{
-    $sop = Sop::findOrFail($id);
-    // Decode JSON alur agar bisa di-looping di view
-    $listAlur = json_decode($sop->gambar_alur, true) ?? [];
-    return view('sop.edit', compact('sop', 'listAlur'));
-}
-
-public function update(Request $request, $id)
-{
-    $sop = Sop::findOrFail($id);
-
-    $request->validate([
-        'judul' => 'required',
-        'kategori' => 'required',
-        'deskripsi' => 'required',
-        'file_pdf' => 'nullable|mimes:pdf|max:2048', // optional saat edit
-        'alur_judul' => 'required|array',
-        'alur_kode' => 'required|array',
-    ]);
-
-    // 1. Update File PDF jika ada upload baru
-    if ($request->hasFile('file_pdf')) {
-        // Hapus file lama
-        if (File::exists(public_path('dokumen-sop/' . $sop->file_pdf))) {
-            File::delete(public_path('dokumen-sop/' . $sop->file_pdf));
-        }
-        $pdfFile = $request->file('file_pdf');
-        $pdfName = time() . '_' . $pdfFile->getClientOriginalName();
-        $pdfFile->move(public_path('dokumen-sop'), $pdfName);
-        $sop->file_pdf = $pdfName;
-    }
-
-    // 2. Olah ulang JSON Alur
-    $dataAlur = [];
-    foreach ($request->alur_judul as $index => $judul) {
-        $dataAlur[] = [
-            'judul' => $judul,
-            'kode'  => $request->alur_kode[$index]
-        ];
-    }
-
-    // 3. Update data lainnya
-    $sop->update([
-        'judul' => $request->judul,
-        'slug' => Str::slug($request->judul),
-        'kategori' => $request->kategori,
-        'deskripsi' => $request->deskripsi,
-        'gambar_alur' => json_encode($dataAlur),
-    ]);
-
-    return redirect()->route('sop.index')->with('success', 'SOP berhasil diperbarui!');
-}
 }

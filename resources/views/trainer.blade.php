@@ -31,7 +31,7 @@
     <main class="flex-grow flex items-center justify-center p-4 md:p-8">
         <div class="w-full max-w-6xl mx-auto">
             
-            <div id="app" class="relative">
+            <div id="" class="relative">
                 {{-- Glow effect --}}
                 <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl blur opacity-20"></div>
                 

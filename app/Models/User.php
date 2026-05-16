@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Permission\Traits\HasRoles; // WAJIB untuk Spatie Laravel-Permission
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles; // HasRoles ditambahkan di sini
 
     /**
      * The attributes that are mass assignable.
@@ -23,7 +24,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin', // Ditambahkan agar admin bisa dikelola via mass assignment
+        'is_admin',
+        'role',
+        'google_id', // Ditambahkan untuk Socialite
+        'avatar',    // Ditambahkan untuk Socialite
     ];
 
     /**
@@ -46,7 +50,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean', // Memastikan is_admin dibaca sebagai true/false
+            'is_admin' => 'boolean',
+            'google_id' => 'string',
         ];
     }
 

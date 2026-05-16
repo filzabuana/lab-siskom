@@ -1,3 +1,204 @@
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&family=JetBrains+Mono:wght@500;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+
+    /* =======================================================
+        ARTICLE ENGINE (Lab Programming Theme)
+    ======================================================= */
+
+    .article-markdown-engine {
+        @apply text-slate-700 dark:text-slate-300 text-[1.05rem] leading-[1.8] font-normal text-left;
+        font-family: 'Inter', sans-serif;
+        counter-reset: step-counter;
+    }
+
+    /* Heading 2 dengan gaya "Terminal/Lab Section" */
+    .article-markdown-engine h2 {
+        @apply text-2xl md:text-3xl font-extrabold text-railway-dark dark:text-white mt-16 mb-6 tracking-tight flex items-center;
+    }
+
+    .article-markdown-engine h2::before {
+        content: '//';
+        @apply text-railway-accent mr-3 font-mono opacity-70 text-2xl;
+    }
+
+    /* Heading 3 */
+    .article-markdown-engine h3 {
+        @apply text-lg md:text-xl font-bold text-slate-800 dark:text-slate-100 mt-10 mb-4 flex items-center;
+    }
+
+    .article-markdown-engine p {
+        @apply mb-6;
+    }
+
+    /* Inline Code - Bergaya ala compiler */
+    .article-markdown-engine :not(pre) > code {
+        @apply bg-slate-100 dark:bg-railway-card text-railway-accent px-1.5 py-0.5 rounded-md text-[0.9em] font-mono border border-slate-200 dark:border-railway-border;
+    }
+
+    /* =======================================================
+        TABLE (Clean & Data-Driven)
+    ======================================================= */
+
+    .article-markdown-engine table {
+        @apply w-full my-10 overflow-hidden border-collapse bg-white dark:bg-railway-dark/50 shadow-sm border border-slate-200 dark:border-railway-border rounded-xl;
+    }
+
+    .article-markdown-engine th {
+        @apply bg-slate-50 dark:bg-railway-card p-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-railway-border;
+    }
+
+    .article-markdown-engine td {
+        @apply p-4 border-b border-slate-100 dark:border-railway-border/50 text-sm align-top;
+    }
+
+   /* =======================================================
+        LIST (Programmer Style - Split Logic)
+    ======================================================= */
+
+    .article-markdown-engine ul, 
+    .article-markdown-engine ol {
+        @apply space-y-4 mb-8 p-0 list-none;
+    }
+
+    .article-markdown-engine ul li, 
+    .article-markdown-engine ol li {
+        @apply relative pl-8 text-slate-700 dark:text-slate-300 transition-all duration-200;
+    }
+
+    /* --- UNORDERED LIST (Simbol Terminal) --- */
+    .article-markdown-engine ul li::before {
+        content: ">"; 
+        @apply absolute left-0 top-1 text-railway-accent font-mono font-black text-sm opacity-80;
+    }
+
+    /* --- ORDERED LIST (Nomor Bergaya Index Array) --- */
+    /* Kita gunakan counter agar nomornya bisa kita hias sendiri */
+    .article-markdown-engine ol {
+        counter-reset: lab-counter;
+    }
+
+    .article-markdown-engine ol li {
+        counter-increment: lab-counter;
+    }
+
+    .article-markdown-engine ol li::before {
+        /* Menggunakan format [0], [1], dst agar ala programmer banget */
+        content: "[" counter(lab-counter) "]"; 
+        @apply absolute left-0 top-1 text-railway-accent font-mono font-bold text-[11px] opacity-70;
+    }
+
+    /* Efek Hover */
+    .article-markdown-engine ul li:hover, 
+    .article-markdown-engine ol li:hover {
+        @apply translate-x-1 text-slate-900 dark:text-white;
+    }
+
+    /* List Bersarang (Nested) */
+    .article-markdown-engine li ul, 
+    .article-markdown-engine li ol {
+        @apply mt-4 mb-0 ml-2 border-l-2 border-slate-100 dark:border-slate-800/50;
+    }
+
+    /* =======================================================
+        BLOCKQUOTE (Note/Warning Lab)
+    ======================================================= */
+
+    .article-markdown-engine blockquote {
+        @apply border-l-4 border-railway-accent bg-blue-50/50 dark:bg-railway-card/50 p-6 my-10 rounded-r-xl text-slate-600 dark:text-slate-400 border-opacity-50;
+    }
+
+    /* =======================================================
+        COPY BUTTON STYLE
+    ======================================================= */
+
+    .copy-button {
+        @apply absolute top-3 right-4 px-3 py-1.5 rounded-lg text-xs font-medium 
+               bg-white/10 text-slate-400 border border-white/10 
+               hover:bg-railway-accent hover:text-white transition-all duration-200 
+               opacity-0 backdrop-blur-sm z-10;
+        cursor: pointer;
+    }
+
+    /* Menampilkan tombol saat pre di-hover */
+    .article-markdown-engine pre:hover .copy-button {
+        @apply opacity-100;
+    }
+
+    /* =======================================================
+    MOBILE TOC (Clean Glassmorphism)
+======================================================= */
+
+@media (max-width: 1023px) {
+    #toc-box {
+        @apply fixed top-0 right-0 h-screen w-[85%] max-w-[320px] z-[100] transition-transform duration-300 ease-in-out shadow-2xl translate-x-full p-8;
+        /* Hapus background lama, gunakan background dari Tailwind class di HTML atau definisikan di sini */
+        background: rgba(255, 255, 255, 0.98); 
+        backdrop-filter: blur(10px);
+    }
+
+    /* Ini bagian yang paling penting untuk Dark Mode */
+    .dark #toc-box {
+        background: rgba(15, 23, 42, 0.98) !important; /* Biru Gelap (Slate 900) */
+        border-left: 1px solid rgba(30, 41, 59, 0.5);
+    }
+
+    #toc-box.active {
+        transform: translateX(0);
+    }
+}
+}
+
+/* =======================================================
+    PRISM CODE ENGINE & LAYOUT FIX
+======================================================= */
+
+.article-markdown-engine pre {
+    background: #0a0f1c !important; 
+    @apply p-6 md:p-8 rounded-2xl my-10 border border-railway-border shadow-2xl overflow-x-auto relative;
+}
+
+/* Efek "Dot" Window macOS */
+.article-markdown-engine pre::before {
+    content: '';
+    @apply absolute top-4 left-4 flex gap-1.5;
+    background-image: radial-gradient(circle, #ff5f56 5px, transparent 5px),
+                      radial-gradient(circle, #ffbd2e 5px, transparent 5px),
+                      radial-gradient(circle, #27c93f 5px, transparent 5px);
+    background-size: 15px 15px, 15px 15px, 15px 15px;
+    background-position: 0px 0px, 20px 0px, 40px 0px;
+    background-repeat: no-repeat;
+    height: 15px;
+    width: 60px;
+}
+
+.article-markdown-engine code {
+    @apply font-mono text-[0.95rem] leading-relaxed !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+}
+
+/* Scrollbar Style */
+.article-markdown-engine pre::-webkit-scrollbar {
+    height: 6px;
+}
+.article-markdown-engine pre::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full;
+}
+
+/* Global Layout Fix */
+main.container, .max-w-6xl, section, body, html {
+    overflow: visible !important;
+}
+
+@media (min-width: 1024px) {
+    aside .lg\:sticky {
+        position: sticky !important;
+        top: 2rem !important;
+        z-index: 40;
+    }
+}

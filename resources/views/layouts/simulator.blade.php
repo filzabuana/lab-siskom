@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Lab Komputasi - Simulator' }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app-blade.js'])
     <style>
         /* Reset dasar untuk memastikan canvas benar-benar memenuhi layar */
         body, html {
@@ -20,7 +20,7 @@
     </style>
 </head>
 <body class="bg-[#020617] antialiased"> {{-- Gunakan warna yang sama persis dengan bg simulator --}}
-    <div id="app" class="min-h-screen"> {{-- Pastikan div utama punya tinggi minimal layar --}}
+    <div id="app-site" class="min-h-screen"> {{-- Pastikan div utama punya tinggi minimal layar --}}
         @yield('content')
     </div>
 </body>

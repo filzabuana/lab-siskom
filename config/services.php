@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    // config/services.php
+
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        // Tambahkan baris di bawah ini untuk mengabaikan verifikasi SSL di lokal
+        'guzzle' => [
+            'verify' => false,
+        ],
+    ],
 ];
