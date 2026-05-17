@@ -5,7 +5,7 @@ import { createPinia } from 'pinia';
 import { useAuthStore } from './Stores/useAuthStore';
 import { ZiggyVue } from 'ziggy-js'; 
 import { Ziggy } from './ziggy'; 
-import vuetify from './Plugins/vuetify'; 
+
 
 createInertiaApp({
     title: (title) => `${title} - Lab FMIPA UNTAN`,
@@ -27,7 +27,7 @@ createInertiaApp({
         // 3. Gunakan Plugin secara berurutan
         app.use(plugin)
            .use(pinia)
-           .use(vuetify);
+          
 
         // 4. Integrasi Ziggy (Routing)
         if (typeof Ziggy !== 'undefined') {

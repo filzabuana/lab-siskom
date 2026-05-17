@@ -32,13 +32,16 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $user ? [
-                    'id'       => $user->id,
-                    'name'     => $user->name,
-                    'email'    => $user->email,
-                    'nim'      => $user->nim,
-                    'avatar'   => $user->avatar, // <--- INI KUNCI UTAMANYA, PAK!
-                    'is_admin' => $user->is_admin,
-                    'roles'    => $user->getRoleNames(), 
+                    'id'        => $user->id,
+                    'name'      => $user->name,
+                    'email'     => $user->email,
+                    // 1. SESUAIKAN KEY: Ubah dari 'nim' menjadi 'nim_nip' agar sinkron dengan Vue & Database
+                    'nim_nip'   => $user->nim_nip, 
+                    'avatar'    => $user->avatar,
+                    'is_admin'  => $user->is_admin,
+                    // 2. TAMBAHKAN INI: Kirim google_id agar Vue bisa mendeteksi metode login SSO
+                    'google_id' => $user->google_id, 
+                    'roles'     => $user->getRoleNames(), 
                 ] : null,
                 'impersonator' => $request->session()->has('impersonate'),
             ],

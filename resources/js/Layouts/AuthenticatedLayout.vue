@@ -38,9 +38,9 @@
           drawer ? 'translate-x-0' : '-translate-x-full',
           $page.props.auth.impersonator ? 'top-[56px] md:top-[48px]' : 'top-0'
         ]"
-        class="fixed inset-y-0 left-0 z-[70] w-[285px] bg-white dark:bg-railway-card border-r border-slate-200 dark:border-railway-border transition-all duration-300 ease-in-out lg:translate-x-0 shadow-sm dark:shadow-2xl"
+        class="fixed inset-y-0 left-0 z-[70] w-[285px] bg-white dark:bg-railway-card border-r border-slate-200 dark:border-railway-border transition-all duration-300 ease-in-out lg:translate-x-0 shadow-sm dark:shadow-2xl flex flex-col"
       >
-        <div class="p-8 flex items-center justify-between">
+        <div class="p-8 flex items-center justify-between shrink-0">
           <div class="flex items-center space-x-3">
             <div class="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 ring-4 ring-blue-500/10">
               <i class="bi bi-cpu-fill text-white text-2xl"></i>
@@ -57,10 +57,25 @@
           </button>
         </div>
 
-        <div class="mx-6 mb-6 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-railway-border to-transparent"></div>
+        <div class="mx-6 mb-4 h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-railway-border to-transparent shrink-0"></div>
 
-        <nav :class="`px-4 space-y-1.5 overflow-y-auto ${$page.props.auth.impersonator ? 'max-h-[calc(100vh-320px)]' : 'max-h-[calc(100vh-280px)]'}`">
+        <nav class="flex-1 px-4 pb-8 space-y-1.5 overflow-y-auto">
           
+          <div class="mb-6 bg-slate-50 dark:bg-railway-dark/50 border border-slate-200 dark:border-railway-border/60 rounded-2xl p-4 flex items-center gap-3">
+            <div class="w-11 h-11 shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-black text-white italic shadow-lg ring-2 ring-white dark:ring-railway-card uppercase overflow-hidden">
+              <img v-if="$page.props.auth.user?.avatar" :src="$page.props.auth.user.avatar" class="w-full h-full object-cover" />
+              <span v-else>{{ $page.props.auth.user?.name ? $page.props.auth.user.name.charAt(0) : '?' }}</span>
+            </div>
+            <div class="overflow-hidden">
+              <div class="text-[10px] font-black truncate uppercase text-slate-900 dark:text-white leading-tight">
+                {{ $page.props.auth.user?.name || 'Guest' }}
+              </div>
+              <div class="text-[8px] font-bold text-blue-500 uppercase tracking-tighter truncate mt-1">
+                {{ safeDisplayRole }}
+              </div>
+            </div>
+          </div>
+
           <button @click="visit('dashboard')" 
                   :class="route().current('dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50'"
                   class="group w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-black text-[11px] tracking-widest transition-all uppercase italic text-left">
@@ -68,7 +83,7 @@
             DASHBOARD
           </button>
 
-          <div v-if="hasRole(['mahasiswa', 'asisten_praktikum']) || $page.props.auth.user.is_admin" class="pt-6">
+          <div v-if="hasRole(['mahasiswa', 'asisten_praktikum']) || $page.props.auth.user.is_admin" class="pt-4">
             <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Layanan Academic</div>
             
             <button @click="visit('bebas-lab.form')" 
@@ -93,7 +108,7 @@
             </button>
           </div>
 
-          <div v-if="hasRole(['plp', 'kalab', 'dosen']) || $page.props.auth.user.is_admin" class="pt-6">
+          <div v-if="hasRole(['plp', 'kepala_lab', 'dosen']) || $page.props.auth.user.is_admin" class="pt-4">
             <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Manajemen Internal</div>
             
             <button v-if="hasRole(['plp']) || $page.props.auth.user.is_admin"
@@ -111,6 +126,14 @@
               INVENTORI ASET
             </button>
 
+            <button v-if="hasRole(['plp', 'kepala_lab']) || $page.props.auth.user.is_admin"
+                    @click="visit('admin.posts.index')" 
+                    :class="route().current('admin.posts.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
+              <i class="bi bi-journal-text text-lg"></i>
+              PENULISAN BLOG
+            </button>
+
             <button v-if="$page.props.auth.user.is_admin" 
                     @click="visit('admin.users.index')" 
                     :class="route().current('admin.users.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
@@ -120,22 +143,6 @@
             </button>
           </div>
         </nav>
-
-        <div class="absolute bottom-0 w-full p-4 bg-white dark:bg-railway-card border-t border-slate-100 dark:border-railway-border">
-          <div class="bg-slate-50 dark:bg-railway-dark/50 border border-slate-200 dark:border-railway-border/60 rounded-2xl p-4 flex items-center gap-3">
-            <div class="w-11 h-11 shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-black text-white italic shadow-lg ring-2 ring-white dark:ring-railway-card uppercase">
-              {{ $page.props.auth.user?.name ? $page.props.auth.user.name.charAt(0) : '?' }}
-            </div>
-            <div class="overflow-hidden">
-              <div class="text-[10px] font-black truncate uppercase text-slate-900 dark:text-white leading-tight">
-                {{ $page.props.auth.user?.name || 'Guest' }}
-              </div>
-              <div class="text-[8px] font-bold text-blue-500 uppercase tracking-tighter truncate mt-1">
-                {{ safeDisplayRole }}
-              </div>
-            </div>
-          </div>
-        </div>
       </aside>
 
       <div class="lg:ml-[285px] transition-all duration-300 min-h-screen flex flex-col">
@@ -171,16 +178,56 @@
             </button>
 
             <button @click="toggleTheme" class="group relative p-2 w-10 h-10 flex items-center justify-center rounded-2xl border border-slate-200 dark:border-railway-border hover:border-blue-500 bg-white dark:bg-railway-dark transition-all shadow-sm">
-              <i v-if="isDark" class="bi bi-sun-fill text-amber-500 text-lg"></i>
-              <i v-else class="bi bi-moon-stars-fill text-blue-700 text-lg"></i>
+              <i class="bi bi-sun-fill text-amber-500 text-lg" v-if="isDark"></i>
+              <i class="bi bi-moon-stars-fill text-blue-700 text-lg" v-else></i>
             </button>
 
-            <div class="hidden sm:block h-8 w-px bg-slate-200 dark:bg-railway-border mx-1"></div>
+            <div class="h-8 w-px bg-slate-200 dark:bg-railway-border mx-1"></div>
 
-            <button @click="logout" class="flex items-center gap-2 group text-red-500 font-black text-[10px] tracking-widest italic uppercase px-3 py-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all">
-              <span class="hidden md:inline-block">SIGNOUT</span>
-              <i class="bi bi-power text-xl"></i>
-            </button>
+            <div class="relative">
+              <button 
+                @click="showProfileDropdown = !showProfileDropdown"
+                class="flex items-center gap-2 p-1 pr-3 rounded-2xl border border-slate-200 dark:border-railway-border bg-white dark:bg-railway-dark hover:border-blue-500/50 transition-all shadow-sm active:scale-95 group"
+              >
+                <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xs font-black uppercase tracking-tighter italic overflow-hidden shadow-inner">
+                  <img v-if="$page.props.auth.user?.avatar" :src="$page.props.auth.user.avatar" class="w-full h-full object-cover" />
+                  <span v-else>{{ $page.props.auth.user?.name ? $page.props.auth.user.name.charAt(0) : '?' }}</span>
+                </div>
+                <i class="bi bi-chevron-down text-[10px] text-slate-400 group-hover:text-slate-600 dark:group-hover:text-white transition-colors"></i>
+              </button>
+
+              <Transition name="fade">
+                <div 
+                  v-if="showProfileDropdown"
+                  class="absolute right-0 mt-2 w-56 bg-white dark:bg-railway-card border border-slate-200 dark:border-railway-border rounded-2xl shadow-xl py-2 z-50 animate-dropdown"
+                >
+                  <div class="px-4 py-2.5 border-b border-slate-100 dark:border-railway-border mb-1">
+                    <p class="text-[9px] font-black tracking-widest text-blue-600 dark:text-blue-400 uppercase italic">Identitas Login</p>
+                    <p class="text-xs font-black uppercase text-slate-900 dark:text-white truncate mt-1">{{ $page.props.auth.user?.name }}</p>
+                    <p class="text-[9px] font-mono text-slate-400 truncate mt-0.5">{{ $page.props.auth.user?.email }}</p>
+                  </div>
+
+                  <button 
+                    @click="visit('profile.edit')"
+                    class="w-full flex items-center gap-3 px-4 py-2 text-[10px] font-black tracking-wider uppercase italic text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-400 transition-all text-left"
+                  >
+                    <i class="bi bi-person-gear text-base"></i>
+                     Profil
+                  </button>
+
+                  <div class="my-1 h-px bg-slate-100 dark:bg-railway-border"></div>
+
+                  <button 
+                    @click="logout"
+                    class="w-full flex items-center gap-3 px-4 py-2 text-[10px] font-black tracking-wider uppercase italic text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all text-left"
+                  >
+                    <i class="bi bi-power text-base"></i>
+                    Sign Out
+                  </button>
+                </div>
+              </Transition>
+            </div>
+
           </div>
         </header>
 
@@ -190,7 +237,7 @@
           </div>
         </main>
 
-        <footer class="p-8 border-t border-slate-100 dark:border-railway-border text-center">
+        <footer class="p-8 border-t border-slate-100 dark:border-railway-border text-center shrink-0">
             <p class="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.5em] italic">
                 &copy; 2026 Laboratorium SISKOM • FMIPA UNTAN
             </p>
@@ -206,16 +253,19 @@ import { router, usePage } from '@inertiajs/vue3';
 
 const drawer = ref(false); 
 const isDark = ref(true);
+const showProfileDropdown = ref(false); // State pengendali menu dropdown kanan atas
 
 const hasRole = (roleNames) => {
     const userRoles = usePage().props.auth.user?.roles || [];
     return roleNames.some(role => userRoles.includes(role));
 };
 
+// Menutup sidebar otomatis jika pindah halaman (Mobile view)
 watch(() => usePage().url, () => {
   if (window.innerWidth < 1024) {
     drawer.value = false;
   }
+  showProfileDropdown.value = false; // Setiap ganti halaman dropdown otomatis tertutup
 });
 
 const safeDisplayRole = computed(() => {
@@ -254,6 +304,13 @@ onMounted(() => {
     isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
   applyTheme();
+
+  // Listener global: Menutup dropdown jika user mengklik di luar area menu profil
+  window.addEventListener('click', (e) => {
+    if (!e.target.closest('.relative')) {
+      showProfileDropdown.value = false;
+    }
+  });
 });
 
 const visit = (routeName) => { 
@@ -278,11 +335,21 @@ const leaveImpersonate = () => {
 <style scoped>
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-.dark ::-webkit-scrollbar-thumb { background: #1f2937; } /* Menyesuaikan warna border railway */
+.dark ::-webkit-scrollbar-thumb { background: #1f2937; } 
 .slide-down-enter-active, .slide-down-leave-active { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 .slide-down-enter-from, .slide-down-leave-to { transform: translateY(-100%); opacity: 0; }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* Animasi dropdown kecil yang halus */
+.animate-dropdown {
+  animation: dropdownIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 main { animation: pageIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(10px); }

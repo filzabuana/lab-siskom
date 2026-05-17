@@ -32,12 +32,11 @@ Route::middleware('auth')->group(function () {
 Route::get('/', [PostController::class, 'welcome'])->name('welcome');
 Route::get('/about', fn() => view('about'))->name('about');
 
-// Blog (Publik - Read Only)
+// Blog (Publik - Read Only Bersetting Blade)
 Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
 
-// --- UPDATE: Katalog Publik Khusus Berbasis BLADE ---
-// Mengarah ke views/katalog/index.blade.php dan views/admin/inventaris/show.blade.php
+// Katalog Publik Khusus Berbasis BLADE
 Route::get('/katalog', [InventarisController::class, 'katalogPublicIndex'])->name('katalog.index');
 Route::get('/katalog/{id}', [InventarisController::class, 'katalogPublicShow'])->name('katalog.show');
 
@@ -55,22 +54,30 @@ Route::name('simulator.')->group(function () {
 });
 Route::view('/apps', 'apps.index')->name('apps.index');
 
+Route::controller(SopController::class)->group(function () {
+    Route::get('/sop', 'index')->name('sop.index');
+    Route::get('/sop/{slug}', 'show')->name('sop.show');
+});
+
 /*
 |--------------------------------------------------------------------------
 | 3. PROTECTED ROUTES (Inertia - Login Required)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'verified'])->group(function () {
-    
-    // Dashboard Utama
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Profile Management
+Route::middleware(['auth'])->group(function () {
     Route::controller(ProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
         Route::patch('/profile', 'update')->name('profile.update');
         Route::delete('/profile', 'destroy')->name('profile.destroy');
     });
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    // Dashboard Utama
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
 
     // Fitur Peminjaman Mahasiswa (Pure Inertia System)
     Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
@@ -85,10 +92,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-| 4. ADMIN & PLP AREA (Spatie Roles)
+    | 4. ADMIN & PLP AREA (Spatie Roles)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:superadmin|plp'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:kepala_lab|plp'])->prefix('admin')->name('admin.')->group(function () {
         
         // Manajemen Peminjaman (Admin/PLP)
         Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
@@ -109,8 +116,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
         Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
 
-        // Konten & SOP
-        Route::resource('posts', PostController::class);
+        // Konten Blog (Admin Side - Full Inertia)
+        // Bypass rute index bawaan resource agar mengarah ke fungsi indexAdmin di controller
+        Route::get('posts', [PostController::class, 'indexAdmin'])->name('posts.index');
+        Route::resource('posts', PostController::class)->except(['index']);
+        
+        // SOP Admin
         Route::resource('sop', SopController::class);
     });
 });

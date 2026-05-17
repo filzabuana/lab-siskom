@@ -20,7 +20,7 @@
                         @click="navigateTo('admin.users.create')"
                         class="bg-blue-600 hover:bg-blue-700 text-white h-[56px] rounded-2xl font-black italic tracking-widest text-[10px] px-8 shadow-xl shadow-blue-600/20 transition-all flex items-center gap-2"
                     >
-                        <i class="mdi mdi-account-plus text-base"></i>
+                        <i class="bi bi-person-plus-fill text-sm"></i>
                         REGISTER AKUN
                     </button>
 
@@ -51,8 +51,8 @@
                                         :style="{ backgroundColor: getAvatarBg(user) }"
                                     >
                                         <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
-                                        <i v-else-if="user.is_admin" class="mdi mdi-shield-check text-amber-500"></i>
-                                        <i v-else-if="user.roles_list?.includes('plp')" class="mdi mdi-account-badge text-purple-500"></i>
+                                        <i v-else-if="user.is_admin" class="bi bi-shield-check text-amber-500 text-lg"></i>
+                                        <i v-else-if="user.roles_list?.includes('plp')" class="bi bi-person-badge-fill text-purple-500 text-lg"></i>
                                         <span v-else class="text-blue-600">{{ user.name.substring(0, 2).toUpperCase() }}</span>
                                     </div>
                                     
@@ -83,7 +83,7 @@
                                     <span class="text-lg font-black text-red-600 dark:text-red-500 leading-none italic">{{ user.peminjamans_count }}</span>
                                     <span class="text-[8px] font-black text-red-400 uppercase tracking-tighter">Items</span>
                                 </div>
-                                <i v-else class="mdi mdi-check-all text-green-500 text-xl"></i>
+                                <i v-else class="bi bi-check2-all text-green-500 text-xl font-bold"></i>
                             </td>
 
                             <td class="px-8 py-5 text-right">
@@ -93,7 +93,7 @@
                                     class="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all inline-flex items-center justify-center"
                                     title="Manage Authority"
                                 >
-                                    <i class="mdi mdi-shield-account text-xl"></i>
+                                    <i class="bi bi-shield-lock-fill text-base"></i>
                                 </button>
                             </td>
                         </tr>
@@ -108,7 +108,7 @@
                     <div class="flex items-center gap-5 mb-6">
                         <div class="w-16 h-16 flex items-center justify-center rounded-xl border shadow-inner overflow-hidden bg-slate-50 border-slate-200 dark:bg-zinc-950 dark:border-slate-800">
                             <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
-                            <i v-else :class="['mdi text-2xl', user.is_admin ? 'text-amber-500 mdi-shield-lock' : 'text-blue-600 mdi-account']"></i>
+                            <i v-else :class="['bi text-xl', user.is_admin ? 'text-amber-500 bi-shield-lock-fill' : 'text-blue-600 bi-person-fill']"></i>
                         </div>
 
                         <div class="flex-1 min-w-0">
@@ -132,7 +132,7 @@
                             </div>
                             <div class="text-center">
                                 <p class="text-[8px] font-black uppercase mb-0.5 text-slate-500 dark:text-slate-400">Bebas Lab</p>
-                                <i :class="['mdi text-xs', user.bebas_lab ? 'text-green-500 mdi-check-circle' : 'text-slate-400 mdi-minus-circle-outline']"></i>
+                                <i :class="['bi text-xs', user.bebas_lab ? 'text-green-500 bi-check-circle-fill' : 'text-slate-400 bi-dash-circle']"></i>
                             </div>
                         </div>
 
@@ -150,7 +150,7 @@
 
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 
 // Props dari Controller
 const props = defineProps({
@@ -172,3 +172,19 @@ const getAvatarBg = (user) => {
     return 'rgba(59, 130, 246, 0.1)'; 
 };
 </script>
+
+<style>
+/* Memastikan style list bawaan tidak merusak layout global */
+.prose ul, .prose-invert ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.prose ol, .prose-invert ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+</style>

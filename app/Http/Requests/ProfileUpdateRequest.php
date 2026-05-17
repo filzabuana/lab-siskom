@@ -26,6 +26,8 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            // TAMBAHKAN BARIS INI: Mengizinkan data nim_nip lolos sensor validasi Laravel
+            'nim_nip' => ['nullable', 'string', 'max:30'], 
         ];
     }
 }

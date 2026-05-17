@@ -78,31 +78,38 @@
     }
 
     /* --- ORDERED LIST (Nomor Bergaya Index Array) --- */
-    /* Kita gunakan counter agar nomornya bisa kita hias sendiri */
     .article-markdown-engine ol {
         counter-reset: lab-counter;
+        @apply list-none p-0 m-0;
     }
 
-    .article-markdown-engine ol li {
+    /* Target hanya untuk LI yang berada di tingkat pertama (Utama) */
+    .article-markdown-engine > ol > li {
         counter-increment: lab-counter;
+        @apply relative pl-8 mb-4;
     }
 
-    .article-markdown-engine ol li::before {
-        /* Menggunakan format [0], [1], dst agar ala programmer banget */
+    .article-markdown-engine > ol > li::before {
         content: "[" counter(lab-counter) "]"; 
         @apply absolute left-0 top-1 text-railway-accent font-mono font-bold text-[11px] opacity-70;
     }
 
-    /* Efek Hover */
-    .article-markdown-engine ul li:hover, 
-    .article-markdown-engine ol li:hover {
-        @apply translate-x-1 text-slate-900 dark:text-white;
+    /* --- SUB-LIST BERSARANG (NESTED ORDERED LIST) --- */
+    .article-markdown-engine ol li ol {
+        counter-reset: lab-sub-counter;
+        @apply mt-3 mb-2 ml-2 pl-0 list-none border-l border-slate-100 dark:border-slate-800/50;
     }
 
-    /* List Bersarang (Nested) */
-    .article-markdown-engine li ul, 
-    .article-markdown-engine li ol {
-        @apply mt-4 mb-0 ml-2 border-l-2 border-slate-100 dark:border-slate-800/50;
+    /* Target untuk LI di dalam sub-list */
+    .article-markdown-engine ol li ol li {
+        counter-increment: lab-sub-counter;
+        @apply relative pl-8 mb-2 text-sm text-slate-600 dark:text-slate-400;
+    }
+
+    /* Matikan counter induk agar tidak diwariskan ke sub-list */
+    .article-markdown-engine ol li ol li::before {
+        content: "[" counter(lab-sub-counter, lower-alpha) "]" !important; /* Mengubah menjadi [a], [b] */
+        @apply absolute left-0 top-0.5 text-blue-500 dark:text-cyan-400 font-mono font-medium text-[11px] opacity-90 !important;
     }
 
     /* =======================================================
@@ -114,80 +121,110 @@
     }
 
     /* =======================================================
-        COPY BUTTON STYLE
+        COPY BUTTON STYLE (Dihapus/Dikosongkan karena diganti tombol melayang baru)
     ======================================================= */
 
     .copy-button {
-        @apply absolute top-3 right-4 px-3 py-1.5 rounded-lg text-xs font-medium 
-               bg-white/10 text-slate-400 border border-white/10 
-               hover:bg-railway-accent hover:text-white transition-all duration-200 
-               opacity-0 backdrop-blur-sm z-10;
-        cursor: pointer;
-    }
-
-    /* Menampilkan tombol saat pre di-hover */
-    .article-markdown-engine pre:hover .copy-button {
-        @apply opacity-100;
+        display: none !important;
     }
 
     /* =======================================================
-    MOBILE TOC (Clean Glassmorphism)
-======================================================= */
+        MOBILE TOC (Clean Glassmorphism)
+    ======================================================= */
 
-@media (max-width: 1023px) {
-    #toc-box {
-        @apply fixed top-0 right-0 h-screen w-[85%] max-w-[320px] z-[100] transition-transform duration-300 ease-in-out shadow-2xl translate-x-full p-8;
-        /* Hapus background lama, gunakan background dari Tailwind class di HTML atau definisikan di sini */
-        background: rgba(255, 255, 255, 0.98); 
-        backdrop-filter: blur(10px);
-    }
+    @media (max-width: 1023px) {
+        #toc-box {
+            @apply fixed top-0 right-0 h-screen w-[85%] max-w-[320px] z-[100] transition-transform duration-300 ease-in-out shadow-2xl translate-x-full p-8;
+            background: rgba(255, 255, 255, 0.98); 
+            backdrop-filter: blur(10px);
+        }
 
-    /* Ini bagian yang paling penting untuk Dark Mode */
-    .dark #toc-box {
-        background: rgba(15, 23, 42, 0.98) !important; /* Biru Gelap (Slate 900) */
-        border-left: 1px solid rgba(30, 41, 59, 0.5);
-    }
+        .dark #toc-box {
+            background: rgba(15, 23, 42, 0.98) !important; 
+            border-left: 1px solid rgba(30, 41, 59, 0.5);
+        }
 
-    #toc-box.active {
-        transform: translateX(0);
+        #toc-box.active {
+            transform: translateX(0);
+        }
     }
-}
 }
 
 /* =======================================================
-    PRISM CODE ENGINE & LAYOUT FIX
+    PRISM CODE ENGINE & LAYOUT FIX (PERBAIKAN TOTAL)
 ======================================================= */
 
 .article-markdown-engine pre {
-    background: #0a0f1c !important; 
-    @apply p-6 md:p-8 rounded-2xl my-10 border border-railway-border shadow-2xl overflow-x-auto relative;
+    background: #1e293b !important; 
+    margin: 1.75rem 0 !important;
+    padding: 0 !important; /* Reset padding agar header inline menempel sempurna */
+    border: 1px solid #334155 !important;
+    border-radius: 1rem !important; 
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5) !important;
+    display: block !important;
+    position: relative !important;
+    overflow-x: auto !important; /* Paksa muncul scrollbar horizontal alih-alih meluber */
 }
 
-/* Efek "Dot" Window macOS */
-.article-markdown-engine pre::before {
-    content: '';
-    @apply absolute top-4 left-4 flex gap-1.5;
-    background-image: radial-gradient(circle, #ff5f56 5px, transparent 5px),
-                      radial-gradient(circle, #ffbd2e 5px, transparent 5px),
-                      radial-gradient(circle, #27c93f 5px, transparent 5px);
-    background-size: 15px 15px, 15px 15px, 15px 15px;
-    background-position: 0px 0px, 20px 0px, 40px 0px;
-    background-repeat: no-repeat;
-    height: 15px;
-    width: 60px;
+/* Bulatan macOS dinonaktifkan total */
+.article-markdown-engine pre::before,
+.article-markdown-engine pre::after {
+    display: none !important;
+    content: none !important;
 }
 
-.article-markdown-engine code {
-    @apply font-mono text-[0.95rem] leading-relaxed !important;
+/* [KOREKSI] Hanya targetkan CODE yang berada di dalam blok PRE (Code Block) */
+.article-markdown-engine pre code {
+    display: block !important;
+    padding: 1.25rem 1.5rem !important; /* Padding sejati teks kode dialihkan ke sini */
+    @apply font-mono text-[0.88rem] leading-relaxed !important;
     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    color: #e2e8f0;
+    
+    /* Kunci Utama Pendeteksi Kode Panjang Tanpa Turun Baris */
+    white-space: pre !important;        /* Paksa lurus mendatar */
+    word-break: normal !important;      /* Matikan pemotongan paksa */
+    word-wrap: normal !important;       /* Matikan pembungkusan otomatis */
+    overflow-x: visible !important;
 }
 
-/* Scrollbar Style */
+/* [KOREKSI] Kembalikan kodrat CODE inline agar tetap mengalir sebaris di dalam kalimat */
+.article-markdown-engine :not(pre) > code {
+    display: inline !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    @apply bg-slate-100 dark:bg-railway-card text-railway-accent px-1.5 py-0.5 rounded-md text-[0.9em] font-mono border border-slate-200 dark:border-railway-border !important;
+}
+
+/* Style Tambahan untuk Menjaga Header Tetap Sticky saat Di-scroll Horizontal */
+.code-block-header-inline {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background-color: #0f172a !important; /* Lebih gelap */
+    padding: 0.6rem 1.25rem !important;
+    border-bottom: 1px solid #334155 !important;
+    border-radius: 1rem 1rem 0 0;
+    position: sticky !important; /* Mengunci header di posisi atas kiri */
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+/* Scrollbar Style Custom */
 .article-markdown-engine pre::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
+}
+.article-markdown-engine pre::-webkit-scrollbar-track {
+    background: #0f172a;
+    border-radius: 0 0 1rem 1rem;
 }
 .article-markdown-engine pre::-webkit-scrollbar-thumb {
-    @apply bg-slate-700 rounded-full;
+    background: #334155;
+    border-radius: 4px;
+}
+.article-markdown-engine pre::-webkit-scrollbar-thumb:hover {
+    background: #475569;
 }
 
 /* Global Layout Fix */

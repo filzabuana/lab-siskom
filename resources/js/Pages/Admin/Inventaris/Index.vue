@@ -25,7 +25,7 @@ const user = computed(() => page.props.auth.user);
 // Hak Akses Pengelolaan Stok Utama (PLP, Kalab, Super Admin bisa menambah)
 const canCreate = computed(() => {
     return Number(user.value.is_admin) === 1 || 
-           user.value.roles.some(roleName => ['plp', 'kalab'].includes(roleName));
+           user.value.roles.some(roleName => ['plp'].includes(roleName));
 });
 
 // Hak Akses Khusus untuk Mengubah Struktur Data & Hapus (Hanya Superadmin)

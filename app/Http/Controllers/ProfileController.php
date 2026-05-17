@@ -7,34 +7,39 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Display the user's profile form via Inertia.
      */
-    public function edit(Request $request): View
+    public function edit(Request $request): Response
     {
-        return view('profile.edit', [
+        return Inertia::render('Profile/Edit', [
+            // Jika data user sudah dishare secara global di HandleInertiaRequests Middleware,
+            // prop 'user' ini opsional, tapi aman untuk tetap dikirimkan.
             'user' => $request->user(),
         ]);
     }
 
     /**
      * Update the user's profile information.
+     * (Catatan: Di Vue saat ini, field dibuat readonly, tapi method ini tetap diamankan untuk Inertia)
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile.edit')->with('message', 'Profil berhasil diperbarui.');
     }
 
     /**

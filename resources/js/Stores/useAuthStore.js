@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', {
         isPlp: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('plp'),
 
         isMahasiswa: (state) => {
-            return typeof state.user?.nim === 'string' && state.user.nim.toUpperCase().startsWith('H');
+            return typeof state.user?.nim_nip === 'string' && state.user.nim_nip.toUpperCase().startsWith('H');
         },
 
         isAsisten: (state) => (Array.isArray(state.user?.roles) ? state.user.roles : []).includes('asisten_praktikum'),

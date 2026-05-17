@@ -28,6 +28,7 @@ class User extends Authenticatable
         'role',
         'google_id', // Ditambahkan untuk Socialite
         'avatar',    // Ditambahkan untuk Socialite
+        'nim_nip',
     ];
 
     /**

@@ -56,18 +56,28 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. Intersepsi input email: Paksa menjadi lowercase sebelum masuk ke validasi 'unique' atau 'lowercase'
+        if ($request->has('email')) {
+            $request->merge([
+                'email' => strtolower($request->email)
+            ]);
+        }
+
+        // 2. Jalankan validasi pada data yang telah disinkronkan
         $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
+            'email'    => 'required|email|lowercase|unique:users,email',
             'password' => 'required|min:8',
             'roles'    => 'array', 
         ]);
 
+        // 3. Simpan ke database dengan email yang dipastikan bersih dari huruf kapital
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'is_admin' => $request->is_admin ? 1 : 0,
+            'name'              => $request->name,
+            'email'             => $request->email,
+            'password'          => Hash::make($request->password),
+            'is_admin'          => $request->is_admin ? 1 : 0,
+            'email_verified_at' => now(), // Memastikan rute profile langsung terbuka tanpa hambatan middleware verified
         ]);
 
         if ($request->has('roles')) {
