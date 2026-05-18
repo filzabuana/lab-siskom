@@ -77,6 +77,8 @@
           </div>
 
           <button @click="visit('dashboard')" 
+                  @mouseenter="prefetchMenu('dashboard')"
+                  @touchstart="prefetchMenu('dashboard')"
                   :class="route().current('dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50'"
                   class="group w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-black text-[11px] tracking-widest transition-all uppercase italic text-left">
             <i class="bi bi-speedometer2 text-lg"></i>
@@ -87,6 +89,8 @@
             <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Layanan Academic</div>
             
             <button @click="visit('bebas-lab.form')" 
+                    @mouseenter="prefetchMenu('bebas-lab.form')"
+                    @touchstart="prefetchMenu('bebas-lab.form')"
                     :class="route().current('bebas-lab.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
               <i class="bi bi-file-earmark-check-fill text-lg"></i>
@@ -94,6 +98,8 @@
             </button>
 
             <button @click="visit('peminjaman.katalog')" 
+                    @mouseenter="prefetchMenu('peminjaman.katalog')"
+                    @touchstart="prefetchMenu('peminjaman.katalog')"
                     :class="route().current('peminjaman.katalog') || route().current('peminjaman.cart.view') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
               <i class="bi bi-cart-plus-fill text-lg"></i>
@@ -101,6 +107,8 @@
             </button>
 
             <button @click="visit('peminjaman.history')" 
+                    @mouseenter="prefetchMenu('peminjaman.history')"
+                    @touchstart="prefetchMenu('peminjaman.history')"
                     :class="route().current('peminjaman.history') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
               <i class="bi bi-clock-history text-lg"></i>
@@ -113,6 +121,8 @@
             
             <button v-if="hasRole(['plp']) || $page.props.auth.user.is_admin"
                     @click="visit('admin.peminjaman.index')" 
+                    @mouseenter="prefetchMenu('admin.peminjaman.index')"
+                    @touchstart="prefetchMenu('admin.peminjaman.index')"
                     :class="route().current('admin.peminjaman.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
               <i class="bi bi-clipboard2-check-fill text-lg"></i>
@@ -120,6 +130,8 @@
             </button>
 
             <button @click="visit('admin.inventaris.index')" 
+                    @mouseenter="prefetchMenu('admin.inventaris.index')"
+                    @touchstart="prefetchMenu('admin.inventaris.index')"
                     :class="route().current('admin.inventaris.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
               <i class="bi bi-box-seam-fill text-lg"></i>
@@ -128,6 +140,8 @@
 
             <button v-if="hasRole(['plp', 'kepala_lab']) || $page.props.auth.user.is_admin"
                     @click="visit('admin.posts.index')" 
+                    @mouseenter="prefetchMenu('admin.posts.index')"
+                    @touchstart="prefetchMenu('admin.posts.index')"
                     :class="route().current('admin.posts.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
               <i class="bi bi-journal-text text-lg"></i>
@@ -136,6 +150,8 @@
 
             <button v-if="$page.props.auth.user.is_admin" 
                     @click="visit('admin.users.index')" 
+                    @mouseenter="prefetchMenu('admin.users.index')"
+                    @touchstart="prefetchMenu('admin.users.index')"
                     :class="route().current('admin.users.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
                     class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
               <i class="bi bi-people-fill text-lg"></i>
@@ -158,6 +174,8 @@
             
             <button v-if="hasRole(['mahasiswa'])" 
                     @click="visit('peminjaman.cart.view')"
+                    @mouseenter="prefetchMenu('peminjaman.cart.view')"
+                    @touchstart="prefetchMenu('peminjaman.cart.view')"
                     class="relative p-2 w-10 h-10 flex items-center justify-center rounded-2xl border border-slate-200 dark:border-railway-border hover:border-blue-500 bg-white dark:bg-railway-dark transition-all shadow-sm group">
               <i class="bi bi-cart3 text-lg text-slate-600 dark:text-slate-400 group-hover:text-blue-600 transition-colors"></i>
               
@@ -169,6 +187,8 @@
 
             <button v-if="hasRole(['plp']) || $page.props.auth.user.is_admin" 
                     @click="visit('admin.peminjaman.index')"
+                    @mouseenter="prefetchMenu('admin.peminjaman.index')"
+                    @touchstart="prefetchMenu('admin.peminjaman.index')"
                     class="relative p-2 w-10 h-10 flex items-center justify-center rounded-2xl border border-slate-200 dark:border-railway-border hover:border-blue-500 bg-white dark:bg-railway-dark transition-all shadow-sm group">
               <i class="bi bi-bell-fill text-lg text-slate-600 dark:text-slate-400 group-hover:text-amber-500 transition-colors"></i>
               <span v-if="$page.props.pendingCount > 0" 
@@ -207,13 +227,16 @@
                     <p class="text-[9px] font-mono text-slate-400 truncate mt-0.5">{{ $page.props.auth.user?.email }}</p>
                   </div>
 
-                  <button 
-                    @click="visit('profile.edit')"
+                  <Link 
+                    :href="route('profile.edit')"
+                    prefetch
+                    as="button"
+                    type="button"
                     class="w-full flex items-center gap-3 px-4 py-2 text-[10px] font-black tracking-wider uppercase italic text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-400 transition-all text-left"
                   >
                     <i class="bi bi-person-gear text-base"></i>
                      Profil
-                  </button>
+                  </Link>
 
                   <div class="my-1 h-px bg-slate-100 dark:bg-railway-border"></div>
 
@@ -249,23 +272,26 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, usePage, Link } from '@inertiajs/vue3'; // Ditambahkan impor Link
 
 const drawer = ref(false); 
 const isDark = ref(true);
-const showProfileDropdown = ref(false); // State pengendali menu dropdown kanan atas
+const showProfileDropdown = ref(false); 
 
 const hasRole = (roleNames) => {
     const userRoles = usePage().props.auth.user?.roles || [];
     return roleNames.some(role => userRoles.includes(role));
 };
 
-// Menutup sidebar otomatis jika pindah halaman (Mobile view)
+// Menutup sidebar otomatis jika pindah halaman (Mobile view) dengan sedikit jeda (150ms)
+// Ini memberi waktu browser mobile menyelesaikan event navigasi sebelum DOM dihancurkan/digeser
 watch(() => usePage().url, () => {
-  if (window.innerWidth < 1024) {
-    drawer.value = false;
-  }
-  showProfileDropdown.value = false; // Setiap ganti halaman dropdown otomatis tertutup
+  setTimeout(() => {
+    if (window.innerWidth < 1024) {
+      drawer.value = false;
+    }
+    showProfileDropdown.value = false; 
+  }, 150);
 });
 
 const safeDisplayRole = computed(() => {
@@ -305,7 +331,6 @@ onMounted(() => {
   }
   applyTheme();
 
-  // Listener global: Menutup dropdown jika user mengklik di luar area menu profil
   window.addEventListener('click', (e) => {
     if (!e.target.closest('.relative')) {
       showProfileDropdown.value = false;
@@ -313,8 +338,14 @@ onMounted(() => {
   });
 });
 
+// Aksi navigasi utama (Aman 100% untuk mobile klik)
 const visit = (routeName) => { 
     router.get(route(routeName)); 
+};
+
+// Fungsi pemicu prefetch manual secara asinkron di latar belakang
+const prefetchMenu = (routeName) => {
+    router.prefetch(route(routeName), { method: 'get' });
 };
 
 const logout = () => {
@@ -341,7 +372,6 @@ const leaveImpersonate = () => {
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
-/* Animasi dropdown kecil yang halus */
 .animate-dropdown {
   animation: dropdownIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }

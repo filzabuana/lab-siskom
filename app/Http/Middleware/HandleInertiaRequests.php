@@ -26,43 +26,38 @@ class HandleInertiaRequests extends Middleware
      * Data yang dibagikan secara global ke Vue.
      */
     public function share(Request $request): array
-    {
-        $user = $request->user();
+{
+    $user = $request->user();
 
-        return array_merge(parent::share($request), [
-            'auth' => [
-                'user' => $user ? [
-                    'id'        => $user->id,
-                    'name'      => $user->name,
-                    'email'     => $user->email,
-                    // 1. SESUAIKAN KEY: Ubah dari 'nim' menjadi 'nim_nip' agar sinkron dengan Vue & Database
-                    'nim_nip'   => $user->nim_nip, 
-                    'avatar'    => $user->avatar,
-                    'is_admin'  => $user->is_admin,
-                    // 2. TAMBAHKAN INI: Kirim google_id agar Vue bisa mendeteksi metode login SSO
-                    'google_id' => $user->google_id, 
-                    'roles'     => $user->getRoleNames(), 
-                ] : null,
-                'impersonator' => $request->session()->has('impersonate'),
-            ],
+    return array_merge(parent::share($request), [
+        'auth' => [
+            'user' => $user ? [
+                'id'        => $user->id,
+                'name'      => $user->name,
+                'email'     => $user->email,
+                'nim_nip'   => $user->nim_nip, 
+                'avatar'    => $user->avatar,
+                'is_admin'  => $user->is_admin,
+                'google_id' => $user->google_id, 
+                // Bungkus getRoleNames ke dalam cache request agar tidak duplikasi query
+                'roles'     => $user->roles->pluck('name'), 
+            ] : null,
+            'impersonator' => $request->session()->has('impersonate'),
+        ],
 
-            /**
-             * Menghitung jumlah jenis barang di tabel keranjangs.
-             */
-            'cartCount' => $user && $user->hasRole('mahasiswa')
-                ? Keranjang::where('user_id', $user->id)->count()
-                : 0,
+        // OPTIMASI: Dibungkus dengan fn () => agar menjadi LAZY PROPS
+        'cartCount' => fn () => $user && $user->hasRole('mahasiswa')
+            ? Keranjang::where('user_id', $user->id)->count()
+            : 0,
 
-            /**
-             * Menghitung jumlah pengajuan peminjaman yang berstatus 'Pending'.
-             */
-            'pendingCount' => $user && ($user->hasRole('plp') || $user->is_admin)
-                ? Peminjaman::where('status', 'Pending')->count()
-                : 0,
+        // OPTIMASI: Dibungkus dengan fn () => agar menjadi LAZY PROPS
+        'pendingCount' => fn () => $user && ($user->hasRole('plp') || $user->is_admin)
+            ? Peminjaman::where('status', 'Pending')->count()
+            : 0,
 
-            'flash' => [
-                'message' => fn () => $request->session()->get('message'),
-            ],
-        ]);
-    }
+        'flash' => [
+            'message' => fn () => $request->session()->get('message'),
+        ],
+    ]);
+}
 }
