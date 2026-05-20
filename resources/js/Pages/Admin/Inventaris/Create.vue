@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const photoPreview = ref(null);
 
@@ -13,13 +13,21 @@ const form = useForm({
     nup: '',
     ruangan: 'Lab Komputasi',
     tahun_perolehan: new Date().getFullYear(),
-    jumlah_stok: 0,
+    jumlah_stok: 1, // Kita default ke 1 agar siap input
     jumlah_rusak: 0,
     kondisi: 'Baik',
     tipe_peminjaman: 'Bisa Dipinjam',
+    is_serialized: 1, // Default: 1 (Serialized / Per Unit)
     deskripsi: '',
     catatan_lokasi: '',
     foto_barang: null,
+});
+
+// Watcher untuk menyesuaikan stok jika PLP mengubah jenis pencatatan
+watch(() => form.is_serialized, (newVal) => {
+    if (newVal === 1 && form.jumlah_stok === 0) {
+        form.jumlah_stok = 1;
+    }
 });
 
 const updatePhotoPreview = (e) => {
@@ -118,20 +126,20 @@ const submit = () => {
                                 <input v-model="form.ruangan" type="text" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 text-sm outline-none focus:border-blue-600" placeholder="Lab Komputasi">
                             </div>
                             <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 italic">Tahun</label>
+                                <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 italic">Tahun Perolehan</label>
                                 <input v-model="form.tahun_perolehan" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 text-sm outline-none focus:border-blue-600">
                             </div>
                             <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-2 italic">Stok Baik</label>
+                                <label class="block text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-2 italic">Stok Baik Baru</label>
                                 <input v-model="form.jumlah_stok" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-900 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 font-bold text-emerald-700 dark:text-emerald-400" min="0">
                             </div>
                             <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest mb-2 italic">Jumlah Rusak</label>
+                                <label class="block text-[10px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest mb-2 italic">Stok Rusak Baru</label>
                                 <input v-model="form.jumlah_rusak" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 rounded-xl text-sm outline-none focus:ring-2 focus:ring-red-500/20 font-bold text-red-700 dark:text-red-400" min="0">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1 italic">Status Kondisi Umum</label>
                                 <select v-model="form.kondisi" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-800 dark:text-slate-200 outline-none focus:border-blue-600 appearance-none">
@@ -146,6 +154,16 @@ const submit = () => {
                                     <option value="Hanya di Lab">Statis (Hanya di Lab)</option>
                                     <option value="Bisa Dipinjam">Mobile (Bisa Dipinjam)</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-2 ml-1 italic">Jenis Pencatatan Unit</label>
+                                <select v-model="form.is_serialized" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-purple-100 dark:border-purple-900 rounded-2xl text-slate-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-purple-600/20 appearance-none font-bold">
+                                    <option :value="1">🆔 Ber-Unit (Punya Kode QR Sendiri)</option>
+                                    <option :value="0">📦 Massal / Bulk (Hanya Hitung Stok)</option>
+                                </select>
+                                <p v-if="form.is_serialized === 1" class="text-[9px] text-purple-500 dark:text-purple-400 mt-2 ml-1 italic">
+                                    Sistem otomatis men-generate total <span class="font-bold text-slate-700 dark:text-slate-200">{{ form.jumlah_stok + form.jumlah_rusak }}</span> kode QR fisik unik berakhiran seri berkelanjutan (_001, _002, dst).
+                                </p>
                             </div>
                         </div>
 
@@ -197,20 +215,3 @@ const submit = () => {
         </div>
     </AuthenticatedLayout>
 </template>
-
-<style scoped>
-/* Custom scrollbar styling for textareas */
-textarea::-webkit-scrollbar {
-    width: 6px;
-}
-textarea::-webkit-scrollbar-track {
-    background: transparent;
-}
-textarea::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-}
-.dark textarea::-webkit-scrollbar-thumb {
-    background: #475569;
-}
-</style>

@@ -24,6 +24,7 @@ class Inventaris extends Model
         'jumlah_rusak',  
         'kondisi',
         'tipe_peminjaman',
+        'is_serialized', // Ditambahkan untuk flag kontrol hibrida aset
         'deskripsi',     
         'catatan_lokasi',
         'foto_barang',
@@ -33,21 +34,55 @@ class Inventaris extends Model
         'tahun_perolehan' => 'integer',
         'jumlah_stok' => 'integer',
         'jumlah_rusak' => 'integer',
+        'is_serialized' => 'boolean', // Cast otomatis ke true/false
     ];
 
     /**
+     * ACCESSOR: Mengubah nilai output 'jumlah_stok' secara dinamis.
+     * Jika alat dikelola per unit (is_serialized = true), stok dihitung real-time dari item berstatus tersedia.
+     */
+    public function getJumlahStokAttribute($value)
+    {
+        if ($this->is_serialized) {
+            return $this->items()->where('status', 'tersedia')->count();
+        }
+
+        // Jika barang habis pakai (bulk), kembalikan nilai angka static bawaan tabel
+        return $value;
+    }
+
+    /**
+     * ACCESSOR: Mengubah nilai output 'jumlah_rusak' secara dinamis.
+     * Jika alat dikelola per unit (is_serialized = true), jumlah rusak dihitung dari unit fisik bermasalah.
+     */
+    public function getJumlahRusakAttribute($value)
+    {
+        if ($this->is_serialized) {
+            return $this->items()->where('status', 'rusak')->count();
+        }
+
+        return $value;
+    }
+
+    /**
+     * Relasi ke InventarisItem (Unit Fisik Ber-ID Unik)
+     */
+    public function items(): HasMany
+    {
+        return $this->hasMany(InventarisItem::class, 'inventaris_id');
+    }
+
+    /**
      * Relasi ke PeminjamanDetail (Tabel Transaksi Detail)
-     * Digunakan untuk menghitung stok yang sedang keluar.
+     * Digunakan untuk menghitung stok yang sedang keluar (khusus barang bulk).
      */
     public function peminjamanDetails(): HasMany
     {
-        // Hubungkan ke PeminjamanDetail menggunakan foreign key 'inventaris_id'
         return $this->hasMany(PeminjamanDetail::class, 'inventaris_id');
     }
 
     /**
-     * Opsi Tambahan: Jika Anda masih ingin mengakses data Peminjaman (Header) secara langsung,
-     * Anda bisa menggunakan hasManyThrough.
+     * Mengakses data Peminjaman (Header) secara langsung melalui tabel detail
      */
     public function peminjaman()
     {

@@ -17,13 +17,18 @@ const auth = computed(() => usePage().props.auth);
 const user = computed(() => auth.value?.user);
 
 /**
- * ELEMEN PERMISSION-BASED (Kebab-Case Sesuai seeder & web.php)
- * Mengizinkan modifikasi jika user adalah Superadmin (is_admin == 1) atau memegang permission terkait
+ * ELEMEN PERMISSION-BASED (Murni berbasis Permission, Bukan Role/is_admin)
  */
 const canModifyOrDelete = computed(() => {
     return user.value?.permissions?.includes('*') ||
-           user.value?.permissions?.includes('manage-inventaris') || 
-           Number(user.value?.is_admin) === 1;
+           user.value?.permissions?.includes('manage-inventaris');
+});
+
+// Permission untuk melihat daftar fisik unit barcode dan pelacakan peminjam
+const canViewUnitDetails = computed(() => {
+    return user.value?.permissions?.includes('*') ||
+           user.value?.permissions?.includes('view-inventaris') ||
+           user.value?.permissions?.includes('manage-inventaris');
 });
 
 const isLoggedIn = computed(() => !!user.value);
@@ -62,6 +67,20 @@ const formatDate = (dateString) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+/**
+ * HELPER: Melacak siapa peminjam terakhir yang aktif pada item tertentu
+ */
+const getPeminjamAktif = (unitItem) => {
+    if (!unitItem.peminjaman_details || unitItem.peminjaman_details.length === 0) return null;
+    
+    // Cari detail transaksi yang status peminjamannya belum kembali (aktif)
+    const detailAktif = unitItem.peminjaman_details.find(detail => {
+        return detail.peminjaman && detail.peminjaman.status === 'dipinjam';
+    });
+
+    return detailAktif?.peminjaman?.user?.name || null;
 };
 </script>
 
@@ -156,6 +175,72 @@ const formatDate = (dateString) => {
                         </div>
                     </div>
 
+                    <div v-if="!!item.is_serialized && canViewUnitDetails" class="bg-white dark:bg-slate-800 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-700 shadow-sm space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700 pb-4">
+                            <div>
+                                <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] flex items-center italic">
+                                    <i class="bi bi-qr-code-scan mr-3 text-blue-600"></i> Manajemen Unit Serialisasi
+                                </h3>
+                                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 italic">Daftar fisik spesifik per unit laboratorium</p>
+                            </div>
+                            <span class="w-fit px-3 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-lg italic">
+                                Total: {{ item.items?.length ?? 0 }} Unit
+                            </span>
+                        </div>
+
+                        <div v-if="!item.items || item.items.length === 0" class="p-8 text-center bg-slate-50 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+                            <i class="bi bi-box-seam text-3xl text-slate-300 block mb-2"></i>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Belum ada data unit fisik tunggal yang digenerasi.</p>
+                        </div>
+
+                        <div v-else class="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-900/50 text-[9px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-100 dark:border-slate-700">
+                                        <th class="px-6 py-4">No.</th>
+                                        <th class="px-6 py-4">Nomor Aset</th>
+                                        <th class="px-6 py-4">Status Fisik</th>
+                                        <th class="px-6 py-4">Peminjam Saat Ini</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
+                                    <tr v-for="(unit, index) in item.items" :key="unit.id" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
+                                        <td class="px-6 py-4 font-mono text-slate-400">{{ index + 1 }}</td>
+                                        
+                                        <td class="px-6 py-4 font-mono text-blue-600 dark:text-blue-400 tracking-wider uppercase">
+                                            <i class="bi bi-barcode mr-1.5 opacity-60"></i>{{ unit.barcode_aset ?? `UNIT-${unit.id}` }}
+                                        </td>
+                                        
+                                        <td class="px-6 py-4">
+                                            <span v-if="unit.status === 'tersedia'" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-md italic">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Tersedia
+                                            </span>
+                                            <span v-else-if="unit.status === 'dipinjam'" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase tracking-widest rounded-md italic">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Dipinjam
+                                            </span>
+                                            <span v-else-if="unit.status === 'dipakai_di_lab'" class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 text-[9px] font-black uppercase tracking-widest rounded-md italic">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Di Lab
+                                            </span>
+                                            <span v-else class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-[9px] font-black uppercase tracking-widest rounded-md italic">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> {{ unit.status }}
+                                            </span>
+                                        </td>
+                                        
+                                        <td class="px-6 py-4 italic font-medium">
+                                            <div v-if="(['dipinjam', 'dipakai_di_lab'].includes(unit.status)) && getPeminjamAktif(unit)" class="text-slate-800 dark:text-slate-200 font-bold uppercase flex items-center gap-2">
+                                                <i class="bi bi-person-circle text-sm text-slate-400"></i>
+                                                {{ getPeminjamAktif(unit) }}
+                                            </div>
+                                            <div v-else class="text-slate-400 text-[10px] tracking-wide uppercase font-bold">
+                                                —
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="bg-white dark:bg-slate-800 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-700 shadow-sm">
                         <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] mb-6 flex items-center italic">
                             <i class="bi bi-card-text mr-3 text-blue-600"></i> Deskripsi & Kegunaan
@@ -174,7 +259,7 @@ const formatDate = (dateString) => {
                 </div>
 
                 <div class="lg:col-span-4 space-y-6">
-                    <div v-if="canModifyOrDelete" class="bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-900/30">
+                    <div v-if="canViewUnitDetails" class="bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-900/30">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-600">
                                 <i class="bi bi-person-walking text-2xl"></i>
@@ -191,7 +276,7 @@ const formatDate = (dateString) => {
                     <div :class="isLoggedIn ? 'bg-blue-600 shadow-blue-200' : 'bg-slate-100 dark:bg-slate-800'" class="rounded-[2.5rem] p-8 text-center shadow-xl dark:shadow-none transition-all">
                         <h6 class="text-[10px] font-black uppercase tracking-[0.2em] mb-2" :class="isLoggedIn ? 'text-blue-100' : 'text-slate-400'">Stok Tersedia</h6>
                         <template v-if="isLoggedIn">
-                            <div class="text-6xl font-black text-white italic tracking-tighter mb-1">{{ item.jumlah_stok }}</div>
+                            <div class="text-6xl font-black text-white italic tracking-tighter mb-1">{{ stok_tersedia }}</div>
                             <p class="text-[10px] font-black text-blue-200 uppercase tracking-widest italic">Unit Siap Pakai</p>
                         </template>
                         <template v-else>
@@ -204,7 +289,7 @@ const formatDate = (dateString) => {
 
                     <div v-if="isKatalog && item.tipe_peminjaman === 'Bisa Dipinjam'">
                         <template v-if="isLoggedIn">
-                            <button :disabled="item.jumlah_stok <= 0"
+                            <button :disabled="stok_tersedia <= 0"
                                     class="w-full py-5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-[1.5rem] shadow-lg shadow-emerald-200 dark:shadow-none font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-1 italic flex items-center justify-center gap-3">
                                 <i class="bi bi-plus-circle text-lg"></i> Ajukan Peminjaman
                             </button>
@@ -251,3 +336,19 @@ const formatDate = (dateString) => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+textarea::-webkit-scrollbar {
+    width: 6px;
+}
+textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+textarea::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+.dark textarea::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+</style>

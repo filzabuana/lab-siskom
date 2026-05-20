@@ -23,6 +23,7 @@ const form = useForm({
     deskripsi: props.inventaris?.deskripsi ?? '',
     catatan_lokasi: props.inventaris?.catatan_lokasi ?? '',
     foto_barang: null,
+    is_serialized: props.inventaris?.is_serialized ?? 0, // Ditambahkan untuk penanganan di frontend
 });
 
 const photoPreview = ref(null);
@@ -102,28 +103,37 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-slate-50/50 dark:bg-slate-900/40 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700">
-                            <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 italic">Ruangan</label>
-                                <input v-model="form.ruangan" type="text" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 outline-none">
+                        <div class="space-y-3">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-slate-50/50 dark:bg-slate-900/40 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700">
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 italic">Ruangan</label>
+                                    <input v-model="form.ruangan" type="text" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 outline-none">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 italic">Tahun</label>
+                                    <input v-model="form.tahun_perolehan" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 outline-none">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-2 italic">Stok Baik</label>
+                                    <input v-model="form.jumlah_stok" type="number" :disabled="!!form.is_serialized" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-900 disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:text-slate-400 dark:disabled:text-slate-600 rounded-xl text-sm font-bold text-emerald-700 dark:text-emerald-400 outline-none">
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-[10px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest mb-2 italic">Jumlah Rusak</label>
+                                    <input v-model="form.jumlah_rusak" type="number" :disabled="!!form.is_serialized" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 disabled:bg-slate-100 dark:disabled:bg-slate-900 disabled:text-slate-400 dark:disabled:text-slate-600 rounded-xl text-sm font-bold text-red-700 dark:text-red-400 outline-none">
+                                </div>
                             </div>
-                            <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 italic">Tahun</label>
-                                <input v-model="form.tahun_perolehan" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 outline-none">
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-2 italic">Stok Baik</label>
-                                <input v-model="form.jumlah_stok" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-emerald-200 dark:border-emerald-900 rounded-xl text-sm font-bold text-emerald-700 dark:text-emerald-400 outline-none">
-                            </div>
-                            <div class="col-span-1">
-                                <label class="block text-[10px] font-black text-red-600 dark:text-red-500 uppercase tracking-widest mb-2 italic">Jumlah Rusak</label>
-                                <input v-model="form.jumlah_rusak" type="number" class="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 rounded-xl text-sm font-bold text-red-700 dark:text-red-400 outline-none">
+                            
+                            <div v-if="!!form.is_serialized" class="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-2xl text-amber-800 dark:text-amber-400">
+                                <i class="bi bi-info-circle-fill text-base mt-0.5"></i>
+                                <div class="text-xs font-medium">
+                                    <span class="font-bold">Aset Ter-serialisasi (Satu Unit Satu Barcode):</span> Input kuantitas dinonaktifkan untuk mencegah kekacauan data fisik. Perubahan status mutasi alat (hilang/rusak/penghapusan) harus diproses langsung per item unit melalui form khusus laporan laborat agar akuntabel.
+                                </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1 italic">Status Kondisi</label>
+                                <label class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1 italic">Status Kondisi Katalog</label>
                                 <select v-model="form.kondisi" class="w-full px-5 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-800 dark:text-slate-200 outline-none">
                                     <option value="Baik">Baik (Siap Pakai)</option>
                                     <option value="Rusak Ringan">Rusak Ringan</option>
@@ -191,7 +201,6 @@ const submit = () => {
 </template>
 
 <style scoped>
-/* Custom scrollbar styling for textareas */
 textarea::-webkit-scrollbar {
     width: 6px;
 }

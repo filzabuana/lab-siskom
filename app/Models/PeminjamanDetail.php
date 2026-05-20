@@ -25,4 +25,8 @@ class PeminjamanDetail extends Model
     {
         return $this->belongsTo(Inventaris::class);
     }
+    public function inventarisItem(): BelongsTo
+    {
+        return $this->belongsTo(InventarisItem::class, 'inventaris_item_id');
+    }
 }

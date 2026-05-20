@@ -26,12 +26,12 @@ class PeminjamanController extends Controller
         // 2. Query dasar mengambil data inventaris yang "Bisa Dipinjam"
         $query = Inventaris::query()->where('tipe_peminjaman', 'Bisa Dipinjam');
 
-        // 3. Jalankan Filter Pencarian (Nama Alat / Kode Barang) jika diisi
+        // 3. Jalankan Filter Pencarian (Nama Alat / Kode Barang / Merk)
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('nama_aset', 'like', "%{$request->search}%")
                   ->orWhere('kode_barang', 'like', "%{$request->search}%")
-                  ->orWhere('merk', 'like', "%{$request->search}%"); // Ditambahkan merk agar pencarian lebih fleksibel
+                  ->orWhere('merk', 'like', "%{$request->search}%");
             });
         }
 
@@ -40,14 +40,13 @@ class PeminjamanController extends Controller
             $query->where('kategori', $request->kategori);
         }
 
-        // 5. Eksekusi pagination dengan mempertahankan query string di URL
+        // 5. Eksekusi pagination (Accessor secara otomatis menyuplai sisa stok riil)
         $katalog = $query->orderByRaw('jumlah_stok > 0 DESC') 
             ->orderBy('nama_aset', 'ASC')
             ->paginate(12)
             ->withQueryString();
 
-        // 6. AMBIL DAFTAR KATEGORI SECARA DINAMIS DARI DATABASE
-        // Menarik semua kategori unik yang saat ini ada di tabel inventaris
+        // 6. Ambil Daftar Kategori Unik untuk Filter
         $kategoriList = Inventaris::whereNotNull('kategori')
             ->where('kategori', '!=', '')
             ->distinct()
@@ -60,8 +59,8 @@ class PeminjamanController extends Controller
         return Inertia::render('Peminjaman/Katalog', [
             'katalog' => $katalog,
             'keranjang' => $isiKeranjang,
-            'kategoriList' => $kategoriList, // Dialirkan ke props Katalog.vue
-            'filters' => $request->only(['search', 'kategori']) // Menyimpan state filter di komponen Vue
+            'kategoriList' => $kategoriList,
+            'filters' => $request->only(['search', 'kategori'])
         ]);
     }
 
@@ -116,6 +115,11 @@ class PeminjamanController extends Controller
                 'expires_at' => now()->addHours(24)
             ]);
         } else {
+            // Khusus perlindungan barang serialized tunggal di UI Keranjang
+            if ($barang->is_serialized && $request->jumlah > $barang->jumlah_stok) {
+                return back()->with('error', 'Stok unit fisik tersedia tidak mencukupi.');
+            }
+
             Keranjang::create([
                 'user_id' => Auth::id(),
                 'inventaris_id' => $request->inventaris_id,
@@ -147,7 +151,7 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * MAHASISWA: Hapus satu item
+     * MAHASISWA: Hapus satu item keranjang
      */
     public function destroyCart($id)
     {
@@ -180,7 +184,6 @@ class PeminjamanController extends Controller
                 return back()->with('error', 'Keranjang kosong.');
             }
 
-            // Validasi stok terakhir saat checkout (Hanya notifikasi, belum mengurangi stok)
             foreach ($items as $item) {
                 if ($item->jumlah > $item->inventaris->jumlah_stok) {
                     return back()->with('error', "Stok {$item->inventaris->nama_aset} tiba-tiba tidak cukup.");
@@ -199,7 +202,7 @@ class PeminjamanController extends Controller
                 PeminjamanDetail::create([
                     'peminjaman_id' => $peminjaman->id,
                     'inventaris_id' => $item->inventaris_id,
-                    'jumlah' => $item->jumlah,
+                    'jumlah'        => $item->jumlah,
                 ]);
             }
 
@@ -210,7 +213,7 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * MAHASISWA: Riwayat
+     * MAHASISWA: Tampilkan Riwayat
      */
     public function history()
     {
@@ -244,7 +247,7 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * UPDATE STATUS (LOGIKA STOK BARU)
+     * ADMIN: UPDATE STATUS PEMINJAMAN (HIBRIDA LOGIC)
      */
     public function updateStatus(Request $request, $id)
     {
@@ -255,43 +258,50 @@ class PeminjamanController extends Controller
 
         $peminjaman = Peminjaman::with('details.inventaris')->findOrFail($id);
         
-        // Gunakan strtolower agar pengecekan tidak sensitif terhadap huruf kapital
         $oldStatus = strtolower($peminjaman->status);
         $newStatus = strtolower($request->status);
 
         return DB::transaction(function () use ($newStatus, $oldStatus, $peminjaman, $request) {
             
-            // 1. KONDISI: DISETUJUI (Kurangi Stok)
-            // Cek apakah berubah dari pending ke disetujui
+            // 1. KONDISI: PERSETUJUAN DISETUJUI
             if ($newStatus === 'disetujui' && $oldStatus === 'pending') {
                 foreach ($peminjaman->details as $detail) {
                     $item = $detail->inventaris;
-                    
-                    // Refresh data stok terbaru untuk menghindari race condition
                     $item->refresh(); 
 
                     if ($item->jumlah_stok < $detail->jumlah) {
-                        throw new \Exception("Stok {$item->nama_aset} tidak cukup.");
+                        throw new \Exception("Stok {$item->nama_aset} tidak mencukupi.");
                     }
                     
-                    // Gunakan decrement langsung ke database
-                    $item->decrement('jumlah_stok', $detail->jumlah);
+                    // JIKA BARANG BULK (BUKAN SERIALIZED), kurangi nominal kolom database
+                    if (!$item->is_serialized) {
+                        $item->decrement('jumlah_stok', $detail->jumlah);
+                    }
+                    // Catatan: Jika serialized, pengurangan stok riil dihitung via relasi 
+                    // status item ketika barang diserahterimakan (di-scan keluar).
                 }
             }
 
-            // 2. KONDISI: BATAL / DITOLAK / SELESAI (Kembalikan Stok)
+            // 2. KONDISI: PEMBATALAN / PENOLAKAN / SELESI KEMBALI
             $statusPengembalian = ['dibatalkan', 'ditolak', 'selesai'];
             $statusPerluBalikStok = ['disetujui', 'sedang dipinjam', 'dipinjam'];
 
             if (in_array($newStatus, $statusPengembalian) && in_array($oldStatus, $statusPerluBalikStok)) {
                 foreach ($peminjaman->details as $detail) {
-                    $detail->inventaris->increment('jumlah_stok', $detail->jumlah);
+                    $item = $detail->inventaris;
+                    
+                    // JIKA BARANG BULK, kembalikan nominal kolom database
+                    if (!$item->is_serialized) {
+                        $item->increment('jumlah_stok', $detail->jumlah);
+                    }
+                    // Catatan: Jika serialized, pemulihan status unit dari 'dipinjam' kembali ke 'tersedia' 
+                    // dikendalikan langsung pada log inventaris_items sewaktu pengembalian fisik barang.
                 }
             }
 
-            // 3. Update Record Peminjaman
+            // 3. Update Status Induk Transaksi Peminjaman
             $peminjaman->update([
-                'status' => $request->status, // Gunakan input asli (Misal: "Disetujui")
+                'status' => $request->status, 
                 'catatan' => $request->catatan,
             ]);
 
