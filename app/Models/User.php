@@ -13,8 +13,8 @@ use Spatie\Permission\Traits\HasRoles; // WAJIB untuk Spatie Laravel-Permission
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles; // HasRoles ditambahkan di sini
-
+    use HasFactory, Notifiable, HasRoles; // HasRoles aktif di sini
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -72,4 +72,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(SuratBebasLab::class, 'user_id');
     }
+
+    // FUNGSI roles() MANUAL DI SINI SUDAH DIHAPUS AGAR TIDAK BENTROK DENGAN TRAIT HASROLES SPATIE
 }

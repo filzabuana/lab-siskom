@@ -85,17 +85,19 @@
             DASHBOARD
           </button>
 
-          <div v-if="hasRole(['mahasiswa', 'asisten_praktikum']) || $page.props.auth.user.is_admin" class="pt-4">
+          <div v-if="hasPermission(['request-bebas-lab', 'view-katalog-alat', 'view-riwayat-pinjam'])" class="pt-4">
             <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Layanan Academic</div>
             
-            <a :href="route('bebas-lab.form')" 
-              :class="route().current('bebas-lab.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
+            <a v-if="hasPermission('request-bebas-lab')"
+               :href="route('bebas-lab.form')" 
+               :class="route().current('bebas-lab.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
+               class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
                 <i class="bi bi-file-earmark-check-fill text-lg"></i>
                 SURAT BEBAS LAB
             </a>
 
-            <button @click="visit('peminjaman.katalog')" 
+            <button v-if="hasPermission('view-katalog-alat')"
+                    @click="visit('peminjaman.katalog')" 
                     @mouseenter="prefetchMenu('peminjaman.katalog')"
                     @touchstart="prefetchMenu('peminjaman.katalog')"
                     :class="route().current('peminjaman.katalog') || route().current('peminjaman.cart.view') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
@@ -104,7 +106,8 @@
               KATALOG ALAT
             </button>
 
-            <button @click="visit('peminjaman.history')" 
+            <button v-if="hasPermission('view-riwayat-pinjam')"
+                    @click="visit('peminjaman.history')" 
                     @mouseenter="prefetchMenu('peminjaman.history')"
                     @touchstart="prefetchMenu('peminjaman.history')"
                     :class="route().current('peminjaman.history') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
@@ -114,10 +117,10 @@
             </button>
           </div>
 
-          <div v-if="hasRole(['plp', 'kepala_lab', 'dosen']) || $page.props.auth.user.is_admin" class="pt-4">
+          <div v-if="hasPermission(['review-peminjaman', 'view-inventaris', 'manage-posts-blog', 'manage-users'])" class="pt-4">
             <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Manajemen Internal</div>
             
-            <button v-if="hasRole(['plp']) || $page.props.auth.user.is_admin"
+            <button v-if="hasPermission('review-peminjaman')"
                     @click="visit('admin.peminjaman.index')" 
                     @mouseenter="prefetchMenu('admin.peminjaman.index')"
                     @touchstart="prefetchMenu('admin.peminjaman.index')"
@@ -127,7 +130,8 @@
               PERMINTAAN PINJAM
             </button>
 
-            <button @click="visit('admin.inventaris.index')" 
+            <button v-if="hasPermission('view-inventaris')"
+                    @click="visit('admin.inventaris.index')" 
                     @mouseenter="prefetchMenu('admin.inventaris.index')"
                     @touchstart="prefetchMenu('admin.inventaris.index')"
                     :class="route().current('admin.inventaris.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
@@ -136,7 +140,7 @@
               INVENTORI ASET
             </button>
 
-            <button v-if="hasRole(['plp', 'kepala_lab']) || $page.props.auth.user.is_admin"
+            <button v-if="hasPermission('manage-posts')"
                     @click="visit('admin.posts.index')" 
                     @mouseenter="prefetchMenu('admin.posts.index')"
                     @touchstart="prefetchMenu('admin.posts.index')"
@@ -146,7 +150,7 @@
               PENULISAN BLOG
             </button>
 
-            <button v-if="$page.props.auth.user.is_admin" 
+            <button v-if="hasPermission('manage-users')"
                     @click="visit('admin.users.index')" 
                     @mouseenter="prefetchMenu('admin.users.index')"
                     @touchstart="prefetchMenu('admin.users.index')"
@@ -155,6 +159,15 @@
               <i class="bi bi-people-fill text-lg"></i>
               MANAJEMEN USER
             </button>
+            <button v-if="$page.props.auth.user?.is_admin"
+                  @click="visit('admin.roles.index')" 
+                  @mouseenter="prefetchMenu('admin.roles.index')"
+                  @touchstart="prefetchMenu('admin.roles.index')"
+                  :class="route().current('admin.roles.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
+                  class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all mt-1">
+            <i class="bi bi-shield-lock-fill text-lg"></i>
+            MANAJEMEN ROLE
+          </button>
           </div>
         </nav>
       </aside>
@@ -183,7 +196,7 @@
               </span>
             </button>
 
-            <button v-if="hasRole(['plp']) || $page.props.auth.user.is_admin" 
+            <button v-if="hasPermission('review-peminjaman')" 
                     @click="visit('admin.peminjaman.index')"
                     @mouseenter="prefetchMenu('admin.peminjaman.index')"
                     @touchstart="prefetchMenu('admin.peminjaman.index')"
@@ -233,7 +246,7 @@
                     class="w-full flex items-center gap-3 px-4 py-2 text-[10px] font-black tracking-wider uppercase italic text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 hover:text-blue-600 dark:hover:text-blue-400 transition-all text-left"
                   >
                     <i class="bi bi-person-gear text-base"></i>
-                     Profil
+                      Profil
                   </Link>
 
                   <div class="my-1 h-px bg-slate-100 dark:bg-railway-border"></div>
@@ -264,25 +277,40 @@
             </p>
         </footer>
       </div>
+
+      <GlobalNotification />
+
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { router, usePage, Link } from '@inertiajs/vue3'; // Ditambahkan impor Link
+import { router, usePage, Link } from '@inertiajs/vue3';
+import GlobalNotification from '@/Components/GlobalNotification.vue';
 
 const drawer = ref(false); 
 const isDark = ref(true);
 const showProfileDropdown = ref(false); 
+
+// MODIFIKASI: Fungsi Helper untuk mengecek Permission (Mendukung string tunggal maupun array)
+const hasPermission = (permissionNames) => {
+    const userPermissions = usePage().props.auth.user?.permissions || [];
+    
+    // Jika user memiliki permission master wildcard '*', langsung loloskan otomatis
+    if (userPermissions.includes('*')) return true;
+
+    if (Array.isArray(permissionNames)) {
+        return permissionNames.some(perm => userPermissions.includes(perm));
+    }
+    return userPermissions.includes(permissionNames);
+};
 
 const hasRole = (roleNames) => {
     const userRoles = usePage().props.auth.user?.roles || [];
     return roleNames.some(role => userRoles.includes(role));
 };
 
-// Menutup sidebar otomatis jika pindah halaman (Mobile view) dengan sedikit jeda (150ms)
-// Ini memberi waktu browser mobile menyelesaikan event navigasi sebelum DOM dihancurkan/digeser
 watch(() => usePage().url, () => {
   setTimeout(() => {
     if (window.innerWidth < 1024) {
@@ -336,12 +364,10 @@ onMounted(() => {
   });
 });
 
-// Aksi navigasi utama (Aman 100% untuk mobile klik)
 const visit = (routeName) => { 
     router.get(route(routeName)); 
 };
 
-// Fungsi pemicu prefetch manual secara asinkron di latar belakang
 const prefetchMenu = (routeName) => {
     router.prefetch(route(routeName), { method: 'get' });
 };
@@ -362,6 +388,7 @@ const leaveImpersonate = () => {
 </script>
 
 <style scoped>
+/* Style bawaan Anda tetap utuh */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 .dark ::-webkit-scrollbar-thumb { background: #1f2937; } 

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             SopSeeder::class,
             InventarisSeeder::class,
+            RoleAndPermissionSeeder::class,
         ]);
 
         // 2. Membuat akun uji coba jika belum ada

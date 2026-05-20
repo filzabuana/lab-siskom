@@ -7,7 +7,7 @@ use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role; // Menggunakan model standar Spatie agar sinkron
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -30,19 +30,20 @@ class UserController extends Controller
                     'email'             => $user->email,
                     'avatar'            => $user->avatar,
                     'is_admin'          => (bool) $user->is_admin,
-                    'roles_list'        => $user->getRoleNames(), 
+                    'roles_list'        => $user->getRoleNames(), // Mengambil array nama role (Spatie)
                     'peminjamans_count' => $user->peminjamans_count,
                     'bebas_lab'         => (bool) $user->bebas_lab_status, 
                 ];
             });
 
         return Inertia::render('Admin/Users/Index', [
-            'users' => $users
+            'users' => $users,
+            'availableRoles' => Role::all()->pluck('name') // Mengirim master role dinamis ke UI Index
         ]);
     }
 
     /**
-     * CREATE: Menampilkan form registrasi user baru (SOLUSI ERROR 500)
+     * CREATE: Menampilkan form registrasi user baru
      */
     public function create()
     {
@@ -56,30 +57,28 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Intersepsi input email: Paksa menjadi lowercase sebelum masuk ke validasi 'unique' atau 'lowercase'
         if ($request->has('email')) {
             $request->merge([
                 'email' => strtolower($request->email)
             ]);
         }
 
-        // 2. Jalankan validasi pada data yang telah disinkronkan
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|lowercase|unique:users,email',
             'password' => 'required|min:8',
-            'roles'    => 'array', 
+            'roles'    => 'nullable|array', 
         ]);
 
-        // 3. Simpan ke database dengan email yang dipastikan bersih dari huruf kapital
         $user = User::create([
             'name'              => $request->name,
             'email'             => $request->email,
             'password'          => Hash::make($request->password),
             'is_admin'          => $request->is_admin ? 1 : 0,
-            'email_verified_at' => now(), // Memastikan rute profile langsung terbuka tanpa hambatan middleware verified
+            'email_verified_at' => now(),
         ]);
 
+        // Sinkronisasi role via Spatie HasRoles trait
         if ($request->has('roles')) {
             $user->syncRoles($request->roles);
         }
@@ -97,7 +96,8 @@ class UserController extends Controller
             $query->where('status', 'disetujui');
         }]);
 
-        $riwayat = Peminjaman::with('inventaris') 
+        // PERBAIKAN: Menggunakan eager loading berjenjang sesuai relasi HasMany di Peminjaman.php
+        $riwayat = Peminjaman::with('details.inventaris') 
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -124,13 +124,15 @@ class UserController extends Controller
     public function updateRole(Request $request, User $user)
     {
         $request->validate([
-            'roles' => 'array',
+            'roles' => 'nullable|array',
         ]);
 
+        // Tetap simpan status is_admin manual jika kolom ini terpisah di tabel users Anda
         $user->update([
             'is_admin' => $request->is_admin ? 1 : 0,
         ]);
 
+        // Sinkronisasi role dengan aman (jika kosong, array kosong akan membersihkan role lama)
         $user->syncRoles($request->roles ?? []);
 
         return back()->with('message', 'Otoritas ' . $user->name . ' berhasil diperbarui!');

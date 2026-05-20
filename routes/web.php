@@ -7,6 +7,7 @@ use App\Http\Controllers\{
     PeminjamanController, PostController, UserController,
     DashboardController
 };
+use App\Http\Controllers\Admin\RoleManagementController; // Impor Controller Baru Terdaftar
 use App\Http\Controllers\Auth\GoogleController;
 
 /*
@@ -64,7 +65,6 @@ Route::controller(SopController::class)->group(function () {
 | 3. PROTECTED ROUTES (Inertia - Login Required)
 |--------------------------------------------------------------------------
 */
-
 Route::middleware(['auth'])->group(function () {
     Route::controller(ProfileController::class)->group(function () {
         Route::get('/profile', 'edit')->name('profile.edit');
@@ -77,7 +77,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Dashboard Utama
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
 
     // Fitur Peminjaman Mahasiswa (Pure Inertia System)
     Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
@@ -92,37 +91,63 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | 4. ADMIN & PLP AREA (Spatie Roles)
+    | 4. AREA MANAGERIAL & STAF LAB (Murni Berbasis Permission / PBAC)
     |--------------------------------------------------------------------------
-    */
-    Route::middleware(['role:kepala_lab|plp'])->prefix('admin')->name('admin.')->group(function () {
+    | Menggunakan standar kebab-case (-) agar sinkron dengan seeder.
+    | */
+    Route::middleware(['can:access-admin-area'])->prefix('admin')->name('admin.')->group(function () {
         
-        // Manajemen Peminjaman (Admin/PLP)
-        Route::prefix('peminjaman')->name('peminjaman.')->group(function () {
+        // Manajemen Peminjaman (Disinkronkan dengan permission 'review-peminjaman')
+        Route::middleware(['can:review-peminjaman'])->prefix('peminjaman')->name('peminjaman.')->group(function () {
             Route::get('/', [PeminjamanController::class, 'indexAdmin'])->name('index');
             Route::patch('/{id}/status', [PeminjamanController::class, 'updateStatus'])->name('update-status');
             Route::delete('/detail/{detail_id}', [PeminjamanController::class, 'destroyDetail'])->name('destroy-detail');
         });
 
-        // Manajemen Inventaris
-        Route::resource('inventaris', InventarisController::class);
+        // Manajemen Inventaris Struktural (Tulis, Ubah, Hapus)
+        Route::middleware(['can:manage-inventaris'])->group(function () {
+            Route::get('inventaris/create', [InventarisController::class, 'create'])->name('inventaris.create');
+            Route::post('inventaris', [InventarisController::class, 'store'])->name('inventaris.store');
+            Route::get('inventaris/{inventari}/edit', [InventarisController::class, 'edit'])->name('inventaris.edit');
+            Route::put('inventaris/{inventari}', [InventarisController::class, 'update'])->name('inventaris.update');
+            Route::delete('inventaris/{inventari}', [InventarisController::class, 'destroy'])->name('inventaris.destroy');
+        });
+
+        // Manajemen Inventaris Standar (Hanya Baca / View)
+        Route::middleware(['can:view-inventaris'])->group(function () {
+            Route::get('inventaris', [InventarisController::class, 'index'])->name('inventaris.index');
+            Route::get('inventaris/{inventari}', [InventarisController::class, 'show'])->name('inventaris.show');
+        });
 
         // Manajemen Bebas Lab (Admin Side)
-        Route::get('/bebas-lab', [SuratBebasLabController::class, 'indexAdmin'])->name('bebas-lab.index');
-        Route::patch('/bebas-lab/{id}', [SuratBebasLabController::class, 'updateStatus'])->name('bebas-lab.update');
+        Route::middleware(['can:manage-bebas-lab'])->group(function () {
+            Route::get('/bebas-lab', [SuratBebasLabController::class, 'indexAdmin'])->name('bebas-lab.index');
+            Route::patch('/bebas-lab/{id}', [SuratBebasLabController::class, 'updateStatus'])->name('bebas-lab.update');
+        });
 
-        // Manajemen User
-        Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
-        Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
-        Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+        // Manajemen User & Role (Eksklusif Superadmin / Kepala Unit dengan permission 'manage-users')
+        Route::middleware(['can:manage-users'])->group(function () {
+            Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
+            Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+            Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+
+            // ROUTE KHUSUS MANAJEMEN ROLE
+            Route::get('/roles', [RoleManagementController::class, 'index'])->name('roles.index');
+            Route::post('/roles', [RoleManagementController::class, 'store'])->name('roles.store');
+            Route::put('/roles/{role}', [RoleManagementController::class, 'update'])->name('roles.update');
+        });
 
         // Konten Blog (Admin Side - Full Inertia)
-        // Bypass rute index bawaan resource agar mengarah ke fungsi indexAdmin di controller
-        Route::get('posts', [PostController::class, 'indexAdmin'])->name('posts.index');
-        Route::resource('posts', PostController::class)->except(['index']);
+        Route::middleware(['can:manage-posts'])->group(function () {
+            Route::get('posts', [PostController::class, 'indexAdmin'])->name('posts.index');
+            Route::resource('posts', PostController::class)->except(['index']);
+        });
         
         // SOP Admin
-        Route::resource('sop', SopController::class);
+        Route::middleware(['can:manage-sop'])->group(function () {
+            Route::resource('sop', SopController::class);
+        });
+
     });
 });
 

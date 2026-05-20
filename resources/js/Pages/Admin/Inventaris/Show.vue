@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; // Pastikan path-nya sesuai (biasanya @/Layouts atau ../../Layouts)
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; 
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { marked } from 'marked';
@@ -14,8 +14,19 @@ const props = defineProps({
 
 // Ambil data Auth dari Global Props Inertia
 const auth = computed(() => usePage().props.auth);
-const isAdmin = computed(() => auth.value?.user?.is_admin == 1);
-const isLoggedIn = computed(() => !!auth.value?.user);
+const user = computed(() => auth.value?.user);
+
+/**
+ * ELEMEN PERMISSION-BASED (Kebab-Case Sesuai seeder & web.php)
+ * Mengizinkan modifikasi jika user adalah Superadmin (is_admin == 1) atau memegang permission terkait
+ */
+const canModifyOrDelete = computed(() => {
+    return user.value?.permissions?.includes('*') ||
+           user.value?.permissions?.includes('manage-inventaris') || 
+           Number(user.value?.is_admin) === 1;
+});
+
+const isLoggedIn = computed(() => !!user.value);
 
 // Konversi Markdown ke HTML
 const renderedMarkdown = computed(() => {
@@ -48,6 +59,7 @@ const confirmDelete = (id, nama) => {
 
 // Format Tanggal
 const formatDate = (dateString) => {
+    if (!dateString) return '-';
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
@@ -70,7 +82,7 @@ const formatDate = (dateString) => {
                     <i class="bi bi-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
                 </Link>
 
-                <div v-if="!isKatalog && isAdmin" class="flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-700">
+                <div v-if="!isKatalog && canModifyOrDelete" class="flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-700">
                     <Link :href="route('admin.inventaris.edit', item.id)" 
                        class="flex items-center px-4 py-2 text-[10px] font-black uppercase tracking-widest text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-all italic">
                         <i class="bi bi-pencil mr-2"></i> Edit Data
@@ -151,7 +163,7 @@ const formatDate = (dateString) => {
                         <div class="prose dark:prose-invert prose-sm max-w-none text-slate-500 dark:text-slate-400 leading-relaxed italic" v-html="renderedMarkdown"></div>
                     </div>
 
-                    <div v-if="!isKatalog && isAdmin" class="bg-slate-900 dark:bg-slate-950 rounded-[2rem] p-8 border border-slate-800 shadow-inner">
+                    <div v-if="!isKatalog && canModifyOrDelete" class="bg-slate-900 dark:bg-slate-950 rounded-[2rem] p-8 border border-slate-800 shadow-inner">
                         <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4 flex items-center italic">
                             <i class="bi bi-info-circle mr-3 text-amber-500"></i> Catatan Internal Lab
                         </h3>
@@ -162,7 +174,7 @@ const formatDate = (dateString) => {
                 </div>
 
                 <div class="lg:col-span-4 space-y-6">
-                    <div v-if="isAdmin" class="bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-900/30">
+                    <div v-if="canModifyOrDelete" class="bg-amber-50 dark:bg-amber-900/10 rounded-[2rem] p-6 border border-amber-100 dark:border-amber-900/30">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-2xl bg-amber-500/20 flex items-center justify-center text-amber-600">
                                 <i class="bi bi-person-walking text-2xl"></i>
@@ -223,7 +235,7 @@ const formatDate = (dateString) => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl text-center">
+                        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl text-center" v-else>
                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest italic leading-relaxed">
                                 <i class="bi bi-shield-lock mr-1"></i> Detail Kondisi Diproteksi
                             </p>

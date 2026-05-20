@@ -22,18 +22,23 @@ const props = defineProps({
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
-// Hak Akses Pengelolaan Stok Utama (PLP, Kalab, Super Admin bisa menambah)
+/**
+ * ELEMEN PERMISSION-BASED (Kebab-Case Sesuai web.php & Seeder Baru)
+ * Mengecek apakah user memiliki wildcard '*' atau string permission spesifik.
+ */
 const canCreate = computed(() => {
-    return Number(user.value.is_admin) === 1 || 
-           user.value.roles.some(roleName => ['plp'].includes(roleName));
+    return user.value?.permissions?.includes('*') ||
+           user.value?.permissions?.includes('manage-inventaris') || 
+           Number(user.value?.is_admin) === 1;
 });
 
-// Hak Akses Khusus untuk Mengubah Struktur Data & Hapus (Hanya Superadmin)
 const canModifyOrDelete = computed(() => {
-    return Number(user.value.is_admin) === 1;
+    return user.value?.permissions?.includes('*') ||
+           user.value?.permissions?.includes('manage-inventaris') || 
+           Number(user.value?.is_admin) === 1;
 });
 
-// State untuk filter
+// State untuk filter alternatif penanganan null/undefined data
 const search = ref(props.filters.search || '');
 const kategori = ref(props.filters.kategori ?? '');
 const ruangan = ref(props.filters.ruangan ?? '');
@@ -151,7 +156,7 @@ const destroy = (id) => {
                         <tr v-for="item in semuaInventaris.data" :key="item.id" class="hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all group">
                             <td class="px-8 py-5">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex-shrink-0 shadow-sm transition-transform">
+                                    <div class="w-14 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex-shrink-0 shadow-sm">
                                         <img v-if="item.foto_barang" :src="'/storage/inventaris/' + item.foto_barang" class="w-full h-full object-cover">
                                         <div v-else class="w-full h-full flex items-center justify-center text-slate-300 dark:text-slate-600">
                                             <i class="bi bi-box-seam text-2xl"></i>
@@ -183,7 +188,7 @@ const destroy = (id) => {
 
                             <td class="px-8 py-5 text-center">
                                 <div class="text-xs font-black text-slate-800 dark:text-slate-100 italic tracking-tighter">
-                                    {{ item.jumlah_stok + item.stok_keluar }} UNITS Total
+                                    {{ Number(item.jumlah_stok) + Number(item.stok_keluar || 0) }} UNITS Total
                                 </div>
                                 <div class="text-[9px] font-bold text-slate-500 mt-0.5">
                                     Tersedia di Lab: <span class="text-blue-600 dark:text-blue-400 font-black">{{ item.jumlah_stok }}</span>
@@ -232,14 +237,14 @@ const destroy = (id) => {
                             </td>
                         </tr>
 
-                        <tr v-if="semuaInventaris.data.length === 0">
+                        <tr v-if="!semuaInventaris.data || semuaInventaris.data.length === 0">
                             <td colspan="5" class="py-24 text-center">
                                 <div class="flex flex-col items-center">
                                     <div class="w-20 h-20 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-4">
                                         <i class="bi bi-search text-3xl text-slate-200"></i>
                                     </div>
                                     <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] italic">Data inventaris tidak ditemukan</p>
-                                    <button @click="resetFilter" class="mt-4 text-blue-600 font-black text-[10px] uppercase underline underline-offset-4 tracking-widest">Bersihkan semua filter</button>
+                                    <button type="button" @click="resetFilter" class="mt-4 text-blue-600 font-black text-[10px] uppercase underline underline-offset-4 tracking-widest">Bersihkan semua filter</button>
                                 </div>
                             </td>
                         </tr>
@@ -249,7 +254,7 @@ const destroy = (id) => {
 
             <div class="px-8 py-8 bg-slate-50/50 dark:bg-slate-900/30 border-t border-slate-100 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div class="text-[10px] font-black text-slate-400 uppercase italic tracking-widest">
-                    Showing {{ semuaInventaris.from || 0 }} to {{ semuaInventaris.to || 0 }} of {{ semuaInventaris.total }} Assets
+                    Showing {{ semuaInventaris.from || 0 }} to {{ semuaInventaris.to || 0 }} of {{ semuaInventaris.total || 0 }} Assets
                 </div>
                 <div class="flex gap-1.5 overflow-x-auto max-w-full pb-2 md:pb-0">
                     <button v-for="link in semuaInventaris.links" :key="link.label"

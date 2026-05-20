@@ -156,9 +156,8 @@
 </template>
 
 <script setup>
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { computed } from 'vue';
 
 const props = defineProps({
     user: Object,
@@ -178,7 +177,7 @@ const updateOtoritas = () => {
     form.patch(route('admin.users.update-role', props.user.id), {
         preserveScroll: true,
         onSuccess: () => {
-            // Bisa tambah toast notification di sini
+            // Urusan pop-up modal sudah dihandle otomatis oleh GlobalNotification di AuthenticatedLayout
         }
     });
 };
@@ -187,7 +186,6 @@ const updateOtoritas = () => {
 const handleImpersonate = () => {
     form.post(route('admin.users.impersonate', props.user.id), {
         onSuccess: () => {
-            // Gunakan replace agar history browser bersih saat impersonasi
             window.location.replace(route('dashboard'));
         }
     });
