@@ -68,20 +68,6 @@ const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
-
-/**
- * HELPER: Melacak siapa peminjam terakhir yang aktif pada item tertentu
- */
-const getPeminjamAktif = (unitItem) => {
-    if (!unitItem.peminjaman_details || unitItem.peminjaman_details.length === 0) return null;
-    
-    // Cari detail transaksi yang status peminjamannya belum kembali (aktif)
-    const detailAktif = unitItem.peminjaman_details.find(detail => {
-        return detail.peminjaman && detail.peminjaman.status === 'dipinjam';
-    });
-
-    return detailAktif?.peminjaman?.user?.name || null;
-};
 </script>
 
 <template>
@@ -227,9 +213,10 @@ const getPeminjamAktif = (unitItem) => {
                                         </td>
                                         
                                         <td class="px-6 py-4 italic font-medium">
-                                            <div v-if="(['dipinjam', 'dipakai_di_lab'].includes(unit.status)) && getPeminjamAktif(unit)" class="text-slate-800 dark:text-slate-200 font-bold uppercase flex items-center gap-2">
+                                            <div v-if="(['dipinjam', 'dipakai_di_lab'].includes(unit.status)) && unit.peminjam_aktif" 
+                                                class="text-slate-800 dark:text-slate-200 font-bold uppercase flex items-center gap-2">
                                                 <i class="bi bi-person-circle text-sm text-slate-400"></i>
-                                                {{ getPeminjamAktif(unit) }}
+                                                {{ unit.peminjam_aktif }}
                                             </div>
                                             <div v-else class="text-slate-400 text-[10px] tracking-wide uppercase font-bold">
                                                 —
@@ -289,10 +276,12 @@ const getPeminjamAktif = (unitItem) => {
 
                     <div v-if="isKatalog && item.tipe_peminjaman === 'Bisa Dipinjam'">
                         <template v-if="isLoggedIn">
-                            <button :disabled="stok_tersedia <= 0"
-                                    class="w-full py-5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-[1.5rem] shadow-lg shadow-emerald-200 dark:shadow-none font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-1 italic flex items-center justify-center gap-3">
+                            <Link :disabled="stok_tersedia <= 0"
+                                  :href="stok_tersedia > 0 ? route('peminjaman.create', { inventaris_id: item.id }) : '#'"
+                                  as="button"
+                                  class="w-full py-5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-[1.5rem] shadow-lg shadow-emerald-200 dark:shadow-none font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-1 italic flex items-center justify-center gap-3">
                                 <i class="bi bi-plus-circle text-lg"></i> Ajukan Peminjaman
-                            </button>
+                            </Link>
                         </template>
                         <template v-else>
                             <Link :href="route('login')" 

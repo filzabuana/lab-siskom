@@ -50,13 +50,24 @@ class InventarisItem extends Model
     {
         return $this->hasMany(InventarisUsageLog::class, 'inventaris_item_id');
     }
+
     /**
-     * RELASI (Has Many): Melacak riwayat peminjaman unit fisik ini
+     * RELASI (Belongs To Many): Melacak riwayat peminjaman unit fisik ini melalui tabel jembatan
      */
     public function peminjamanDetails()
     {
-        // Hubungkan ke PeminjamanDetail menggunakan foreign key 'inventaris_item_id'
-        // (Pastikan nama kolom foreign key di tabel peminjaman_details Anda sesuai)
-        return $this->hasMany(PeminjamanDetail::class, 'inventaris_item_id');
+        /**
+         * Menggunakan belongsToMany karena data bersilangan di tabel 'peminjaman_details_item'
+         * Argumen 1: Model Target (PeminjamanDetail)
+         * Argumen 2: Nama tabel jembatan/pivot Anda
+         * Argumen 3: Foreign key tabel ini di tabel pivot (inventaris_item_id)
+         * Argumen 4: Foreign key tabel target di tabel pivot (peminjaman_detail_id)
+         */
+        return $this->belongsToMany(
+            PeminjamanDetail::class, 
+            'peminjaman_detail_items', 
+            'inventaris_item_id', 
+            'peminjaman_detail_id'
+        );
     }
 }

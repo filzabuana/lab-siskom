@@ -87,6 +87,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/keranjang/{id}', [PeminjamanController::class, 'destroyCart'])->name('cart.destroy');
         Route::post('/checkout', [PeminjamanController::class, 'checkout'])->name('checkout');
         Route::get('/riwayat', [PeminjamanController::class, 'history'])->name('history');
+        Route::get('/peminjaman/katalog/{id}', [PeminjamanController::class, 'showItem'])->name('peminjaman.show');
     });
 
     /*

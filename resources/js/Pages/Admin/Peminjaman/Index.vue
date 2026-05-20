@@ -10,10 +10,17 @@ const props = defineProps({
 const selectedRequest = ref(null);
 const showReasonInput = ref(false); 
 
+// Modifikasi formStatus agar membawa data barcode unit dinamis terindeks
 const formStatus = useForm({
     status: '',
     catatan: '', 
+    selected_barcodes: {}, // Format data: { 'detail_id-1': 'BARCODE_A', 'detail_id-2': 'BARCODE_B' }
 });
+
+// Helper untuk merekam barcode yang dipilih ke dalam objek formStatus berdasarkan indeks unit fisik
+const handleBarcodeChange = (uniqueKey, barcode) => {
+    formStatus.selected_barcodes[uniqueKey] = barcode;
+};
 
 const updateStatus = (id, newStatus) => {
     // 1. Logika untuk status yang butuh alasan (Ditolak atau Dibatalkan)
@@ -23,10 +30,33 @@ const updateStatus = (id, newStatus) => {
         return;
     }
 
+    // 2. Validasi Barcode untuk Alat is_serialized = 1 saat disetujui / diserahkan
+    if (['Disetujui', 'Sedang Dipinjam'].includes(newStatus)) {
+        let allBarcodesSelected = true;
+        
+        selectedRequest.value.details.forEach(dt => {
+            if (dt.inventaris.is_serialized == 1) {
+                // Cek setiap unit dari 1 sampai sejumlah dt.jumlah
+                for (let n = 1; n <= dt.jumlah; n++) {
+                    const uniqueKey = `${dt.id}-${n}`;
+                    const currentBarcode = formStatus.selected_barcodes[uniqueKey] || (dt.barcodes_terpilih ? dt.barcodes_terpilih[n-1] : null);
+                    if (!currentBarcode) {
+                        allBarcodesSelected = false;
+                    }
+                }
+            }
+        });
+
+        if (!allBarcodesSelected) {
+            alert('Mohon pilih semua Barcode Aset terlebih dahulu untuk semua jumlah unit yang wajib dilacak (is_serialized).');
+            return;
+        }
+    }
+
     const messages = {
-        'Disetujui': 'Setujui peminjaman ini? Stok akan otomatis terkunci.',
+        'Disetujui': 'Setujui peminjaman ini? Fisik barcode alat yang dipilih akan dikunci.',
         'Sedang Dipinjam': 'Konfirmasi alat sudah diambil oleh mahasiswa?',
-        'Selesai': 'Konfirmasi pengembalian alat? Stok akan dikembalikan ke lab.'
+        'Selesai': 'Konfirmasi pengembalian alat? Stok unit akan dikembalikan ke laboratorium.'
     };
 
     // Validasi catatan jika menolak atau membatalkan
@@ -70,7 +100,6 @@ const getStatusBadge = (status) => {
     if (s === 'disetujui') return 'bg-railway-accent/10 text-railway-accent border-railway-accent/20 animate-pulse';
     if (s === 'sedang dipinjam' || s === 'dipinjam') return 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-400 border-green-200 dark:border-green-900/50';
     if (s === 'selesai') return 'bg-zinc-100 dark:bg-railway-card text-zinc-500 border-zinc-200 dark:border-railway-border';
-    // Dibatalkan sekarang berwarna merah sama dengan ditolak
     if (s === 'ditolak' || s === 'dibatalkan') return 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-400 border-red-200 dark:border-red-900/50';
     return 'bg-zinc-100 text-zinc-800';
 };
@@ -159,30 +188,56 @@ const getStatusBadge = (status) => {
                         </div>
                     </section>
 
-                    <section v-if="selectedRequest.catatan">
-                        <label class="text-[10px] font-black text-red-400 uppercase tracking-widest">Catatan/Alasan</label>
-                        <div class="mt-2 p-3 bg-red-50 dark:bg-red-900/10 border-l-4 border-red-500 rounded-r-lg">
-                            <p class="text-xs text-red-800 dark:text-red-400 font-sans leading-relaxed">{{ selectedRequest.catatan }}</p>
-                        </div>
-                    </section>
-
                     <section>
                         <label class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-3 block">Alat Dipesan</label>
                         <div class="space-y-2 font-mono">
                             <div v-for="dt in selectedRequest.details" :key="dt.id" 
-                                class="p-3 border dark:border-railway-border rounded-xl flex justify-between items-center bg-white dark:bg-railway-dark/50 shadow-sm">
-                                <div class="min-w-0">
-                                    <p class="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate">{{ dt.inventaris.nama_aset }}</p>
-                                    <p class="text-[9px] text-zinc-500 truncate">{{ dt.inventaris.kode_barang }}</p>
+                                class="p-3 border dark:border-railway-border rounded-xl bg-white dark:bg-railway-dark/50 shadow-sm space-y-3">
+                                
+                                <div class="flex justify-between items-center">
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-xs text-zinc-900 dark:text-zinc-100 truncate">{{ dt.inventaris.nama_aset }}</p>
+                                        <p class="text-[9px] text-zinc-500 truncate">{{ dt.inventaris.kode_barang }}</p>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <span class="text-[10px] font-black text-railway-accent bg-railway-accent/10 px-2 py-0.5 rounded border border-railway-accent/20">{{ dt.jumlah }}</span>
+                                        <button v-if="selectedRequest.status.toLowerCase() === 'pending'"
+                                            @click="deleteDetail(dt.id)"
+                                            class="text-zinc-400 hover:text-red-500 p-1 transition-all">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-[10px] font-black text-railway-accent bg-railway-accent/10 px-2 py-0.5 rounded border border-railway-accent/20">{{ dt.jumlah }}</span>
-                                    <button v-if="selectedRequest.status.toLowerCase() === 'pending'"
-                                        @click="deleteDetail(dt.id)"
-                                        class="text-zinc-400 hover:text-red-500 p-1 transition-all">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
+
+                                <div v-if="dt.inventaris.is_serialized == 1" class="pt-2 border-t border-zinc-100 dark:border-railway-border/50 space-y-3">
+                                    <div v-for="n in dt.jumlah" :key="n" class="space-y-1">
+                                        <label class="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block">
+                                            Pilih Barcode Unit ke-{{ n }}:
+                                        </label>
+                                        
+                                        <div v-if="selectedRequest.status.toLowerCase() === 'pending'">
+                                            <select 
+                                                :value="formStatus.selected_barcodes[`${dt.id}-${n}`] || ''"
+                                                @change="handleBarcodeChange(`${dt.id}-${n}`, $event.target.value)"
+                                                class="w-full text-xs rounded-lg border-zinc-300 dark:border-railway-border bg-zinc-50 dark:bg-railway-dark font-mono text-zinc-800 dark:text-zinc-200 focus:ring-railway-accent">
+                                                
+                                                <option value="">-- Pilih Barcode Unit ke-{{ n }} --</option>
+                                                
+                                                <option v-for="item in dt.inventaris?.items" :key="item.id" :value="item.barcode_aset">
+                                                    {{ item.barcode_aset }} (Status: {{ item.status }})
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div v-else class="p-2 bg-zinc-100 dark:bg-railway-dark rounded-lg text-xs text-zinc-700 dark:text-zinc-300 border dark:border-railway-border flex items-center justify-between">
+                                            <span>🔒 Terkunci (Unit {{ n }}):</span>
+                                            <span class="font-black text-railway-accent font-mono">
+                                                {{ (dt.barcodes_terpilih ? dt.barcodes_terpilih[n-1] : '') || 'Belum di-set' }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
                     </section>
@@ -215,7 +270,7 @@ const getStatusBadge = (status) => {
                             </button>
                         </template>
 
-                        <template v-else-if="selectedRequest.status.toLowerCase() === 'disetujui'">
+                        <template v-if="selectedRequest.status.toLowerCase() === 'disetujui'">
                             <button @click="updateStatus(selectedRequest.id, 'Sedang Dipinjam')" 
                                 class="w-full py-4 bg-green-600 text-white font-black text-[11px] uppercase rounded-xl shadow-lg shadow-green-900/20 active:scale-95">
                                 Konfirmasi Serah Terima Alat
@@ -226,13 +281,13 @@ const getStatusBadge = (status) => {
                             </button>
                         </template>
 
-                        <button v-else-if="['sedang dipinjam', 'dipinjam'].includes(selectedRequest.status.toLowerCase())"
+                        <button v-if="['sedang dipinjam', 'dipinjam'].includes(selectedRequest.status.toLowerCase())"
                             @click="updateStatus(selectedRequest.id, 'Selesai')" 
                             class="w-full py-4 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-railway-dark font-black text-[11px] uppercase rounded-xl active:scale-95">
                             Konfirmasi Pengembalian Alat
                         </button>
 
-                        <div v-else class="text-center py-2 italic text-[10px] text-zinc-500">
+                        <div v-if="selectedRequest.status.toLowerCase() === 'selesai'" class="text-center py-2 italic text-[10px] text-zinc-500">
                             Peminjaman Selesai & Diarsipkan
                         </div>
                     </div>

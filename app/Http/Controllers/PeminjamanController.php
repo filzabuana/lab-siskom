@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inventaris;
+use App\Models\InventarisItem;
 use App\Models\Keranjang;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanDetail;
+use App\Models\PeminjamanDetailItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -120,6 +122,20 @@ class PeminjamanController extends Controller
                 return back()->with('error', 'Stok unit fisik tersedia tidak mencukupi.');
             }
 
+            // Untuk barang bulk, hitung sisa riil sebelum diizinkan masuk keranjang
+            if (!$barang->is_serialized) {
+                $totalDipinjam = (int) PeminjamanDetail::where('inventaris_id', $barang->id)
+                    ->whereHas('peminjaman', function($q) {
+                        $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
+                    })->sum('jumlah');
+                
+                $sisaStokRiil = max(0, $barang->jumlah_stok - $totalDipinjam);
+
+                if ($request->jumlah > $sisaStokRiil) {
+                    return back()->with('error', "Stok di rak sisa {$sisaStokRiil} unit. Tidak bisa memesan sejumlah {$request->jumlah}.");
+                }
+            }
+
             Keranjang::create([
                 'user_id' => Auth::id(),
                 'inventaris_id' => $request->inventaris_id,
@@ -133,22 +149,25 @@ class PeminjamanController extends Controller
 
     /**
      * MAHASISWA: Update Jumlah di Keranjang
-     */
-    public function updateCart(Request $request, $id)
-    {
-        $request->validate([
-            'jumlah' => 'required|integer|min:1'
-        ]);
+     */public function updateCart(Request $request, $id)
+{
+    $request->validate([
+        'jumlah' => 'required|integer|min:1'
+    ]);
 
-        $item = Keranjang::with('inventaris')->where('user_id', Auth::id())->findOrFail($id);
+    $item = Keranjang::with('inventaris')->where('user_id', Auth::id())->findOrFail($id);
 
-        if ($request->jumlah > $item->inventaris->jumlah_stok) {
-            return back()->with('error', 'Jumlah melebihi stok tersedia.');
-        }
-
-        $item->update(['jumlah' => $request->jumlah]);
-        return back();
+    if ($request->jumlah > $item->inventaris->jumlah_stok) {
+        return back()->with('error', 'Jumlah melebihi stok tersedia.');
     }
+
+    // Tambahkan baris ini agar perubahan tersimpan ke DB
+    $item->update([
+        'jumlah' => $request->jumlah
+    ]);
+
+    return back()->with('message', 'Jumlah berhasil diupdate.');
+}
 
     /**
      * MAHASISWA: Hapus satu item keranjang
@@ -229,17 +248,35 @@ class PeminjamanController extends Controller
 
     /* | AREA ADMIN / PLP | */
 
+    /**
+     * ADMIN: Tampilkan Semua Permintaan Peminjaman Alat
+     */
     public function indexAdmin()
     {
-        $requests = Peminjaman::with(['user', 'details.inventaris'])
-            ->orderByRaw("CASE 
-                WHEN status = 'Pending' THEN 1 
-                WHEN status = 'Disetujui' THEN 2 
-                WHEN status = 'Sedang Dipinjam' THEN 3 
-                ELSE 4 END")
-            ->orderBy('created_at', 'DESC')
-            ->paginate(10)
-            ->withQueryString();
+        $requests = Peminjaman::with([
+            'user', 
+            'details.inventaris.items' => function($query) {
+                $query->where('status', 'tersedia');
+            },
+            'details.detailItems.inventarisItem'
+        ])
+        ->orderByRaw("CASE 
+            WHEN status = 'Pending' THEN 1 
+            WHEN status = 'Disetujui' THEN 2 
+            WHEN status = 'Sedang Dipinjam' THEN 3 
+            ELSE 4 END")
+        ->orderBy('created_at', 'DESC')
+        ->paginate(10)
+        ->withQueryString();
+
+        $requests->getCollection()->transform(function($peminjaman) {
+            foreach ($peminjaman->details as $detail) {
+                $detail->barcodes_terpilih = $detail->detailItems->map(function($di) {
+                    return $di->inventarisItem ? $di->inventarisItem->barcode_aset : null;
+                })->filter()->values()->toArray(); 
+            }
+            return $peminjaman;
+        });
 
         return Inertia::render('Admin/Peminjaman/Index', [
             'requests' => $requests
@@ -247,13 +284,14 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * ADMIN: UPDATE STATUS PEMINJAMAN (HIBRIDA LOGIC)
+     * ADMIN: UPDATE STATUS PEMINJAMAN
      */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
             'status' => 'required|string',
             'catatan' => 'nullable|string|max:255',
+            'selected_barcodes' => 'nullable|array'
         ]);
 
         $peminjaman = Peminjaman::with('details.inventaris')->findOrFail($id);
@@ -263,26 +301,67 @@ class PeminjamanController extends Controller
 
         return DB::transaction(function () use ($newStatus, $oldStatus, $peminjaman, $request) {
             
-            // 1. KONDISI: PERSETUJUAN DISETUJUI
+            // KONDISI 1: PERSETUJUAN DISETUJUI
             if ($newStatus === 'disetujui' && $oldStatus === 'pending') {
                 foreach ($peminjaman->details as $detail) {
                     $item = $detail->inventaris;
                     $item->refresh(); 
 
-                    if ($item->jumlah_stok < $detail->jumlah) {
-                        throw new \Exception("Stok {$item->nama_aset} tidak mencukupi.");
+                    if ($item->is_serialized) {
+                        $stokTersediaRiil = $item->items()->where('status', 'tersedia')->count();
+                        
+                        if ($stokTersediaRiil < $detail->jumlah) {
+                            throw new \Exception("Stok unit fisik {$item->nama_aset} yang siap pakai tidak mencukupi (Tersedia: {$stokTersediaRiil}).");
+                        }
+
+                        // Daftarkan relasi barcode fisik satu per satu
+                        for ($n = 1; $n <= $detail->jumlah; $n++) {
+                            $key = "{$detail->id}-{$n}";
+                            $barcodeString = $request->selected_barcodes[$key] ?? null;
+                            
+                            if (!$barcodeString) {
+                                throw new \Exception("Barcode untuk unit ke-{$n} pada alat {$item->nama_aset} belum ditentukan.");
+                            }
+
+                            $inventarisItem = InventarisItem::where('inventaris_id', $item->id)
+                                                                ->where('barcode_aset', $barcodeString)
+                                                                ->first();
+
+                            if (!$inventarisItem) {
+                                throw new \Exception("Unit fisik dengan kode {$barcodeString} tidak ditemukan.");
+                            }
+
+                            if ($inventarisItem->status !== 'tersedia') {
+                                throw new \Exception("Unit {$barcodeString} saat ini tidak tersedia.");
+                            }
+
+                            PeminjamanDetailItem::create([
+                                'peminjaman_detail_id' => $detail->id,
+                                'inventaris_item_id'   => $inventarisItem->id,
+                            ]);
+
+                            $inventarisItem->update(['status' => 'dipinjam']);
+                        }
+                    } else {
+                        // KONTROL BARANG BULK: Validasi real-time berbasis kalkulasi statis vs transaksi aktif
+                        $totalDipinjam = (int) PeminjamanDetail::where('inventaris_id', $item->id)
+                            ->whereHas('peminjaman', function($q) {
+                                $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
+                            })->sum('jumlah');
+
+                        $sisaStokRiil = max(0, $item->jumlah_stok - $totalDipinjam);
+
+                        if ($sisaStokRiil < $detail->jumlah) {
+                            throw new \Exception("Gagal menyetujui. Sisa fisik {$item->nama_aset} di lab hanya {$sisaStokRiil} unit.");
+                        }
+
+                        // KEPUTUSAN ARSITEKTUR BARU: Tidak ada lagi $item->decrement() di sini. 
+                        // Stok aman terkunci di angka plafon.
                     }
-                    
-                    // JIKA BARANG BULK (BUKAN SERIALIZED), kurangi nominal kolom database
-                    if (!$item->is_serialized) {
-                        $item->decrement('jumlah_stok', $detail->jumlah);
-                    }
-                    // Catatan: Jika serialized, pengurangan stok riil dihitung via relasi 
-                    // status item ketika barang diserahterimakan (di-scan keluar).
                 }
             }
 
-            // 2. KONDISI: PEMBATALAN / PENOLAKAN / SELESI KEMBALI
+            // KONDISI 2: RESTORE / PEMULIHAN STATUS BARCODE (Khusus Serialized)
             $statusPengembalian = ['dibatalkan', 'ditolak', 'selesai'];
             $statusPerluBalikStok = ['disetujui', 'sedang dipinjam', 'dipinjam'];
 
@@ -290,12 +369,22 @@ class PeminjamanController extends Controller
                 foreach ($peminjaman->details as $detail) {
                     $item = $detail->inventaris;
                     
-                    // JIKA BARANG BULK, kembalikan nominal kolom database
-                    if (!$item->is_serialized) {
-                        $item->increment('jumlah_stok', $detail->jumlah);
+                    if ($item->is_serialized) {
+                        $detailItems = PeminjamanDetailItem::where('peminjaman_detail_id', $detail->id)->get();
+                        
+                        foreach ($detailItems as $di) {
+                            if ($di->inventarisItem) {
+                                $di->inventarisItem->update(['status' => 'tersedia']);
+                            }
+                        }
+                        
+                        if (in_array($newStatus, ['dibatalkan', 'ditolak'])) {
+                            PeminjamanDetailItem::where('peminjaman_detail_id', $detail->id)->delete();
+                        }
+                    } else {
+                        // KEPUTUSAN ARSITEKTUR BARU: Tidak ada lagi $item->increment() di sini.
+                        // Fluktuasi barang bulk otomatis selesai ketika status peminjaman berubah dari scope aktif.
                     }
-                    // Catatan: Jika serialized, pemulihan status unit dari 'dipinjam' kembali ke 'tersedia' 
-                    // dikendalikan langsung pada log inventaris_items sewaktu pengembalian fisik barang.
                 }
             }
 

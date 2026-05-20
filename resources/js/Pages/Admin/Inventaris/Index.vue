@@ -34,7 +34,7 @@ const canCreate = computed(() => {
 
 const canModifyOrDelete = computed(() => {
     return user.value?.permissions?.includes('*') ||
-           user.value?.permissions?.includes('manage-inventaris') || 
+        //    user.value?.permissions?.includes('manage-inventaris') || 
            Number(user.value?.is_admin) === 1;
 });
 
@@ -188,19 +188,24 @@ const destroy = (id) => {
 
                             <td class="px-8 py-5 text-center">
                                 <div class="text-xs font-black text-slate-800 dark:text-slate-100 italic tracking-tighter">
-                                    {{ Number(item.jumlah_stok) + Number(item.stok_keluar || 0) }} UNITS Total
+                                    {{ item.jumlah_stok }} UNITS Total
                                 </div>
+                                
                                 <div class="text-[9px] font-bold text-slate-500 mt-0.5">
-                                    Tersedia di Lab: <span class="text-blue-600 dark:text-blue-400 font-black">{{ item.jumlah_stok }}</span>
+                                    Tersedia di Lab: 
+                                    <span class="text-blue-600 dark:text-blue-400 font-black">
+                                        {{ Number(item.jumlah_stok) - Number(item.stok_keluar || 0) }}
+                                    </span>
                                 </div>
                                 
                                 <div v-if="item.stok_keluar > 0" class="mt-1 text-[9px] text-amber-600 dark:text-amber-500 font-bold italic">
                                     <i class="bi bi-exclamation-circle-fill me-0.5"></i> 
                                     <b>{{ item.stok_keluar }}</b> Unit sedang di luar
                                 </div>
+
                                 <div class="mt-1.5">
                                     <span :class="item.jumlah_rusak > 0 ? 'text-red-500 bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20' : 'text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20'" 
-                                          class="text-[8px] font-black uppercase italic px-2 py-0.5 rounded-md border whitespace-nowrap">
+                                        class="text-[8px] font-black uppercase italic px-2 py-0.5 rounded-md border whitespace-nowrap">
                                         {{ item.jumlah_rusak > 0 ? item.jumlah_rusak + ' Unit Rusak' : 'Kondisi Baik' }}
                                     </span>
                                 </div>

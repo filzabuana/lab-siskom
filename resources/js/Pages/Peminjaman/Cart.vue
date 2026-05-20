@@ -26,9 +26,11 @@ const loanDuration = computed(() => {
 const isDurationInvalid = computed(() => loanDuration.value > 30 || loanDuration.value < 0);
 
 const updateQuantity = (id, newQty, stock) => {
-    if (newQty < 1 || newQty > stock) return;
+    // Sanitasi input: pastikan minimal 1 dan maksimal sesuai stok
+    const sanitizedQty = Math.max(1, Math.min(newQty, stock));
+    
     router.patch(route('peminjaman.cart.update', id), {
-        jumlah: newQty
+        jumlah: sanitizedQty
     }, { preserveScroll: true });
 };
 
@@ -94,13 +96,19 @@ const removeFromCart = (id) => {
                                                         class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 transition-all">
                                                     <i class="bi bi-dash-lg"></i>
                                                 </button>
-                                                <span class="w-8 text-center font-black text-xs dark:text-white">{{ item.jumlah }}</span>
+                                                
+                                                <input type="number" 
+                                                       :value="item.jumlah"
+                                                       @change="(e) => updateQuantity(item.id, Number(e.target.value), item.inventaris.jumlah_stok)"
+                                                       class="w-12 text-center font-black text-xs bg-transparent border-none focus:ring-0 p-0 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
+                                                
                                                 <button @click="updateQuantity(item.id, item.jumlah + 1, item.inventaris.jumlah_stok)" 
                                                         :disabled="item.jumlah >= item.inventaris.jumlah_stok"
                                                         class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 transition-all">
                                                     <i class="bi bi-plus-lg"></i>
                                                 </button>
                                             </div>
+                                            
                                             <span class="text-[9px] font-bold text-slate-400 uppercase italic">
                                                 Tersedia: {{ item.inventaris.jumlah_stok }}
                                             </span>
@@ -172,7 +180,6 @@ const removeFromCart = (id) => {
                             </form>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -180,17 +187,14 @@ const removeFromCart = (id) => {
 </template>
 
 <style scoped>
-/* Perbaikan Icon Kalender */
 input[type="date"]::-webkit-calendar-picker-indicator {
     background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16"><path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/></svg>');
     filter: invert(0.4);
     cursor: pointer;
 }
-
 .dark input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1) brightness(100%);
 }
-
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

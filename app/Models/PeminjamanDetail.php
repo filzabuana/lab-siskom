@@ -29,4 +29,8 @@ class PeminjamanDetail extends Model
     {
         return $this->belongsTo(InventarisItem::class, 'inventaris_item_id');
     }
+    public function detailItems()
+    {
+        return $this->hasMany(PeminjamanDetailItem::class, 'peminjaman_detail_id');
+    }
 }

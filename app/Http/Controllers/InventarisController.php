@@ -43,10 +43,10 @@ class InventarisController extends Controller
                     // Hitung jumlah record fisik berdasarkan status relasi tabel items
                     $stokKeluar = $item->items()->whereIn('status', ['dipinjam', 'dipakai_di_lab'])->count();
                 } else {
-                    // Untuk barang bulk, hitung manual akumulasi dari relasi detail peminjaman aktif
+                    // Untuk barang bulk, hitung manual akumulasi dari relasi detail peminjaman aktif (Disamakan lowercase)
                     $stokKeluar = (int) PeminjamanDetail::where('inventaris_id', $item->id)
                         ->whereHas('peminjaman', function($q) {
-                            $q->whereIn('status', ['Dipinjam', 'Sedang Dipinjam', 'Disetujui']);
+                            $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
                         })->sum('jumlah');
                 }
 
@@ -57,8 +57,8 @@ class InventarisController extends Controller
                     'kategori'        => $item->kategori,
                     'ruangan'         => $item->ruangan,
                     'is_serialized'   => $item->is_serialized,
-                    'jumlah_stok'     => (int) $item->jumlah_stok,   // Nilai terpapar dinamis lewat Accessor Model
-                    'jumlah_rusak'    => (int) $item->jumlah_rusak,  // Nilai terpapar dinamis lewat Accessor Model
+                    'jumlah_stok'     => (int) $item->jumlah_stok,   // Nilai total kapasitas aset lab
+                    'jumlah_rusak'    => (int) $item->jumlah_rusak, 
                     'stok_keluar'     => $stokKeluar,
                     'kondisi'         => $item->kondisi,
                     'foto_barang'     => $item->foto_barang,
@@ -86,7 +86,6 @@ class InventarisController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi tanpa 'unique' pada kode_barang agar bisa menambah sub-unit kelak
         $request->validate([
             'kode_barang'     => 'required|string|max:255',
             'nama_aset'       => 'required|string|max:255',
@@ -101,13 +100,11 @@ class InventarisController extends Controller
             'is_serialized'   => 'required|boolean',
         ]);
 
-        // Bungkus dengan Database Transaction demi keamanan data induk & anak
         DB::beginTransaction();
 
         try {
             $data = $request->except('foto_barang');
 
-            // Handle upload foto jika ada
             if ($request->hasFile('foto_barang')) {
                 $file = $request->file('foto_barang');
                 $namaFile = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
@@ -115,11 +112,9 @@ class InventarisController extends Controller
                 $data['foto_barang'] = $namaFile;
             }
 
-            // 1. Cari apakah barang dengan kode ini sudah pernah ada
             $inventaris = Inventaris::where('kode_barang', $request->kode_barang)->first();
 
             if ($inventaris) {
-                // Validasi bentrokan tipe pencatatan (Serialized vs Bulk)
                 if ($inventaris->is_serialized != $request->is_serialized) {
                     DB::rollBack();
                     return redirect()->back()->withErrors([
@@ -127,30 +122,24 @@ class InventarisController extends Controller
                     ]);
                 }
 
-                // Jika tipenya BULK (0), langsung akumulasikan stoknya di tabel induk
+                // Jika tipenya BULK (0), akumulasikan ke total stok fisik tanpa memotong sisa rak
                 if (!$request->is_serialized) {
                     $inventaris->increment('jumlah_stok', $request->jumlah_stok);
                     $inventaris->increment('jumlah_rusak', $request->jumlah_rusak);
                 }
                 
-                // Update detail informasi kosmetik barangkali ada perubahan
                 $inventaris->update($request->only(['nama_aset', 'kategori', 'ruangan', 'kondisi', 'tipe_peminjaman', 'deskripsi', 'catatan_lokasi']));
             } else {
-                // Jika barang baru gres, buat baris barunya
                 $inventaris = Inventaris::create($data);
             }
 
-            // 2. Jika tipenya SERIALIZED (1), generate sub-unit otomatis di inventaris_items
             if ($request->is_serialized) {
-                // Ambil data sub-unit terakhir berdasarkan ID terbesar untuk mencari counter terakhir
                 $lastItem = InventarisItem::where('inventaris_id', $inventaris->id)
                     ->orderBy('id', 'desc')
                     ->first();
 
-                // Tentukan angka counter awal (Default: 1)
                 $startCounter = 1;
                 
-                // Menggunakan preg_match pada kolom barcode_aset
                 if ($lastItem && preg_match('/_(\d+)$/', $lastItem->barcode_aset, $matches)) {
                     $startCounter = ((int) $matches[1]) + 1;
                 }
@@ -159,12 +148,8 @@ class InventarisController extends Controller
 
                 for ($i = 0; $i < $totalLoop; $i++) {
                     $currentIndex = $startCounter + $i;
-                    
-                    // Format padded 3 digit, contoh: 001, 002, dst.
                     $paddedIndex = str_pad($currentIndex, 3, '0', STR_PAD_LEFT);
                     $barcodeAset = $inventaris->kode_barang . '_' . $paddedIndex;
-
-                    // Alokasikan status berdasarkan loop: stok baik dimasukkan dulu ('tersedia'), sisanya diset 'rusak'
                     $statusUnit = ($i < $request->jumlah_stok) ? 'tersedia' : 'rusak';
 
                     InventarisItem::create([
@@ -176,9 +161,7 @@ class InventarisController extends Controller
             }
 
             DB::commit();
-
-            return redirect()->route('admin.inventaris.index')
-                             ->with('message', 'Aset berhasil diproses dan disinkronkan.');
+            return redirect()->route('admin.inventaris.index')->with('message', 'Aset berhasil diproses dan disinkronkan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -197,20 +180,25 @@ class InventarisController extends Controller
             $stokTersedia  = $item->items()->where('status', 'tersedia')->count();
             $totalDipinjam = $item->items()->whereIn('status', ['dipinjam', 'dipakai_di_lab'])->count();
             
-            // Menggunakan Nested Eager Loading untuk melacak peminjaman aktif dan peminjam (User)
-            $item->load([
-                'items' => function($query) {
-                    $query->with(['peminjamanDetails' => function($subQuery) {
-                        $subQuery->whereHas('peminjaman', function($q) {
-                            $q->whereIn('status', ['Dipinjam', 'Sedang Dipinjam', 'Disetujui']);
-                        })->with('peminjaman.user:id,name'); // Mengambil profil peminjam secara efisien
-                    }]);
-                }
-            ]);
+            $item->load(['items.peminjamanDetails.peminjaman.user:id,name']);
+
+            $item->setRelation('items', $item->items->map(function ($unit) {
+                $detailAktif = $unit->peminjamanDetails->first(function ($detail) {
+                    $statusPeminjaman = optional($detail->peminjaman)->status;
+                    return $statusPeminjaman && in_array(strtolower($statusPeminjaman), [
+                        'dipinjam', 'sedang dipinjam', 'disetujui', 'dipakai_di_lab'
+                    ]);
+                });
+
+                $unit->peminjam_aktif = $detailAktif?->peminjaman?->user?->name ?? null;
+                return $unit;
+            }));
+
         } else {
+            // UNTUK BULK: Hitung total kuantitas item yang sedang dipinjam secara real-time
             $totalDipinjam = (int) PeminjamanDetail::where('inventaris_id', $id)
                 ->whereHas('peminjaman', function($q) {
-                    $q->whereIn('status', ['Dipinjam', 'Sedang Dipinjam', 'Disetujui']);
+                    $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
                 })->sum('jumlah');
 
             $stokTersedia = max(0, $item->jumlah_stok - $totalDipinjam);
@@ -263,7 +251,7 @@ class InventarisController extends Controller
             $data['foto_barang'] = $namaFile;
         }
 
-        // Pada aksi edit data dasar, kita tidak merusak sinkronisasi kuantitas counter
+        // Jika barang serialized, kuantitas total dikunci agar tidak merusak relasi item fisik
         if ($request->is_serialized) {
             unset($data['jumlah_stok']);
             unset($data['jumlah_rusak']);
@@ -304,7 +292,7 @@ class InventarisController extends Controller
             } else {
                 $stokKeluar = (int) PeminjamanDetail::where('inventaris_id', $item->id)
                     ->whereHas('peminjaman', function($q) {
-                        $q->whereIn('status', ['Dipinjam', 'Sedang Dipinjam', 'Disetujui']);
+                        $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
                     })->sum('jumlah');
                 $item->sisa_stok = max(0, $item->jumlah_stok - $stokKeluar);
             }
@@ -327,7 +315,7 @@ class InventarisController extends Controller
         } else {
             $totalDipinjam = (int) PeminjamanDetail::where('inventaris_id', $id)
                 ->whereHas('peminjaman', function($q) {
-                    $q->whereIn('status', ['Dipinjam', 'Sedang Dipinjam', 'Disetujui']);
+                    $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
                 })->sum('jumlah');
 
             $stokTersedia = max(0, $item->jumlah_stok - $totalDipinjam);
