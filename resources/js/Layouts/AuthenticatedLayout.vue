@@ -88,14 +88,12 @@
           <div v-if="hasRole(['mahasiswa', 'asisten_praktikum']) || $page.props.auth.user.is_admin" class="pt-4">
             <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Layanan Academic</div>
             
-            <button @click="visit('bebas-lab.form')" 
-                    @mouseenter="prefetchMenu('bebas-lab.form')"
-                    @touchstart="prefetchMenu('bebas-lab.form')"
-                    :class="route().current('bebas-lab.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
-                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
-              <i class="bi bi-file-earmark-check-fill text-lg"></i>
-              SURAT BEBAS LAB
-            </button>
+            <a :href="route('bebas-lab.form')" 
+              :class="route().current('bebas-lab.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
+                <i class="bi bi-file-earmark-check-fill text-lg"></i>
+                SURAT BEBAS LAB
+            </a>
 
             <button @click="visit('peminjaman.katalog')" 
                     @mouseenter="prefetchMenu('peminjaman.katalog')"

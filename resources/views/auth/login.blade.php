@@ -60,10 +60,11 @@
                     {{-- Divider yang lebih tipis agar clean --}}
                     <div class="relative my-6">
                         <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-white/10 dark:border-white/5"></div>
+                            <div class="w-full border-t border-slate-100 dark:border-white/5"></div>
                         </div>
                         <div class="relative flex justify-center">
-                            <span class="bg-[#0f172a] px-4 text-[10px] uppercase tracking-[0.3em] font-medium text-slate-500">Atau</span>
+                            {{-- BERHASIL DIPERBAIKI: Menggunakan bg-white di lightmode dan bg-railway-card di darkmode agar menyatu dengan background card utama --}}
+                            <span class="bg-white dark:bg-railway-card px-4 text-[10px] uppercase tracking-[0.3em] font-medium text-slate-400 dark:text-slate-500">Atau</span>
                         </div>
                     </div>
                 </div>
