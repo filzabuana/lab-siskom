@@ -178,11 +178,13 @@ const daftarKategori = computed(() => {
                         :class="{'opacity-50 grayscale': item.jumlah_stok <= 0}">
                         
                         <div class="h-32 sm:h-48 overflow-hidden bg-zinc-100 dark:bg-railway-dark relative">
-                            <img v-if="item.foto_barang" :src="`/storage/inventaris/${item.foto_barang}`" 
-                                :alt="item.nama_aset" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            <div v-else class="flex items-center justify-center h-full text-zinc-400 text-[10px] font-mono italic">
-                                [no_img]
-                            </div>
+                            <Link :href="route('peminjaman.show', { id: item.id })" class="block w-full h-full">
+                                <img v-if="item.foto_barang" :src="`/storage/inventaris/${item.foto_barang}`" 
+                                    :alt="item.nama_aset" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <div v-else class="flex items-center justify-center h-full text-zinc-400 text-[10px] font-mono italic">
+                                    [no_img]
+                                </div>
+                            </Link>
                             
                             <div class="absolute bottom-2 right-2">
                                 <span :class="item.jumlah_stok > 0 ? 'bg-green-500/90' : 'bg-red-500/90'" 
@@ -196,9 +198,11 @@ const daftarKategori = computed(() => {
                             <div class="mb-1">
                                 <span class="text-[9px] sm:text-xs font-black text-railway-accent uppercase tracking-tighter">{{ item.kategori }}</span>
                             </div>
-                            <h3 class="text-sm sm:text-lg font-black text-zinc-900 dark:text-zinc-100 leading-tight mb-1 italic uppercase truncate">
-                                {{ item.nama_aset }}
-                            </h3>
+                            <Link :href="route('peminjaman.show', { id: item.id })" class="group/title block">
+                                <h3 class="text-sm sm:text-lg font-black text-zinc-900 dark:text-zinc-100 leading-tight mb-1 italic uppercase truncate group-hover/title:text-railway-accent transition-colors">
+                                    {{ item.nama_aset }}
+                                </h3>
+                            </Link>
                             <p class="text-[10px] sm:text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1 font-mono">
                                 {{ item.merk || 'No Brand' }}
                             </p>

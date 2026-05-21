@@ -67,6 +67,38 @@ class PeminjamanController extends Controller
     }
 
     /**
+     * MAHASISWA: Tampilkan Halaman Detail Alat
+     */
+    /**
+     * MAHASISWA: Tampilkan Halaman Detail Alat melalui Katalog
+     */
+    public function showItem($id)
+    {
+        // Load data inventaris beserta item fisiknya (jako ada)
+        $inventaris = Inventaris::with('items')->findOrFail($id);
+        
+        // 1. Hitung total yang sedang dipinjam secara riil di luar lab
+        if ($inventaris->is_serialized) {
+            $totalDipinjam = $inventaris->items()->where('status', 'dipinjam')->count();
+            $stokTersedia = $inventaris->items()->where('status', 'tersedia')->count();
+        } else {
+            $totalDipinjam = (int) PeminjamanDetail::where('inventaris_id', $inventaris->id)
+                ->whereHas('peminjaman', function($q) {
+                    $q->whereIn(DB::raw('LOWER(status)'), ['dipinjam', 'sedang dipinjam', 'disetujui']);
+                })->sum('jumlah');
+
+            $stokTersedia = max(0, $inventaris->jumlah_stok - $totalDipinjam);
+        }
+
+        return Inertia::render('Admin/Inventaris/Show', [
+            'item' => $inventaris, // Menggunakan 'item' sesuai dengan props di Show.vue
+            'stok_tersedia' => $stokTersedia,
+            'totalDipinjam' => $totalDipinjam,
+            'isKatalog' => true // Mengunci UI agar masuk mode view-only mahasiswa
+        ]);
+    }
+
+    /**
      * MAHASISWA: Tampilkan Halaman Keranjang
      */
     public function viewCart()

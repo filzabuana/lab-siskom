@@ -40,7 +40,30 @@ const renderedMarkdown = computed(() => {
         : '<i>Belum ada deskripsi spesifik untuk alat ini.</i>';
 });
 
-// Logic Hapus
+// Form untuk Tambah ke Keranjang (Sama seperti di Peminjaman/Katalog.vue)
+const cartForm = useForm({
+    inventaris_id: props.item.id,
+    jumlah: 1 // Diubah dari kuantitas -> jumlah sesuai ekspektasi backend
+});
+
+const addToCart = () => {
+    cartForm.post(route('peminjaman.cart.add'), {
+        preserveScroll: true,
+        // onSuccess sengaja dikosongkan/dihapus karena sudah di-handle Global oleh AuthenticatedLayout
+        onError: (err) => {
+            // Kita tetap pertahankan alert error untuk antisipasi jika validasi backend gagal (misal: stok habis)
+            const errorMsg = err.jumlah || err.inventaris_id || 'Gagal menambahkan item ke keranjang.';
+            Swal.fire({
+                title: 'Gagal!',
+                text: errorMsg,
+                icon: 'error',
+                fontFamily: 'Inter'
+            });
+        }
+    });
+};
+
+// Logic Hapus Inventaris (Admin)
 const formDelete = useForm({});
 const confirmDelete = (id, nama) => {
     Swal.fire({
@@ -82,9 +105,9 @@ const formatDate = (dateString) => {
 
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-10">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <Link :href="isKatalog ? route('katalog.index') : route('admin.inventaris.index')" 
-                   class="group flex items-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-blue-600 transition-colors italic">
-                    <i class="bi bi-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
+                <Link :href="isKatalog ? route('peminjaman.katalog') : route('admin.inventaris.index')" 
+                    class="flex items-center gap-2 text-sm font-mono text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors">
+                    <i class="bi bi-arrow-left"></i> Kembali
                 </Link>
 
                 <div v-if="!isKatalog && canModifyOrDelete" class="flex items-center bg-white dark:bg-slate-800 rounded-2xl p-1 shadow-sm border border-slate-200 dark:border-slate-700">
@@ -276,12 +299,11 @@ const formatDate = (dateString) => {
 
                     <div v-if="isKatalog && item.tipe_peminjaman === 'Bisa Dipinjam'">
                         <template v-if="isLoggedIn">
-                            <Link :disabled="stok_tersedia <= 0"
-                                  :href="stok_tersedia > 0 ? route('peminjaman.create', { inventaris_id: item.id }) : '#'"
-                                  as="button"
-                                  class="w-full py-5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-[1.5rem] shadow-lg shadow-emerald-200 dark:shadow-none font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-1 italic flex items-center justify-center gap-3">
-                                <i class="bi bi-plus-circle text-lg"></i> Ajukan Peminjaman
-                            </Link>
+                            <button :disabled="stok_tersedia <= 0 || cartForm.processing"
+                                    @click="addToCart"
+                                    class="w-full py-5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-[1.5rem] shadow-lg shadow-emerald-200 dark:shadow-none font-black text-xs uppercase tracking-[0.2em] transition-all hover:-translate-y-1 italic flex items-center justify-center gap-3">
+                                <i class="bi bi-cart-plus text-lg"></i> Tambah ke Keranjang
+                            </button>
                         </template>
                         <template v-else>
                             <Link :href="route('login')" 
