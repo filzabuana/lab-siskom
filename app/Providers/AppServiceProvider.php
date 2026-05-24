@@ -4,7 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Gate; // <-- Ditambahkan untuk mengaktifkan fitur Gate
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL; // <--- TAMBAHKAN BARIS INI!
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,11 +25,16 @@ class AppServiceProvider extends ServiceProvider
         // Paginator bawaan Anda
         Paginator::useTailwind();
 
-        // TAMBAHKAN INI: Bypass semua pengecekan role/permission Spatie jika user memiliki is_admin = 1
+        // Bypass semua pengecekan role/permission Spatie jika user memiliki is_admin = 1
         Gate::before(function ($user, $ability) {
             if ($user->is_admin == 1) {
-                return true; // Lolos otomatis dari gerbang Route::middleware(['role:...'])
+                return true; 
             }
         });
+
+        // Paksa HTTPS jika di Ngrok agar CSS/JS tidak pecah
+        if (config('app.env') !== 'local' || isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            URL::forceScheme('https');
+        }
     }
 }

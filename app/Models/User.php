@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\Traits\HasRoles; // WAJIB untuk Spatie Laravel-Permission
 
 class User extends Authenticatable
@@ -73,5 +74,13 @@ class User extends Authenticatable
         return $this->hasMany(SuratBebasLab::class, 'user_id');
     }
 
-    // FUNGSI roles() MANUAL DI SINI SUDAH DIHAPUS AGAR TIDAK BENTROK DENGAN TRAIT HASROLES SPATIE
+    public function enrolledClasses(): BelongsToMany
+    {
+        return $this->belongsToMany(CourseClass::class, 'course_class_user', 'user_id', 'course_class_id');
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }    
 }

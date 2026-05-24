@@ -143,6 +143,11 @@ class UserController extends Controller
      */
     public function impersonate(User $user)
     {
+        // Proteksi tambahan: Pastikan yang melakukan ini memang Admin/punya akses
+        if (!Auth::user()->can('manage-users')) {
+            abort(403, 'Anda tidak memiliki otoritas untuk melakukan impersonasi.');
+        }
+
         if ($user->id === Auth::id()) {
             return back()->with('message', 'Anda sudah login sebagai diri sendiri.');
         }

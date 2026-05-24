@@ -85,8 +85,19 @@
             DASHBOARD
           </button>
 
+
+          <div v-if="hasPermission(['request-bebas-lab', 'view-katalog-alat', 'view-riwayat-pinjam','create-presensi'])" class="pt-4">
+            <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Praktikum</div>
+            <button v-if="hasPermission('create-presensi')"
+                  @click="visit('admin.attendance.index')" 
+                  :class="route().current('admin.attendance.*') ? 'text-blue-600 bg-blue-50 dark:bg-blue-500/5 ring-1 ring-blue-500/20' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'"
+                  class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-[11px] italic text-left transition-all">
+              <i class="bi bi-qr-code text-lg"></i>
+              PRESENSI PRAKTIKUM
+           </button>
+          </div>
           <div v-if="hasPermission(['request-bebas-lab', 'view-katalog-alat', 'view-riwayat-pinjam'])" class="pt-4">
-            <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Layanan Academic</div>
+            <div class="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 tracking-[0.3em] uppercase italic">Layanan Akademik</div>
             
             <a v-if="hasPermission('request-bebas-lab')"
                :href="route('bebas-lab.form')" 
@@ -273,7 +284,7 @@
 
         <footer class="p-8 border-t border-slate-100 dark:border-railway-border text-center shrink-0">
             <p class="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.5em] italic">
-                &copy; 2026 Laboratorium SISKOM • FMIPA UNTAN
+                &copy; 2026 Laboratorium Pemrograman dan Komputasi • FMIPA UNTAN
             </p>
         </footer>
       </div>

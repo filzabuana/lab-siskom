@@ -17,48 +17,53 @@ class RoleManagementController extends Controller
     {
         return Inertia::render('Admin/Roles/Index', [
             'roles' => Role::with('permissions')->get(),
-            'permissions' => Permission::select('id', 'name')->get(),
+            // Mengambil deskripsi agar bisa tampil di form modal
+            'permissions' => Permission::select('id', 'name', 'description')->get(),
         ]);
     }
 
     /**
-     * Menyimpan Role Baru dari Modal Tambah
+     * Menyimpan Role Baru
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|lowercase|alpha_dash|unique:roles,name',
+            'description' => 'nullable|string|max:255', // Tambahkan validasi deskripsi
             'permissions' => 'nullable|array',
         ]);
 
-        // 1. Buat Master Role baru
         $role = Role::create([
-            'name' => $validated['name']
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'guard_name' => 'web'
         ]);
 
-        // 2. Sinkronisasikan permission pilihan (mengambil ID berdasarkan nama permission)
         if (!empty($validated['permissions'])) {
-            $permissionIds = Permission::whereIn('name', $validated['permissions'])->pluck('id');
-            $role->permissions()->sync($permissionIds);
+            $role->syncPermissions($validated['permissions']);
         }
 
-        return redirect()->back()->with('success', 'Role baru berhasil ditambahkan.');
+        return redirect()->back()->with('message', 'Role baru berhasil ditambahkan.');
     }
 
     /**
-     * Memperbarui Hak Akses (Permissions) dari Role yang Sudah Ada
+     * Memperbarui Hak Akses & Deskripsi
      */
     public function update(Request $request, Role $role)
     {
         $validated = $request->validate([
-            // Nama tidak diubah (disabled di frontend) demi keamanan integrity code referensi
+            'description' => 'nullable|string|max:255', // Izinkan update deskripsi
             'permissions' => 'nullable|array',
         ]);
 
-        // Sinkronisasi ulang permission terbaru (menghapus yang tidak dicentang, menambah yang dicentang)
-        $permissionIds = Permission::whereIn('name', $validated['permissions'] ?? [])->pluck('id');
-        $role->permissions()->sync($permissionIds);
+        // Update deskripsi jika ada
+        if ($request->has('description')) {
+            $role->update(['description' => $validated['description']]);
+        }
 
-        return redirect()->back()->with('success', 'Hak akses role berhasil diperbarui.');
+        // Sinkronisasi permission berdasarkan nama
+        $role->syncPermissions($validated['permissions'] ?? []);
+
+        return redirect()->back()->with('message', 'Hak akses role berhasil diperbarui.');
     }
 }

@@ -51,10 +51,12 @@
                 class="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors"
               >
                 <td class="py-4 px-6 text-center font-mono text-slate-400">{{ index + 1 }}</td>
-                <td class="py-4 px-6 font-black uppercase tracking-wide text-slate-900 dark:text-white">
-                  {{ role.name.replace('_', ' ') }}
-                  <span class="block text-[9px] font-mono text-slate-400 dark:text-slate-500 lowercase tracking-normal mt-0.5">
-                    slug: {{ role.name }}
+                <td class="py-4 px-6">
+                  <span class="font-black uppercase tracking-wide text-slate-900 dark:text-white block">
+                    {{ role.name.replace('_', ' ') }}
+                  </span>
+                  <span class="block text-[9px] font-medium text-slate-400 dark:text-slate-500 tracking-normal mt-0.5 italic">
+                    {{ role.description || 'Tidak ada deskripsi role.' }}
                   </span>
                 </td>
                 <td class="py-4 px-6">
@@ -63,6 +65,7 @@
                       v-for="perm in role.permissions" 
                       :key="perm.id"
                       class="px-2.5 py-1 bg-slate-100 dark:bg-railway-dark text-slate-600 dark:text-slate-400 text-[10px] font-mono rounded-lg border border-slate-200/60 dark:border-railway-border/60 uppercase"
+                      :title="perm.description"
                     >
                       {{ perm.name }}
                     </span>
@@ -155,7 +158,7 @@
                       {{ perm.name }}
                     </label>
                     <span class="text-[9px] text-slate-400 font-medium block mt-1 leading-normal">
-                      {{ getPermDescription(perm.name) }}
+                      {{ perm.description || 'Hak akses fungsional sistem laboratorium.' }}
                     </span>
                   </div>
                 </div>
@@ -196,7 +199,6 @@ import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 
-// MENANGKAP PROPS DARI CONTROLLER
 const props = defineProps({
   roles: { type: Array, default: () => [] },
   permissions: { type: Array, default: () => [] }
@@ -206,31 +208,11 @@ const modalOpen = ref(false);
 const isEditMode = ref(false);
 const currentRoleId = ref(null);
 
-// INERTIA FORM HELPER
 const form = useForm({
   name: '',
   permissions: []
 });
 
-// DESKRIPSI MANUSIAWI UNTUK PERMISSION PLP / DOSEN
-const getPermDescription = (name) => {
-  const descriptions = {
-    'access-admin-area': 'Mengizinkan user masuk ke area dashboard administrasi.',
-    'request-bebas-lab': 'Mengajukan validasi surat bebas tanggungan laboratorium.',
-    'view-katalog-alat': 'Melihat galeri dan ketersediaan stok alat laboratorium.',
-    'view-riwayat-pinjam': 'Melihat history logs peminjaman personal milik sendiri.',
-    'review-peminjaman': 'Validasi persetujuan status request pinjaman alat masuk.',
-    'view-inventaris': 'Membuka tab sirkulasi modul inventori aset siskom.',
-    'manage-inventaris': 'Akses penuh CRUD data master alat, kategori, dan lokasi.',
-    'manage-bebas-lab': 'Eksekusi penerbitan & tanda tangan elektronik surat bebas lab.',
-    'manage-posts': 'Menulis, mengedit, dan menerbitkan artikel berita di blog lab.',
-    'manage-sop': 'Mengunggah dan memperbarui file Standar Operasional Prosedur.',
-    'manage-users': 'Mengontrol penuh data user, mutasi role, dan modifikasi akses.',
-  };
-  return descriptions[name] || 'Hak akses fungsional sistem laboratorium.';
-};
-
-// HANDLERS
 const togglePermission = (permName) => {
   const index = form.permissions.indexOf(permName);
   if (index > -1) {
@@ -275,3 +257,8 @@ const submitForm = () => {
   }
 };
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

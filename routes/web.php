@@ -5,7 +5,7 @@ use App\Http\Controllers\{
     ProfileController, SopController, SiteMapController, 
     SuratBebasLabController, InventarisController, 
     PeminjamanController, PostController, UserController,
-    DashboardController
+    DashboardController, AttendanceController,
 };
 use App\Http\Controllers\Admin\RoleManagementController; // Impor Controller Baru Terdaftar
 use App\Http\Controllers\Auth\GoogleController;
@@ -90,65 +90,80 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/katalog/{id}', [PeminjamanController::class, 'showItem'])->name('show');
     });
 
+    // Scan Presensi Mahasiswa
+    Route::get('/scan-presensi', [AttendanceController::class, 'showScanner'])->name('attendance.scan');
+    Route::post('/scan-presensi', [AttendanceController::class, 'scan'])->name('attendance.scan.process');
+
     /*
     |--------------------------------------------------------------------------
     | 4. AREA MANAGERIAL & STAF LAB (Murni Berbasis Permission / PBAC)
     |--------------------------------------------------------------------------
-    | Menggunakan standar kebab-case (-) agar sinkron dengan seeder.
     | */
-    Route::middleware(['can:access-admin-area'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'can:access-admin-area'])->prefix('admin')->name('admin.')->group(function () {
         
-        // Manajemen Peminjaman (Disinkronkan dengan permission 'review-peminjaman')
+        // Manajemen Peminjaman
         Route::middleware(['can:review-peminjaman'])->prefix('peminjaman')->name('peminjaman.')->group(function () {
             Route::get('/', [PeminjamanController::class, 'indexAdmin'])->name('index');
             Route::patch('/{id}/status', [PeminjamanController::class, 'updateStatus'])->name('update-status');
             Route::delete('/detail/{detail_id}', [PeminjamanController::class, 'destroyDetail'])->name('destroy-detail');
         });
 
-        // Manajemen Inventaris Struktural (Tulis, Ubah, Hapus)
+        // Manajemen Inventaris
         Route::middleware(['can:manage-inventaris'])->group(function () {
-            Route::get('inventaris/create', [InventarisController::class, 'create'])->name('inventaris.create');
-            Route::post('inventaris', [InventarisController::class, 'store'])->name('inventaris.store');
-            Route::get('inventaris/{inventari}/edit', [InventarisController::class, 'edit'])->name('inventaris.edit');
-            Route::put('inventaris/{inventari}', [InventarisController::class, 'update'])->name('inventaris.update');
-            Route::delete('inventaris/{inventari}', [InventarisController::class, 'destroy'])->name('inventaris.destroy');
+            Route::resource('inventaris', InventarisController::class)->except(['index', 'show']);
         });
-
-        // Manajemen Inventaris Standar (Hanya Baca / View)
         Route::middleware(['can:view-inventaris'])->group(function () {
             Route::get('inventaris', [InventarisController::class, 'index'])->name('inventaris.index');
             Route::get('inventaris/{inventari}', [InventarisController::class, 'show'])->name('inventaris.show');
         });
 
-        // Manajemen Bebas Lab (Admin Side)
+        // Manajemen Bebas Lab (Admin)
         Route::middleware(['can:manage-bebas-lab'])->group(function () {
             Route::get('/bebas-lab', [SuratBebasLabController::class, 'indexAdmin'])->name('bebas-lab.index');
             Route::patch('/bebas-lab/{id}', [SuratBebasLabController::class, 'updateStatus'])->name('bebas-lab.update');
         });
 
-        // Manajemen User & Role (Eksklusif Superadmin / Kepala Unit dengan permission 'manage-users')
+        // Manajemen User & Role (PBAC: manage-users)
         Route::middleware(['can:manage-users'])->group(function () {
-            Route::resource('users', UserController::class)->only(['index', 'show', 'create', 'store', 'destroy']);
-            Route::post('users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+            // User Management
+            Route::resource('users', UserController::class);
             Route::patch('users/{user}/role', [UserController::class, 'updateRole'])->name('users.update-role');
+            
+            // Impersonation
+            Route::post('users-impersonate/{user}', [UserController::class, 'impersonate'])->name('users.impersonate');
+            // Catatan: stop-impersonate sudah ada di middleware auth global di atas sesuai file Anda
 
-            // ROUTE KHUSUS MANAJEMEN ROLE
-            Route::get('/roles', [RoleManagementController::class, 'index'])->name('roles.index');
-            Route::post('/roles', [RoleManagementController::class, 'store'])->name('roles.store');
-            Route::put('/roles/{role}', [RoleManagementController::class, 'update'])->name('roles.update');
+            // Role Management (Menggunakan controller di folder Admin)
+            Route::get('roles', [RoleManagementController::class, 'index'])->name('roles.index');
+            Route::post('roles', [RoleManagementController::class, 'store'])->name('roles.store');
+            Route::put('roles/{role}', [RoleManagementController::class, 'update'])->name('roles.update');
         });
 
-        // Konten Blog (Admin Side - Full Inertia)
-        Route::middleware(['can:manage-posts'])->group(function () {
+        // Konten Blog & SOP
+        Route::middleware(['can:manage-posts'])->group(function() {
             Route::get('posts', [PostController::class, 'indexAdmin'])->name('posts.index');
             Route::resource('posts', PostController::class)->except(['index']);
-        });
-        
-        // SOP Admin
-        Route::middleware(['can:manage-sop'])->group(function () {
-            Route::resource('sop', SopController::class);
-        });
+            });
+        Route::middleware(['can:manage-sop'])->resource('sop', SopController::class);
 
+        // Presensi Praktikum
+        Route::middleware(['can:create-presensi'])->prefix('attendance')->name('attendance.')->group(function () {
+            // --- Manajemen Kelas (CRUD) ---
+            Route::get('/', [AttendanceController::class, 'index'])->name('index');
+            Route::post('/store-class', [AttendanceController::class, 'storeClass'])->name('store-class'); // Tambahkan ini
+            Route::put('/update-class/{courseClass}', [AttendanceController::class, 'updateClass'])->name('update-class'); // Tambahkan ini
+            Route::delete('/destroy-class/{courseClass}', [AttendanceController::class, 'destroyClass'])->name('destroy-class'); // Tambahkan ini
+
+            // --- Manajemen Sesi Presensi ---
+            Route::get('/session/{courseClass}', [AttendanceController::class, 'showSession'])->name('session');
+            Route::post('/start/{courseClass}', [AttendanceController::class, 'startSession'])->name('start');
+            Route::patch('session/{session}/toggle', [AttendanceController::class, 'toggleSession'])->name('toggle');
+            
+            // --- Laporan & Import ---
+            Route::get('/report/{courseClass}', [AttendanceController::class, 'report'])->name('report');
+            Route::get('/export-template', [AttendanceController::class, 'exportTemplate'])->name('export-template');
+            Route::post('/{classId}/import', [AttendanceController::class, 'import'])->name('import');
+        });
     });
 });
 
